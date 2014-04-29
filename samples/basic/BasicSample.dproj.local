@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2014/04/28 11:45:58.000.682,=C:\Users\Admin\Documents\RAD Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2014/04/28 11:46:31.000.202,C:\Users\Admin\Documents\RAD Studio\Projects\BasicSample.dproj=C:\Users\Admin\Documents\RAD Studio\Projects\Project2.dproj</Transaction>
+    <Transaction>2014/04/28 11:46:57.000.463,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic\src\Frm.Main.dfm=C:\Users\Admin\Documents\RAD Studio\Projects\Unit2.dfm</Transaction>
+    <Transaction>2014/04/28 11:46:57.000.463,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic\src\Frm.Main.pas=C:\Users\Admin\Documents\RAD Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2014/04/28 11:47:01.000.611,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic\BasicSample.dproj=C:\Users\Admin\Documents\RAD Studio\Projects\BasicSample.dproj</Transaction>
+    <Transaction>2014/04/28 11:50:13.000.358,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\src\DBLib4D.DMICRUD.FireDAC.pas</Transaction>
+    <Transaction>2014/04/28 11:50:13.000.256,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\src\DBLib4D.DMICRUD.Base.pas</Transaction>
+    <Transaction>2014/04/28 11:51:48.000.151,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\BasicSample.dproj=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\BasicDMICrudSample.dproj</Transaction>
+    <Transaction>2014/04/28 11:52:35.000.367,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\Unit1.pas</Transaction>
+    <Transaction>2014/04/28 11:52:51.000.217,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\Unit1.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.DBConnection.dfm</Transaction>
+    <Transaction>2014/04/28 11:52:51.000.217,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\Unit1.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.DBConnection.pas</Transaction>
+    <Transaction>2014/04/28 11:53:09.000.706,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.DBConnection.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.FireDACConnection.pas</Transaction>
+    <Transaction>2014/04/28 11:53:09.000.706,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.DBConnection.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.FireDACConnection.dfm</Transaction>
+    <Transaction>2014/04/28 11:53:24.000.678,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.FireDACConnection.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.Connection.FireDAC.dfm</Transaction>
+    <Transaction>2014/04/28 11:53:24.000.678,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.FireDACConnection.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\basic-dmi-crud\src\Dm.Connection.FireDAC.pas</Transaction>
+    <Transaction>2014/04/28 11:56:31.000.133,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\DMICrudSample.dproj=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\BasicDMICrudSample.dproj</Transaction>
+    <Transaction>2014/04/28 11:58:10.000.360,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Dm.Connection.FireDAC.pas=</Transaction>
+    <Transaction>2014/04/28 11:58:33.000.147,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\Dm.Connection.FireDAC.pas</Transaction>
+    <Transaction>2014/04/28 11:59:47.000.650,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\Dm.Connection.FireDAC.pas=</Transaction>
+    <Transaction>2014/04/28 12:00:04.000.246,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\src\Dm.Connection.FireDAC.pas</Transaction>
+    <Transaction>2014/04/28 13:53:17.000.156,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\DMICrudSample1.dproj=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\DMICrudSample.dproj</Transaction>
+    <Transaction>2014/04/28 13:53:26.000.064,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\DMICRUDSample.dproj=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\DMICrudSample1.dproj</Transaction>
+    <Transaction>2014/04/28 14:40:57.000.803,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.pas</Transaction>
+    <Transaction>2014/04/28 14:41:30.000.474,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Dm.Country.dfm</Transaction>
+    <Transaction>2014/04/28 14:41:30.000.474,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Dm.Country.pas</Transaction>
+    <Transaction>2014/04/28 14:42:36.000.079,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.pas</Transaction>
+    <Transaction>2014/04/28 14:42:51.000.799,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Controller.Country.pas</Transaction>
+    <Transaction>2014/04/28 14:43:55.000.492,=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.pas</Transaction>
+    <Transaction>2014/04/28 14:44:02.000.657,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Frm.Country.dfm</Transaction>
+    <Transaction>2014/04/28 14:44:02.000.657,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\Unit1.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Frm.Country.pas</Transaction>
+    <Transaction>2014/04/28 15:11:09.000.515,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Frm.Main.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Main.View.dfm</Transaction>
+    <Transaction>2014/04/28 15:11:09.000.515,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Frm.Main.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Main.View.pas</Transaction>
+    <Transaction>2014/04/28 15:11:21.000.939,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Frm.Country.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Country.View.pas</Transaction>
+    <Transaction>2014/04/28 15:11:21.000.939,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Frm.Country.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Country.View.dfm</Transaction>
+    <Transaction>2014/04/28 15:11:56.000.943,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Dm.Country.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Country.Model.pas</Transaction>
+    <Transaction>2014/04/28 15:11:56.000.943,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Dm.Country.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Country.Model.dfm</Transaction>
+    <Transaction>2014/04/28 15:12:18.000.364,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Controller.Country.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\dmi-crud\src\Country.Controller.pas</Transaction>
+    <Transaction>2014/04/28 15:12:54.000.872,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\src\Dm.Connection.FireDAC.pas=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\src\Connection.FireDAC.pas</Transaction>
+    <Transaction>2014/04/28 15:12:54.000.872,\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\src\Dm.Connection.FireDAC.dfm=\\VBOXSVR\d_drive\GitHub\DatabaseLib4Delphi\samples\common\src\Connection.FireDAC.dfm</Transaction>
+    <Transaction>2014/04/28 17:38:35.000.913,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\BasicSample.dproj=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\DMICRUDSample.dproj</Transaction>
+    <Transaction>2014/04/28 17:39:09.000.494,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\src\InfraDB4D.Model.FireDAC.pas</Transaction>
+    <Transaction>2014/04/28 17:39:09.000.412,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\src\InfraDB4D.Model.Base.pas</Transaction>
+    <Transaction>2014/04/29 08:47:05.000.333,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.pas</Transaction>
+    <Transaction>2014/04/29 08:47:30.000.867,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.pas=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\src\Province.Model.pas</Transaction>
+    <Transaction>2014/04/29 08:47:30.000.867,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.dfm=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\src\Province.Model.dfm</Transaction>
+    <Transaction>2014/04/29 08:55:45.000.912,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.pas</Transaction>
+    <Transaction>2014/04/29 08:55:55.000.933,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.pas=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\src\Province.Controller.pas</Transaction>
+    <Transaction>2014/04/29 09:22:56.000.875,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.pas</Transaction>
+    <Transaction>2014/04/29 09:23:38.000.334,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.pas=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\src\Dm.Models.pas</Transaction>
+    <Transaction>2014/04/29 09:23:38.000.334,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\Unit1.dfm=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\basic\src\Dm.Models.dfm</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="..\..\samples"/>
+    <File Path="..\common"/>
+    <File Path="..\common\src"/>
+    <File Path="..\common\src\Connection.FireDAC.pas"/>
+    <File Path="..\common\src\Connection.FireDAC.dfm"/>
+    <File Path="..\..\..\InfraDatabase4Delphi"/>
+    <File Path="..\..\src"/>
+    <File Path="..\..\src\InfraDB4D.Model.Base.pas"/>
+    <File Path="..\..\src\InfraDB4D.Model.Base.dfm"/>
+    <File Path="..\..\src\InfraDB4D.Model.FireDAC.pas"/>
+    <File Path="..\..\src\InfraDB4D.Model.FireDAC.dfm"/>
+    <File Path="src"/>
+    <File Path="src\Country.Controller.pas"/>
+    <File Path="src\Country.Model.pas"/>
+    <File Path="src\Country.Model.dfm"/>
+    <File Path="src\Country.View.pas"/>
+    <File Path="src\Country.View.dfm"/>
+    <File Path="src\Main.View.pas"/>
+    <File Path="src\Main.View.dfm"/>
+    <File Path="src\Province.Model.pas"/>
+    <File Path="src\Province.Model.dfm"/>
+    <File Path="src\Province.Controller.pas"/>
+    <File Path="src\Dm.Models.pas"/>
+    <File Path="src\Dm.Models.dfm"/>
+  </ProjectSortOrder>
+</BorlandProject>

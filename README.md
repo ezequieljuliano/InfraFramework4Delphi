@@ -1,2 +1,2 @@
-InfraDatabase4Delphi
-====================
+DatabaseLib4Delphi
+==================
