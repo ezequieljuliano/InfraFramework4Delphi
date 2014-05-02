@@ -2,8 +2,8 @@ object MainView: TMainView
   Left = 0
   Top = 0
   Caption = 'MainView'
-  ClientHeight = 118
-  ClientWidth = 645
+  ClientHeight = 116
+  ClientWidth = 488
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -32,8 +32,8 @@ object MainView: TMainView
     OnClick = Button2Click
   end
   object Button3: TButton
-    Left = 24
-    Top = 78
+    Left = 239
+    Top = 16
     Width = 209
     Height = 25
     Caption = 'Country With Separate Model No View'
@@ -42,7 +42,7 @@ object MainView: TMainView
   end
   object Button4: TButton
     Left = 239
-    Top = 16
+    Top = 47
     Width = 209
     Height = 25
     Caption = 'Province With Separate Model No View'
@@ -51,11 +51,20 @@ object MainView: TMainView
   end
   object Button5: TButton
     Left = 239
-    Top = 47
+    Top = 78
     Width = 209
     Height = 25
     Caption = 'Province With Single Model No View'
     TabOrder = 4
     OnClick = Button5Click
+  end
+  object Button6: TButton
+    Left = 24
+    Top = 78
+    Width = 209
+    Height = 25
+    Caption = 'Country With Separate Model Option 3'
+    TabOrder = 5
+    OnClick = Button6Click
   end
 end

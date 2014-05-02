@@ -30,11 +30,13 @@ type
     Button3: TButton;
     Button4: TButton;
     Button5: TButton;
+    Button6: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -55,19 +57,17 @@ uses
 
 procedure TMainView.Button1Click(Sender: TObject);
 var
-  vCountryModel: TCountryModel;
   vCountryView: TCountryView;
+  vCountryController: TCountryController;
 begin
-  vCountryModel := TCountryModel.Create(nil, TCountryController, ConnectionFireDAC.GetDatabase);
   vCountryView := TCountryView.Create(nil);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, TCountryModel, 'DataSet');
   try
-    vCountryView.DsCountry.DataSet := vCountryModel.GetController<TCountryController>.GetDataSet;
-
-    vCountryModel.GetController<TCountryController>.GetDataSet.Open();
-
+    vCountryView.DsCountry.DataSet := vCountryController.GetDataSet;
+    vCountryController.GetDataSet.Open();
     vCountryView.ShowModal;
   finally
-    FreeAndNil(vCountryModel);
+    FreeAndNil(vCountryController);
     FreeAndNil(vCountryView);
   end;
 end;
@@ -78,14 +78,12 @@ var
   vCountryView: TCountryView;
   vCountryController: TCountryController;
 begin
-  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase);
-  vCountryModel := TCountryModel.Create(nil, vCountryController);
+  vCountryModel := TCountryModel.Create(nil);
   vCountryView := TCountryView.Create(nil);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, vCountryModel, vCountryModel.DataSet);
   try
-    vCountryView.DsCountry.DataSet := vCountryModel.GetController<TCountryController>.GetDataSet;
-
-    vCountryModel.GetController<TCountryController>.GetDataSet.Open();
-
+    vCountryView.DsCountry.DataSet := vCountryController.GetDataSet;
+    vCountryController.GetDataSet.Open();
     vCountryView.ShowModal;
   finally
     FreeAndNil(vCountryModel);
@@ -96,47 +94,50 @@ end;
 
 procedure TMainView.Button3Click(Sender: TObject);
 var
-  vCountryModel: TCountryModel;
+  vCountryController: TCountryController;
 begin
-  vCountryModel := TCountryModel.Create(nil, TCountryController, ConnectionFireDAC.GetDatabase);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, TCountryModel, 'DataSet');
   try
-    vCountryModel.DataSet.Open();
-    vCountryModel.DataSet.Insert;
-    vCountryModel.DataSetCTY_CODE.AsInteger := Random(10000);
-    vCountryModel.DataSetCTY_NAME.AsString := 'Country ' + vCountryModel.DataSetCTY_CODE.AsString;
-    vCountryModel.DataSet.Post;
+    vCountryController.GetDataSet.Open();
 
-    vCountryModel.DataSet.Insert;
-    vCountryModel.DataSetCTY_CODE.AsInteger := 0;
-    vCountryModel.DataSetCTY_NAME.AsString := 'Country';
-    vCountryModel.GetController<TCountryController>.ValidateFields();
-    vCountryModel.DataSet.Post;
+    vCountryController.GetDataSet.Insert;
+    vCountryController.GetModel<TCountryModel>.DataSetCTY_CODE.AsInteger := Random(10000);
+    vCountryController.GetModel<TCountryModel>.DataSetCTY_NAME.AsString := 'Country ' +
+      vCountryController.GetModel<TCountryModel>.DataSetCTY_CODE.AsString;
+    vCountryController.GetDataSet.Post;
+
+    vCountryController.GetDataSet.Insert;
+    vCountryController.GetModel<TCountryModel>.DataSetCTY_CODE.AsInteger := 0;
+    vCountryController.GetModel<TCountryModel>.DataSetCTY_NAME.AsString := 'Country 0';
+    vCountryController.ValidateFields();
+    vCountryController.GetDataSet.Post;
   finally
-    FreeAndNil(vCountryModel);
+    FreeAndNil(vCountryController);
   end;
 end;
 
 procedure TMainView.Button4Click(Sender: TObject);
 var
-  vCountryModel: TCountryModel;
-  vProvinceModel: TProvinceModel;
+  vCountryController: TCountryController;
+  vProvinceController: TProvinceController;
 begin
-  vCountryModel := TCountryModel.Create(nil, TCountryController, ConnectionFireDAC.GetDatabase);
-  vProvinceModel := TProvinceModel.Create(nil, TProvinceController, ConnectionFireDAC.GetDatabase);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, TCountryModel, 'DataSet');
+  vProvinceController := TProvinceController.Create(ConnectionFireDAC.GetDatabase, TProvinceModel, 'DataSet');
   try
-    vProvinceModel.DataSet.Open();
+    vProvinceController.GetDataSet.Open();
 
-    vProvinceModel.DataSet.Insert;
-    vProvinceModel.DataSetPRO_CODE.AsInteger := Random(10000);
-    vProvinceModel.DataSetPRO_NAME.AsString := 'Province ' + vProvinceModel.DataSetPRO_CODE.AsString;
+    vProvinceController.GetDataSet.Insert;
+    vProvinceController.GetModel<TProvinceModel>.DataSetPRO_CODE.AsInteger := Random(10000);
+    vProvinceController.GetModel<TProvinceModel>.DataSetPRO_NAME.AsString := 'Province ' +
+      vProvinceController.GetModel<TProvinceModel>.DataSetPRO_CODE.AsString;
 
-    vCountryModel.GetController<TCountryController>.SQLBuild(TSQLBuilder.Where('CTY_CODE').IsNotNull);
-    vProvinceModel.DataSetCTY_CODE.AsInteger := vCountryModel.DataSetCTY_CODE.AsInteger;
+    vCountryController.SQLBuild(TSQLBuilder.Where('CTY_CODE').IsNotNull);
+    vProvinceController.GetModel<TProvinceModel>.DataSetCTY_CODE.AsInteger := vCountryController.GetModel<TCountryModel>.DataSetCTY_CODE.AsInteger;
 
-    vProvinceModel.DataSet.Post;
+    vProvinceController.GetDataSet.Post;
   finally
-    FreeAndNil(vCountryModel);
-    FreeAndNil(vProvinceModel);
+    FreeAndNil(vCountryController);
+    FreeAndNil(vProvinceController);
   end;
 end;
 
@@ -146,9 +147,10 @@ var
   vCountryController: TCountryController;
   vProvinceController: TProvinceController;
 begin
+  // Option 1 - DataSet Object
   vModels := TDmModels.Create(nil);
-  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, vModels.DtsCountry);
-  vProvinceController := TProvinceController.Create(ConnectionFireDAC.GetDatabase, vModels.DtsProvince);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, vModels, vModels.DtsCountry);
+  vProvinceController := TProvinceController.Create(ConnectionFireDAC.GetDatabase, vModels, vModels.DtsProvince);
   try
     vProvinceController.GetDataSet.Open();
 
@@ -161,9 +163,50 @@ begin
 
     vProvinceController.GetDataSet.Post;
   finally
+    FreeAndNil(vModels);
     FreeAndNil(vCountryController);
     FreeAndNil(vProvinceController);
+  end;
+
+  // Option 2 - DataSet Name
+  vModels := TDmModels.Create(nil);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, vModels, 'DtsCountry');
+  vProvinceController := TProvinceController.Create(ConnectionFireDAC.GetDatabase, vModels, 'DtsProvince');
+  try
+    vProvinceController.GetDataSet.Open();
+
+    vProvinceController.GetDataSet.Insert;
+    vProvinceController.GetDataSet.FieldByName('PRO_CODE').AsInteger := Random(10000);
+    vProvinceController.GetDataSet.FieldByName('PRO_NAME').AsString := 'Province ' + vProvinceController.GetDataSet.FieldByName('PRO_CODE').AsString;
+
+    vCountryController.SQLBuild(TSQLBuilder.Where('CTY_CODE').IsNotNull);
+    vProvinceController.GetDataSet.FieldByName('CTY_CODE').AsInteger := vCountryController.GetDataSet.FieldByName('CTY_CODE').AsInteger;
+
+    vProvinceController.GetDataSet.Post;
+  finally
     FreeAndNil(vModels);
+    FreeAndNil(vCountryController);
+    FreeAndNil(vProvinceController);
+  end;
+end;
+
+procedure TMainView.Button6Click(Sender: TObject);
+var
+  vCountryModel: TCountryModel;
+  vCountryView: TCountryView;
+  vCountryController: TCountryController;
+begin
+  vCountryModel := TCountryModel.Create(nil);
+  vCountryView := TCountryView.Create(nil);
+  vCountryController := TCountryController.Create(ConnectionFireDAC.GetDatabase, vCountryModel, 'DataSet');
+  try
+    vCountryView.DsCountry.DataSet := vCountryController.GetDataSet;
+    vCountryController.GetDataSet.Open();
+    vCountryView.ShowModal;
+  finally
+    FreeAndNil(vCountryModel);
+    FreeAndNil(vCountryView);
+    FreeAndNil(vCountryController);
   end;
 end;
 

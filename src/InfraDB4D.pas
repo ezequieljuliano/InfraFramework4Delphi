@@ -34,6 +34,7 @@ type
   EDetailAlreadyRegistered = class(EInfraBaseException);
   EDataSetDoesNotExist = class(EInfraBaseException);
   EConnectionDoesNotExist = class(EInfraBaseException);
+  EModelDoesNotExist = class(EInfraBaseException);
 
   TGlobalCriticalSection = class sealed
   public
@@ -45,7 +46,7 @@ implementation
 var
   _vCriticalSection: TCriticalSection;
 
-  { TDBCriticalSection }
+  { TGlobalCriticalSection }
 
 class function TGlobalCriticalSection.GetInstance: TCriticalSection;
 begin

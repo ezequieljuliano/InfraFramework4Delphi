@@ -54,20 +54,22 @@ type
     procedure DoRollback(); override;
   end;
 
-  TFireDACConnectionFactoryAdapter = class(TDriverConnectionFactory<TFireDACConnectionAdapter>)
-  strict protected
-    function DoGetNewInstance(): TFireDACConnectionAdapter; override;
-    function DoGetSingletonInstance(): TFireDACConnectionAdapter; override;
+  TFireDACSingletonConnectionAdapter = class(TDriverSingletonConnection<TFireDACConnectionAdapter>)
+  public
+    class function Get(): TFireDACConnectionAdapter; static;
   end;
 
-  TFireDACManagerAdapter = class(TDriverManager<string, TFireDACConnectionAdapter>);
+  TFireDACConnectionManagerAdapter = class(TDriverConnectionManager<string, TFireDACConnectionAdapter>);
 
   TFireDACDetailsAdapter = class;
 
   TFireDACControllerAdapter = class(TDriverController<TFDQuery, TFireDACConnectionAdapter, TFireDACDetailsAdapter>)
   strict protected
     procedure DoCreateDetails(); override;
+
     procedure DoChangeSQLTextOfDataSet(); override;
+    procedure DoConfigureDataSetConnection(); override;
+
     function DoGetSQLTextOfDataSet(): string; override;
 
     procedure DoOpen(); override;
@@ -82,12 +84,14 @@ type
     procedure DoCloseAll(); override;
     procedure DoDisableAllControls(); override;
     procedure DoEnableAllControls(); override;
+    procedure DoLinkMasterDataSource(const pMasterController: TFireDACControllerAdapter); override;
+    procedure DoLinkDetailOnMasterDataSource(const pDetail: TFireDACControllerAdapter); override;
   end;
 
 implementation
 
 var
-  _vFireDACDBConnection: TFireDACConnectionAdapter = nil;
+  _vFireDACConnection: TFireDACConnectionAdapter = nil;
 
   { TFireDACStatementAdapter }
 
@@ -98,7 +102,7 @@ var
 begin
   vDataSet := TFDQuery.Create(nil);
   try
-    vDataSet.Connection := GetConnection.GetComponent.GetCompConnection;
+    vDataSet.Connection := GetConnection.GetComponent.GetConnection;
     vDataSet.SQL.Add(pSQL);
     if pAutoCommit then
     begin
@@ -128,7 +132,7 @@ function TFireDACStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TFDQuery;
 begin
   Result := TFDQuery.Create(nil);
-  Result.Connection := GetConnection.GetComponent.GetCompConnection;
+  Result.Connection := GetConnection.GetComponent.GetConnection;
   if (pFetchRows > 0) then
   begin
     Result.FetchOptions.Mode := fmOnDemand;
@@ -148,12 +152,12 @@ end;
 
 procedure TFireDACConnectionAdapter.DoCommit;
 begin
-  GetComponent.GetCompConnection.Commit();
+  GetComponent.GetConnection.Commit();
 end;
 
 procedure TFireDACConnectionAdapter.DoConnect;
 begin
-  GetComponent.GetCompConnection.Open();
+  GetComponent.GetConnection.Open();
 end;
 
 procedure TFireDACConnectionAdapter.DoCreateStatement;
@@ -163,36 +167,38 @@ end;
 
 procedure TFireDACConnectionAdapter.DoDisconect;
 begin
-  GetComponent.GetCompConnection.Close();
+  GetComponent.GetConnection.Close();
 end;
 
 function TFireDACConnectionAdapter.DoInTransaction: Boolean;
 begin
-  Result := GetComponent.GetCompConnection.InTransaction;
+  Result := GetComponent.GetConnection.InTransaction;
 end;
 
 procedure TFireDACConnectionAdapter.DoRollback;
 begin
-  GetComponent.GetCompConnection.Rollback();
+  GetComponent.GetConnection.Rollback();
 end;
 
 procedure TFireDACConnectionAdapter.DoStartTransaction;
 begin
-  GetComponent.GetCompConnection.StartTransaction();
+  GetComponent.GetConnection.StartTransaction();
 end;
 
-{ TFireDACConnectionFactoryAdapter }
+{ TFireDACSingletonConnectionAdapter }
 
-function TFireDACConnectionFactoryAdapter.DoGetNewInstance: TFireDACConnectionAdapter;
+class function TFireDACSingletonConnectionAdapter.Get: TFireDACConnectionAdapter;
 begin
-  Result := TFireDACConnectionAdapter.Create();
-end;
-
-function TFireDACConnectionFactoryAdapter.DoGetSingletonInstance: TFireDACConnectionAdapter;
-begin
-  if (_vFireDACDBConnection = nil) then
-    _vFireDACDBConnection := GetNewInstance();
-  Result := _vFireDACDBConnection;
+  if (_vFireDACConnection = nil) then
+  begin
+    TGlobalCriticalSection.GetInstance.Enter;
+    try
+      _vFireDACConnection := TFireDACConnectionAdapter.Create;
+    finally
+      TGlobalCriticalSection.GetInstance.Leave;
+    end;
+  end;
+  Result := _vFireDACConnection;
 end;
 
 { TFireDACControllerAdapter }
@@ -206,6 +212,11 @@ end;
 procedure TFireDACControllerAdapter.DoClose;
 begin
   GetDataSet.Close();
+end;
+
+procedure TFireDACControllerAdapter.DoConfigureDataSetConnection;
+begin
+  GetDataSet.Connection := GetConnection.GetComponent.GetConnection;
 end;
 
 procedure TFireDACControllerAdapter.DoCreateDetails;
@@ -227,43 +238,55 @@ end;
 
 procedure TFireDACDetailsAdapter.DoCloseAll;
 var
-  vPair: TPair<string, TFireDACControllerAdapter>;
+  vPair: TPair<string, TDetailProperties>;
 begin
   for vPair in GetDetailDictionary do
-    vPair.Value.GetDataSet.Close;
+    vPair.Value.Obj.GetDataSet.Close;
 end;
 
 procedure TFireDACDetailsAdapter.DoDisableAllControls;
 var
-  vPair: TPair<string, TFireDACControllerAdapter>;
+  vPair: TPair<string, TDetailProperties>;
 begin
   for vPair in GetDetailDictionary do
-    vPair.Value.GetDataSet.DisableControls();
+    vPair.Value.Obj.GetDataSet.DisableControls();
 end;
 
 procedure TFireDACDetailsAdapter.DoEnableAllControls;
 var
-  vPair: TPair<string, TFireDACControllerAdapter>;
+  vPair: TPair<string, TDetailProperties>;
 begin
   for vPair in GetDetailDictionary do
-    vPair.Value.GetDataSet.EnableControls();
+    vPair.Value.Obj.GetDataSet.EnableControls();
+end;
+
+procedure TFireDACDetailsAdapter.DoLinkDetailOnMasterDataSource(
+  const pDetail: TFireDACControllerAdapter);
+begin
+  pDetail.GetDataSet.MasterSource := GetMasterDataSource();
+end;
+
+procedure TFireDACDetailsAdapter.DoLinkMasterDataSource(
+  const pMasterController: TFireDACControllerAdapter);
+begin
+  GetMasterDataSource.DataSet := pMasterController.GetDataSet;
 end;
 
 procedure TFireDACDetailsAdapter.DoOpenAll;
 var
-  vPair: TPair<string, TFireDACControllerAdapter>;
+  vPair: TPair<string, TDetailProperties>;
 begin
   for vPair in GetDetailDictionary do
-    vPair.Value.GetDataSet.Open();
+    vPair.Value.Obj.GetDataSet.Open();
 end;
 
 initialization
 
-_vFireDACDBConnection := nil;
+_vFireDACConnection := nil;
 
 finalization
 
-if (_vFireDACDBConnection <> nil) then
-  FreeAndNil(_vFireDACDBConnection);
+if (_vFireDACConnection <> nil) then
+  FreeAndNil(_vFireDACConnection);
 
 end.

@@ -34,7 +34,7 @@ type
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
-    FDBFactory: TFireDACConnectionFactoryAdapter;
+
   public
     function GetDatabase(): TFireDACConnectionAdapter;
   end;
@@ -51,24 +51,18 @@ implementation
 
 procedure TConnectionFireDAC.DataModuleCreate(Sender: TObject);
 begin
-  FDBFactory := TFireDACConnectionFactoryAdapter.Create;
-  FDBFactory.IsThreadSafe := True;
-
   FDConnection.Connected := True;
-
-  GetDatabase.Build(TFireDACComponentAdapter.Create(FDConnection));
+  GetDatabase.Build(TFireDACComponentAdapter.Create(FDConnection), True);
 end;
 
 procedure TConnectionFireDAC.DataModuleDestroy(Sender: TObject);
 begin
   FDConnection.Connected := False;
-
-  FreeAndNil(FDBFactory);
 end;
 
 function TConnectionFireDAC.GetDatabase: TFireDACConnectionAdapter;
 begin
-  Result := FDBFactory.GetSingletonInstance;
+  Result := TFireDACSingletonConnectionAdapter.Get();
 end;
 
 end.

@@ -14,35 +14,39 @@
   limitations under the License.
 *)
 
-unit InfraDB4D.Model.FireDAC;
+unit Dm.Models;
 
 interface
 
 uses
-  System.SysUtils,
-  System.Classes,
-  System.Generics.Collections,
-  InfraDB4D,
-  InfraDB4D.Model.Base,
-  InfraDB4D.Drivers.FireDAC,
-  FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf,
   FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB,
   FireDAC.Comp.DataSet, FireDAC.Comp.Client;
 
 type
 
-  TModelFireDAC = class(TModelBase)
-    DataSet: TFDQuery;
-  strict private
-
+  TDmModels = class(TDataModule)
+    DtsCustomer: TFDQuery;
+    DtsCustomerCTR_CODE: TIntegerField;
+    DtsCustomerCTR_NAME: TStringField;
+    DsCustomer: TDataSource;
+    DtsCustomerContact: TFDQuery;
+    DtsCustomerContactCTC_CODE: TIntegerField;
+    DtsCustomerContactCTC_NAME: TStringField;
+    DtsCustomerContactCTR_CODE: TIntegerField;
+  private
+    { Private declarations }
   public
-
+    { Public declarations }
   end;
 
 implementation
 
-{ %CLASSGROUP 'System.Classes.TPersistent' }
+uses
+  Connection.FireDAC;
+
+{ %CLASSGROUP 'Vcl.Controls.TControl' }
 
 {$R *.dfm}
 

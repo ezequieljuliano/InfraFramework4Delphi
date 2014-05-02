@@ -27,17 +27,21 @@ uses
   InfraDB4D,
   SQLBuilder4D,
   PropertiesFile4D,
-  SQLBuilder4D.Parser;
+  SQLBuilder4D.Parser,
+  Data.DB;
 
 type
 
-  TDriverComponent<TCompConnection: TComponent> = class abstract
-  strict private
-    FCompConnection: TCompConnection;
-  public
-    constructor Create(const pCompConnection: TCompConnection);
+  TDataModuleClass = class of TDataModule;
+  TDriverClass = class of TObject;
 
-    function GetCompConnection(): TCompConnection;
+  TDriverComponent<TConnection: TComponent> = class abstract
+  strict private
+    FConnection: TConnection;
+  public
+    constructor Create(const pConnection: TConnection);
+
+    function GetConnection(): TConnection;
   end;
 
   TDriverStatement<TDataSet: TComponent; TDrvConnection: class> = class abstract
@@ -70,7 +74,9 @@ type
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
   strict private
     FComponent: TDrvComponent;
+    FAutoDestroyComponent: Boolean;
     FStatement: TDrvStatement;
+    procedure DestroyComponent();
   strict protected
     procedure SetStatement(const pStatement: TDrvStatement);
     procedure DoCreateStatement(); virtual; abstract;
@@ -97,77 +103,84 @@ type
     procedure Commit();
     procedure Rollback();
 
-    procedure Build(const pComponent: TDrvComponent);
+    procedure Build(const pComponent: TDrvComponent; const pAutoDestroyComponent: Boolean = True);
   end;
 
-  TDriverConnectionFactory<TDrvConnection: class> = class abstract
-  strict private
-    FIsThreadSafe: Boolean;
-  strict protected
-    function DoGetNewInstance(): TDrvConnection; virtual; abstract;
-    function DoGetSingletonInstance(): TDrvConnection; virtual; abstract;
-  public
-    constructor Create();
+  TDriverSingletonConnection<TDrvConnection: class> = class abstract
 
-    function GetIsThreadSafe: Boolean;
-    procedure SetIsThreadSafe(const pValue: Boolean);
-
-    function GetNewInstance(): TDrvConnection;
-    function GetSingletonInstance(): TDrvConnection;
-
-    property IsThreadSafe: Boolean read GetIsThreadSafe write SetIsThreadSafe;
   end;
 
-  TDriverManager<TKey; TDrvConnection: class> = class abstract
+  TDriverConnectionManager<TKey; TDrvConnection: class> = class abstract
   strict private
-    FIsThreadSafe: Boolean;
-    FConnections: TDictionary<TKey, TDrvConnection>;
+  type
+    TConnectionProperties = class
+    strict private
+      FObj: TDrvConnection;
+      FAutoDestroy: Boolean;
+    public
+      constructor Create(const pObj: TDrvConnection; const pAutoDestroy: Boolean);
+      destructor Destroy(); override;
+
+      property Obj: TDrvConnection read FObj;
+      property AutoDestroy: Boolean write FAutoDestroy;
+    end;
+  strict private
+    FConnections: TObjectDictionary<TKey, TConnectionProperties>;
+    procedure InternalRegisterConnection(const pKey: TKey; pConnectionProperties: TConnectionProperties);
   public
     constructor Create();
     destructor Destroy(); override;
 
     function GetCount: Integer;
-    function GetIsThreadSafe: Boolean;
-    procedure SetIsThreadSafe(const pValue: Boolean);
 
-    procedure RegisterConnection(const pKey: TKey; const pConnection: TDrvConnection);
+    procedure RegisterConnection(const pKey: TKey; const pConnection: TDrvConnection); overload;
+    procedure RegisterConnection(const pKey: TKey; const pConnectionClass: TDriverClass); overload;
     procedure UnregisterConnection(const pKey: TKey);
     procedure UnregisterAllConnections();
     function ConnectionIsRegistered(const pKey: TKey): Boolean;
     function GetConnection(const pKey: TKey): TDrvConnection;
 
     property Count: Integer read GetCount;
-    property IsThreadSafe: Boolean read GetIsThreadSafe write SetIsThreadSafe;
   end;
 
   TDriverController<TDataSet: TComponent; TDrvConnection, TDrvDetails: class> = class abstract
   strict private
-    FDataSet: TDataSet;
     FConnection: TDrvConnection;
+    FDataSet: TDataSet;
+    FModel: TDataModule;
+    FModelDestroy: Boolean;
     FSQLInitial: string;
     FSQLParserSelect: ISQLParserSelect;
     FDetails: TDrvDetails;
     procedure InternalCreate();
+    function FindDataSetOnModel(const pDataSetName: string): TDataSet;
   strict protected
     procedure SetDetails(const pDBDetails: TDrvDetails);
+    procedure SetModel(const pModel: TDataModule);
+
     function GetSQLInitial(): string;
     function GetSQLParserSelect(): ISQLParserSelect;
 
     procedure DoCreateDetails(); virtual; abstract;
+
     procedure DoChangeSQLTextOfDataSet(); virtual; abstract;
+    procedure DoConfigureDataSetConnection(); virtual; abstract;
+
     function DoGetSQLTextOfDataSet(): string; virtual; abstract;
 
     procedure DoOpen(); virtual; abstract;
     procedure DoClose(); virtual; abstract;
   public
-    constructor Create(const pConnection: TDrvConnection); overload;
-    constructor Create(const pConnection: TDrvConnection; const pDataSet: TDataSet); overload;
+    constructor Create(const pConnection: TDrvConnection; const pModel: TDataModule; const pDataSet: TDataSet); overload;
+    constructor Create(const pConnection: TDrvConnection; const pModel: TDataModule; const pDataSetName: string); overload;
+    constructor Create(const pConnection: TDrvConnection; const pModelClass: TDataModuleClass; const pDataSetName: string); overload;
+
     destructor Destroy(); override;
 
     function GetConnection(): TDrvConnection;
     function GetDetails(): TDrvDetails;
     function GetDataSet(): TDataSet;
-    procedure SetDataSet(const pDataSet: TDataSet);
+    function GetModel<T: TDataModule>(): T;
 
     procedure SQLInitialize(const pSQL: string);
     procedure SQLBuild(const pWhere: ISQLWhere; const pOpen: Boolean = True); overload;
@@ -178,24 +191,41 @@ type
   end;
 
   TDriverDetails<TKey; TDrvController: class> = class abstract
+  strict protected
+  type
+    TDetailProperties = class
+    strict private
+      FObj: TDrvController;
+      FAutoDestroy: Boolean;
+    public
+      constructor Create(const pObj: TDrvController; const pAutoDestroy: Boolean);
+      destructor Destroy(); override;
+
+      property Obj: TDrvController read FObj;
+      property AutoDestroy: Boolean write FAutoDestroy;
+    end;
   strict private
-    FDetails: TDictionary<TKey, TDrvController>;
+    FDetails: TObjectDictionary<TKey, TDetailProperties>;
     FMasterController: TDrvController;
+    FMasterDataSource: TDataSource;
   strict protected
     function GetMasterController(): TDrvController;
-    function GetDetailDictionary(): TDictionary<TKey, TDrvController>;
+    function GetMasterDataSource(): TDataSource;
+    function GetDetailDictionary(): TDictionary<TKey, TDetailProperties>;
 
     procedure DoOpenAll(); virtual; abstract;
     procedure DoCloseAll(); virtual; abstract;
     procedure DoDisableAllControls(); virtual; abstract;
     procedure DoEnableAllControls(); virtual; abstract;
+    procedure DoLinkMasterDataSource(const pMasterController: TDrvController); virtual; abstract;
+    procedure DoLinkDetailOnMasterDataSource(const pDetail: TDrvController); virtual; abstract;
   public
     constructor Create(const pMasterController: TDrvController);
     destructor Destroy(); override;
 
     function GetCount: Integer;
 
-    procedure RegisterDetail(const pKey: TKey; const pDetail: TDrvController);
+    procedure RegisterDetail(const pKey: TKey; const pDetail: TDrvController; const pAutoDestroyDetail: Boolean = True);
     procedure UnregisterDetail(const pKey: TKey);
     procedure UnregisterAllDetails();
     function DetailIsRegistered(const pKey: TKey): Boolean;
@@ -296,25 +326,27 @@ begin
   Result := FConnection;
 end;
 
-{ TDriverComponent<TCompConnection> }
+{ TDriverComponent<TConnection> }
 
-constructor TDriverComponent<TCompConnection>.Create(
-  const pCompConnection: TCompConnection);
+constructor TDriverComponent<TConnection>.Create(
+  const pConnection: TConnection);
 begin
-  FCompConnection := pCompConnection;
+  FConnection := pConnection;
 end;
 
-function TDriverComponent<TCompConnection>.GetCompConnection: TCompConnection;
+function TDriverComponent<TConnection>.GetConnection: TConnection;
 begin
-  Result := FCompConnection;
+  Result := FConnection;
 end;
 
 { TDriverConnection<TDrvComponent, TDrvStatement> }
 
 procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(
-  const pComponent: TDrvComponent);
+  const pComponent: TDrvComponent; const pAutoDestroyComponent: Boolean);
 begin
+  DestroyComponent();
   FComponent := pComponent;
+  FAutoDestroyComponent := pAutoDestroyComponent;
 end;
 
 procedure TDriverConnection<TDrvComponent, TDrvStatement>.Commit;
@@ -330,17 +362,22 @@ end;
 constructor TDriverConnection<TDrvComponent, TDrvStatement>.Create;
 begin
   FComponent := nil;
+  FAutoDestroyComponent := False;
   DoCreateStatement();
 end;
 
 destructor TDriverConnection<TDrvComponent, TDrvStatement>.Destroy;
 begin
-  if (FComponent <> nil) then
-    FreeAndNil(FComponent);
-
+  DestroyComponent();
   if (FStatement <> nil) then
     FreeAndNil(FStatement);
   inherited Destroy();
+end;
+
+procedure TDriverConnection<TDrvComponent, TDrvStatement>.DestroyComponent;
+begin
+  if (FAutoDestroyComponent) and (FComponent <> nil) then
+    FreeAndNil(FComponent);
 end;
 
 procedure TDriverConnection<TDrvComponent, TDrvStatement>.Disconect;
@@ -385,137 +422,95 @@ begin
   DoStartTransaction();
 end;
 
-{ TDriverConnectionFactory<TDrvConnection> }
+{ TDriverConnectionManager<TKey, TDrvConnection> }
 
-constructor TDriverConnectionFactory<TDrvConnection>.Create;
+constructor TDriverConnectionManager<TKey, TDrvConnection>.Create;
 begin
-  FIsThreadSafe := True;
+  FConnections := TObjectDictionary<TKey, TConnectionProperties>.Create([doOwnsValues]);
 end;
 
-function TDriverConnectionFactory<TDrvConnection>.GetIsThreadSafe: Boolean;
-begin
-  Result := FIsThreadSafe;
-end;
-
-function TDriverConnectionFactory<TDrvConnection>.GetNewInstance: TDrvConnection;
-begin
-  Result := DoGetNewInstance();
-end;
-
-function TDriverConnectionFactory<TDrvConnection>.GetSingletonInstance: TDrvConnection;
-begin
-  if FIsThreadSafe then
-    TGlobalCriticalSection.GetInstance.Enter;
-  try
-    Result := DoGetSingletonInstance();
-  finally
-    if FIsThreadSafe then
-      TGlobalCriticalSection.GetInstance.Leave;
-  end;
-end;
-
-procedure TDriverConnectionFactory<TDrvConnection>.SetIsThreadSafe(
-  const pValue: Boolean);
-begin
-  FIsThreadSafe := pValue;
-end;
-
-{ TDriverManager<TKey, TDrvConnection> }
-
-constructor TDriverManager<TKey, TDrvConnection>.Create;
-begin
-  FIsThreadSafe := True;
-  FConnections := TDictionary<TKey, TDrvConnection>.Create();
-end;
-
-function TDriverManager<TKey, TDrvConnection>.ConnectionIsRegistered(
+function TDriverConnectionManager<TKey, TDrvConnection>.ConnectionIsRegistered(
   const pKey: TKey): Boolean;
 begin
   Result := FConnections.ContainsKey(pKey);
 end;
 
-destructor TDriverManager<TKey, TDrvConnection>.Destroy;
+destructor TDriverConnectionManager<TKey, TDrvConnection>.Destroy;
 begin
+  UnregisterAllConnections();
   FreeAndNil(FConnections);
   inherited Destroy();
 end;
 
-function TDriverManager<TKey, TDrvConnection>.GetCount: Integer;
+function TDriverConnectionManager<TKey, TDrvConnection>.GetCount: Integer;
 begin
   Result := FConnections.Count;
 end;
 
-function TDriverManager<TKey, TDrvConnection>.GetConnection(
-  const pKey: TKey): TDrvConnection;
-begin
-  if ConnectionIsRegistered(pKey) then
-  begin
-    if FIsThreadSafe then
-      TGlobalCriticalSection.GetInstance.Enter;
-    try
-      Result := FConnections.Items[pKey];
-    finally
-      if FIsThreadSafe then
-        TGlobalCriticalSection.GetInstance.Leave;
-    end;
-  end
-  else
-    raise EConnectionUnregistered.Create('Database connection unregistered!');
-end;
-
-function TDriverManager<TKey, TDrvConnection>.GetIsThreadSafe: Boolean;
-begin
-  Result := FIsThreadSafe;
-end;
-
-procedure TDriverManager<TKey, TDrvConnection>.RegisterConnection(
-  const pKey: TKey; const pConnection: TDrvConnection);
+procedure TDriverConnectionManager<TKey, TDrvConnection>.InternalRegisterConnection(
+  const pKey: TKey; pConnectionProperties: TConnectionProperties);
 begin
   if not ConnectionIsRegistered(pKey) then
   begin
-    if FIsThreadSafe then
-      TGlobalCriticalSection.GetInstance.Enter;
+    TGlobalCriticalSection.GetInstance.Enter;
     try
-      FConnections.Add(pKey, pConnection);
+      FConnections.Add(pKey, pConnectionProperties);
     finally
-      if FIsThreadSafe then
-        TGlobalCriticalSection.GetInstance.Leave;
+      TGlobalCriticalSection.GetInstance.Leave;
     end;
   end
   else
     raise EConnectionAlreadyRegistered.Create('Database already registered!');
 end;
 
-procedure TDriverManager<TKey, TDrvConnection>.SetIsThreadSafe(
-  const pValue: Boolean);
+procedure TDriverConnectionManager<TKey, TDrvConnection>.RegisterConnection(
+  const pKey: TKey; const pConnectionClass: TDriverClass);
 begin
-  FIsThreadSafe := pValue;
+  InternalRegisterConnection(pKey, TConnectionProperties.Create(pConnectionClass.Create(), True));
 end;
 
-procedure TDriverManager<TKey, TDrvConnection>.UnregisterAllConnections;
+function TDriverConnectionManager<TKey, TDrvConnection>.GetConnection(
+  const pKey: TKey): TDrvConnection;
 begin
-  if FIsThreadSafe then
+  if ConnectionIsRegistered(pKey) then
+  begin
     TGlobalCriticalSection.GetInstance.Enter;
+    try
+      Result := FConnections.Items[pKey].Obj;
+    finally
+      TGlobalCriticalSection.GetInstance.Leave;
+    end;
+  end
+  else
+    raise EConnectionUnregistered.Create('Database connection unregistered!');
+end;
+
+procedure TDriverConnectionManager<TKey, TDrvConnection>.RegisterConnection(
+  const pKey: TKey; const pConnection: TDrvConnection);
+begin
+  InternalRegisterConnection(pKey, TConnectionProperties.Create(pConnection, False));
+end;
+
+procedure TDriverConnectionManager<TKey, TDrvConnection>.UnregisterAllConnections;
+begin
+  TGlobalCriticalSection.GetInstance.Enter;
   try
     FConnections.Clear;
   finally
-    if FIsThreadSafe then
-      TGlobalCriticalSection.GetInstance.Leave;
+    TGlobalCriticalSection.GetInstance.Leave;
   end;
 end;
 
-procedure TDriverManager<TKey, TDrvConnection>.UnregisterConnection(
+procedure TDriverConnectionManager<TKey, TDrvConnection>.UnregisterConnection(
   const pKey: TKey);
 begin
   if ConnectionIsRegistered(pKey) then
   begin
-    if FIsThreadSafe then
-      TGlobalCriticalSection.GetInstance.Enter;
+    TGlobalCriticalSection.GetInstance.Enter;
     try
       FConnections.Remove(pKey);
     finally
-      if FIsThreadSafe then
-        TGlobalCriticalSection.GetInstance.Leave;
+      TGlobalCriticalSection.GetInstance.Leave;
     end;
   end
   else
@@ -525,18 +520,35 @@ end;
 { TDriverController<TDataSet, TDrvConnection, TDrvDetails> }
 
 constructor TDriverController<TDataSet, TDrvConnection, TDrvDetails>.Create(
-  const pConnection: TDrvConnection; const pDataSet: TDataSet);
+  const pConnection: TDrvConnection; const pModel: TDataModule;
+  const pDataSet: TDataSet);
 begin
   FConnection := pConnection;
+  FModelDestroy := False;
+  FModel := pModel;
   FDataSet := pDataSet;
   InternalCreate();
 end;
 
 constructor TDriverController<TDataSet, TDrvConnection, TDrvDetails>.Create(
-  const pConnection: TDrvConnection);
+  const pConnection: TDrvConnection; const pModel: TDataModule;
+  const pDataSetName: string);
 begin
   FConnection := pConnection;
-  FDataSet := nil;
+  FModelDestroy := False;
+  FModel := pModel;
+  FDataSet := FindDataSetOnModel(pDataSetName);
+  InternalCreate();
+end;
+
+constructor TDriverController<TDataSet, TDrvConnection, TDrvDetails>.Create(
+  const pConnection: TDrvConnection; const pModelClass: TDataModuleClass;
+  const pDataSetName: string);
+begin
+  FConnection := pConnection;
+  FModelDestroy := True;
+  FModel := pModelClass.Create(nil);
+  FDataSet := FindDataSetOnModel(pDataSetName);
   InternalCreate();
 end;
 
@@ -544,7 +556,23 @@ destructor TDriverController<TDataSet, TDrvConnection, TDrvDetails>.Destroy;
 begin
   if (FDetails <> nil) then
     FreeAndNil(FDetails);
+
+  if FModelDestroy then
+    FreeAndNil(FModel);
   inherited Destroy();
+end;
+
+function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.FindDataSetOnModel(const pDataSetName: string): TDataSet;
+begin
+  Result := nil;
+
+  if (FModel = nil) then
+    raise EModelDoesNotExist.Create('Model does not exist!');
+
+  Result := TDataSet(FModel.FindComponent(pDataSetName));
+
+  if (Result = nil) then
+    raise EDataSetDoesNotExist.Create('DataSet does not exist!');
 end;
 
 function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetDataSet: TDataSet;
@@ -558,7 +586,7 @@ end;
 function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetConnection: TDrvConnection;
 begin
   if (FConnection = nil) then
-    raise EConnectionDoesNotExist.Create('DBConnection does not exist!');
+    raise EConnectionDoesNotExist.Create('Connection does not exist!');
 
   Result := FConnection;
 end;
@@ -566,9 +594,17 @@ end;
 function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetDetails: TDrvDetails;
 begin
   if (FDetails = nil) then
-    raise EDetailUnregistered.Create('DBDetails unregistered!');
+    raise EDetailUnregistered.Create('Details unregistered!');
 
   Result := FDetails;
+end;
+
+function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetModel<T>: T;
+begin
+  if (FModel = nil) then
+    raise EModelDoesNotExist.Create('Model does not exist!');
+
+  Result := T(FModel);
 end;
 
 function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetSQLInitial: string;
@@ -584,26 +620,21 @@ end;
 procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.InternalCreate;
 begin
   FSQLParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
-  if (FDataSet <> nil) then
-    FSQLInitial := DoGetSQLTextOfDataSet
-  else
-    FSQLInitial := EmptyStr;
-  SQLInitialize(FSQLInitial);
+  SQLInitialize(DoGetSQLTextOfDataSet);
+  DoConfigureDataSetConnection();
   DoCreateDetails();
-end;
-
-procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SetDataSet(
-  const pDataSet: TDataSet);
-begin
-  FDataSet := pDataSet;
-  FSQLInitial := DoGetSQLTextOfDataSet;
-  SQLInitialize(FSQLInitial);
 end;
 
 procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SetDetails(
   const pDBDetails: TDrvDetails);
 begin
   FDetails := pDBDetails;
+end;
+
+procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SetModel(
+  const pModel: TDataModule);
+begin
+  FModel := pModel;
 end;
 
 procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SQLBuild(
@@ -649,7 +680,7 @@ end;
 procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SQLInitialize(
   const pSQL: string);
 begin
-  if (pSQL <> EmptyStr) then
+  if (Trim(pSQL) <> EmptyStr) then
   begin
     DoClose();
     FSQLInitial := pSQL;
@@ -678,8 +709,10 @@ end;
 constructor TDriverDetails<TKey, TDrvController>.Create(
   const pMasterController: TDrvController);
 begin
-  FDetails := TDictionary<TKey, TDrvController>.Create();
+  FDetails := TObjectDictionary<TKey, TDetailProperties>.Create([doOwnsValues]);;
   FMasterController := pMasterController;
+  FMasterDataSource := TDataSource.Create(nil);
+  DoLinkMasterDataSource(FMasterController);
 end;
 
 function TDriverDetails<TKey, TDrvController>.DetailIsRegistered(
@@ -690,7 +723,9 @@ end;
 
 destructor TDriverDetails<TKey, TDrvController>.Destroy;
 begin
+  UnregisterAllDetails();
   FreeAndNil(FDetails);
+  FreeAndNil(FMasterDataSource);
   inherited Destroy();
 end;
 
@@ -714,16 +749,21 @@ begin
   Result := FMasterController;
 end;
 
+function TDriverDetails<TKey, TDrvController>.GetMasterDataSource: TDataSource;
+begin
+  Result := FMasterDataSource;
+end;
+
 function TDriverDetails<TKey, TDrvController>.GetDetail(
   const pKey: TKey): TDrvController;
 begin
   if DetailIsRegistered(pKey) then
-    Result := FDetails.Items[pKey]
+    Result := FDetails.Items[pKey].Obj
   else
-    raise EDetailUnregistered.Create('DBDetail unregistered!');
+    raise EDetailUnregistered.Create('Detail unregistered!');
 end;
 
-function TDriverDetails<TKey, TDrvController>.GetDetailDictionary: TDictionary<TKey, TDrvController>;
+function TDriverDetails<TKey, TDrvController>.GetDetailDictionary: TDictionary<TKey, TDetailProperties>;
 begin
   Result := FDetails;
 end;
@@ -734,24 +774,20 @@ begin
 end;
 
 procedure TDriverDetails<TKey, TDrvController>.RegisterDetail(
-  const pKey: TKey; const pDetail: TDrvController);
+  const pKey: TKey; const pDetail: TDrvController; const pAutoDestroyDetail: Boolean);
 begin
   if not DetailIsRegistered(pKey) then
-    FDetails.Add(pKey, pDetail)
+  begin
+    FDetails.Add(pKey, TDetailProperties.Create(pDetail, pAutoDestroyDetail));
+    DoLinkDetailOnMasterDataSource(pDetail);
+  end
   else
-    raise EDetailAlreadyRegistered.Create('DBDetail already registered!');
+    raise EDetailAlreadyRegistered.Create('Detail already registered!');
 end;
 
 procedure TDriverDetails<TKey, TDrvController>.UnregisterAllDetails;
-var
-  vPair: TPair<TKey, TDrvController>;
-  vKey: TKey;
 begin
-  for vPair in FDetails do
-  begin
-    vKey := vPair.Key;
-    UnregisterDetail(vKey);
-  end;
+  FDetails.Clear;
 end;
 
 procedure TDriverDetails<TKey, TDrvController>.UnregisterDetail(
@@ -760,7 +796,39 @@ begin
   if DetailIsRegistered(pKey) then
     FDetails.Remove(pKey)
   else
-    raise EDetailUnregistered.Create('DBDetail unregistered!');
+    raise EDetailUnregistered.Create('Detail unregistered!');
+end;
+
+{ TDriverConnectionManager<TKey, TDrvConnection>.TConnectionProperties }
+
+constructor TDriverConnectionManager<TKey, TDrvConnection>.TConnectionProperties.Create(
+  const pObj: TDrvConnection; const pAutoDestroy: Boolean);
+begin
+  FObj := pObj;
+  FAutoDestroy := pAutoDestroy;
+end;
+
+destructor TDriverConnectionManager<TKey, TDrvConnection>.TConnectionProperties.Destroy;
+begin
+  if (FAutoDestroy) then
+    FreeAndNil(FObj);
+  inherited Destroy();
+end;
+
+{ TDriverDetails<TKey, TDrvController>.TDetailProperties }
+
+constructor TDriverDetails<TKey, TDrvController>.TDetailProperties.Create(
+  const pObj: TDrvController; const pAutoDestroy: Boolean);
+begin
+  FObj := pObj;
+  FAutoDestroy := pAutoDestroy;
+end;
+
+destructor TDriverDetails<TKey, TDrvController>.TDetailProperties.Destroy;
+begin
+  if (FAutoDestroy) then
+    FreeAndNil(FObj);
+  inherited Destroy();
 end;
 
 end.
