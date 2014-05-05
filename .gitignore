@@ -10,3 +10,12 @@
 /samples/master-detail/Win32/Debug
 /samples/master-detail/__history
 /samples/master-detail/src/__history
+/samples/FireDAC/basic/Win32/Debug
+
+/samples/FireDAC/basic/__history
+/samples/FireDAC/basic/src/__history
+/samples/FireDAC/common/src/__history
+/samples/FireDAC/master-detail/Win32/Debug/dcu
+/samples/FireDAC/master-detail/__history
+/samples/FireDAC/master-detail/src/__history
+/samples/FireDAC/master-detail/Win32/Debug
