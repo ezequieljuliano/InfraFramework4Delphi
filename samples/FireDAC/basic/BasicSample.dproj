@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{2622050E-D527-4167-90BD-B3F3D814F99A}</ProjectGuid>
-        <ProjectVersion>15.1</ProjectVersion>
+        <ProjectVersion>15.4</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <MainSource>BasicSample.dpr</MainSource>
         <Base>True</Base>
@@ -40,7 +40,8 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_UnitSearchPath>..\..\..\InfraDatabase4Delphi\src;..\..\..\InfraDatabase4Delphi\dependencies\PropertiesFile4Delphi\src;..\..\..\InfraDatabase4Delphi\dependencies\SQLBuilder4Delphi\src;..\..\..\InfraDatabase4Delphi\dependencies\SQLBuilder4Delphi\dependencies\gaSQLParser\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <SanitizedProjectName>BasicSample</SanitizedProjectName>
+        <DCC_UnitSearchPath>..\..\..\..\InfraDatabase4Delphi\src;..\..\..\..\InfraDatabase4Delphi\dependencies\PropertiesFile4Delphi\src;..\..\..\..\InfraDatabase4Delphi\dependencies\SQLBuilder4Delphi\src;..\..\..\..\InfraDatabase4Delphi\dependencies\SQLBuilder4Delphi\dependencies\gaSQLParser\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_DcpOutput>.\$(Platform)\$(Config)\dcp</DCC_DcpOutput>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
@@ -107,16 +108,6 @@
             <Form>CountryView</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="..\..\src\InfraDB4D.Model.Base.pas">
-            <Form>ModelBase</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="..\..\src\InfraDB4D.Model.FireDAC.pas">
-            <Form>ModelFireDAC</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
         <DCCReference Include="src\Province.Model.pas">
             <Form>ProvinceModel</Form>
             <FormType>dfm</FormType>
@@ -125,6 +116,16 @@
         <DCCReference Include="src\Province.Controller.pas"/>
         <DCCReference Include="src\Dm.Models.pas">
             <Form>DmModels</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\..\..\src\InfraDB4D.Model.Base.pas">
+            <Form>ModelBase</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="..\..\..\src\InfraDB4D.Model.FireDAC.pas">
+            <Form>ModelFireDAC</Form>
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
@@ -196,8 +197,8 @@
                     <VersionInfoKeys Name="theme"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k190.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp190.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k200.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp200.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
                 <Source>
                     <Source Name="MainSource">BasicSample.dpr</Source>

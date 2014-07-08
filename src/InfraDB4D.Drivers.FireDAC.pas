@@ -11,7 +11,7 @@ uses
   InfraDB4D.Drivers.Base,
   SQLBuilder4D,
   FireDAC.Comp.Client,
-  FireDAC.Stan.Option;
+  FireDAC.Stan.Option, Data.DB;
 
 type
 
@@ -23,6 +23,8 @@ type
   strict protected
     procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); override;
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TFDQuery; override;
+    function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
+    function DoInternalBuildAsFloat(const pSQL: string): Double; override;
   end;
 
   TFireDACConnectionAdapter = class(TDriverConnection<TFireDACComponentAdapter, TFireDACStatementAdapter>)
@@ -130,6 +132,36 @@ begin
   Result.SQL.Add(pSQL);
   Result.Prepare;
   Result.Open;
+end;
+
+function TFireDACStatementAdapter.DoInternalBuildAsFloat(const pSQL: string): Double;
+var
+  vDataSet: TFDQuery;
+begin
+  Result := 0;
+
+  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  try
+    if not vDataSet.IsEmpty then
+      Result := vDataSet.Fields[0].AsFloat;
+  finally
+    FreeAndNil(vDataSet);
+  end;
+end;
+
+function TFireDACStatementAdapter.DoInternalBuildAsInteger(const pSQL: string): Integer;
+var
+  vDataSet: TFDQuery;
+begin
+  Result := 0;
+
+  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  try
+    if not vDataSet.IsEmpty then
+      Result := vDataSet.Fields[0].AsInteger;
+  finally
+    FreeAndNil(vDataSet);
+  end;
 end;
 
 { TFireDACConnectionAdapter }

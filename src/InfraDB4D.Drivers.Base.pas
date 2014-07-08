@@ -36,6 +36,8 @@ type
 
     procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); virtual; abstract;
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TDataSet; virtual; abstract;
+    function DoInternalBuildAsInteger(const pSQL: string): Integer; virtual; abstract;
+    function DoInternalBuildAsFloat(const pSQL: string): Double; virtual; abstract;
   public
     constructor Create(const pConnection: TDrvConnection);
 
@@ -53,6 +55,18 @@ type
     function BuildAsDataSet(const pGroupBy: ISQLGroupBy; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pHaving: ISQLHaving; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pOrderBy: ISQLOrderBy; const pFetchRows: Integer = 0): TDataSet; overload;
+
+    function BuildAsInteger(const pSelect: ISQLSelect): Integer; overload;
+    function BuildAsInteger(const pWhere: ISQLWhere): Integer; overload;
+    function BuildAsInteger(const pGroupBy: ISQLGroupBy): Integer; overload;
+    function BuildAsInteger(const pHaving: ISQLHaving): Integer; overload;
+    function BuildAsInteger(const pOrderBy: ISQLOrderBy): Integer; overload;
+
+    function BuildAsFloat(const pSelect: ISQLSelect): Double; overload;
+    function BuildAsFloat(const pWhere: ISQLWhere): Double; overload;
+    function BuildAsFloat(const pGroupBy: ISQLGroupBy): Double; overload;
+    function BuildAsFloat(const pHaving: ISQLHaving): Double; overload;
+    function BuildAsFloat(const pOrderBy: ISQLOrderBy): Double; overload;
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -297,6 +311,66 @@ function TDriverStatement<TDataSet, TDrvConnection>.BuildAsDataSet(
   const pOrderBy: ISQLOrderBy; const pFetchRows: Integer): TDataSet;
 begin
   Result := DoInternalBuildAsDataSet(pOrderBy.ToString, pFetchRows);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
+  const pWhere: ISQLWhere): Double;
+begin
+  Result := DoInternalBuildAsFloat(pWhere.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
+  const pSelect: ISQLSelect): Double;
+begin
+  Result := DoInternalBuildAsFloat(pSelect.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
+  const pGroupBy: ISQLGroupBy): Double;
+begin
+  Result := DoInternalBuildAsFloat(pGroupBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
+  const pOrderBy: ISQLOrderBy): Double;
+begin
+  Result := DoInternalBuildAsFloat(pOrderBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
+  const pHaving: ISQLHaving): Double;
+begin
+  Result := DoInternalBuildAsFloat(pHaving.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
+  const pWhere: ISQLWhere): Integer;
+begin
+  Result := DoInternalBuildAsInteger(pWhere.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
+  const pSelect: ISQLSelect): Integer;
+begin
+  Result := DoInternalBuildAsInteger(pSelect.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
+  const pGroupBy: ISQLGroupBy): Integer;
+begin
+  Result := DoInternalBuildAsInteger(pGroupBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
+  const pOrderBy: ISQLOrderBy): Integer;
+begin
+  Result := DoInternalBuildAsInteger(pOrderBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
+  const pHaving: ISQLHaving): Integer;
+begin
+  Result := DoInternalBuildAsInteger(pHaving.ToString);
 end;
 
 constructor TDriverStatement<TDataSet, TDrvConnection>.Create(

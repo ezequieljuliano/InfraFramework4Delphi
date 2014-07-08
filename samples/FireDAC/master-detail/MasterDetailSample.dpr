@@ -2,16 +2,16 @@ program MasterDetailSample;
 
 uses
   Vcl.Forms,
-  Main.View in 'src\Main.View.pas' {MainView} ,
-  Connection.FireDAC in '..\common\src\Connection.FireDAC.pas' {ConnectionFireDAC: TDataModule} ,
-  InfraDB4D.Model.Base in '..\..\src\InfraDB4D.Model.Base.pas' {ModelBase: TDataModule} ,
-  InfraDB4D.Model.FireDAC in '..\..\src\InfraDB4D.Model.FireDAC.pas' {ModelFireDAC: TDataModule} ,
-  Customer.Model in 'src\Customer.Model.pas' {CustomerModel: TDataModule} ,
-  CustomerContact.Model in 'src\CustomerContact.Model.pas' {CustomerContactModel: TDataModule} ,
+  Main.View in 'src\Main.View.pas' {MainView},
+  Connection.FireDAC in '..\common\src\Connection.FireDAC.pas' {ConnectionFireDAC: TDataModule},
+  Customer.Model in 'src\Customer.Model.pas' {CustomerModel: TDataModule},
+  CustomerContact.Model in 'src\CustomerContact.Model.pas' {CustomerContactModel: TDataModule},
   Customer.Controller in 'src\Customer.Controller.pas',
   CustomerContact.Controller in 'src\CustomerContact.Controller.pas',
-  Dm.Models in 'src\Dm.Models.pas' {DmModels: TDataModule} ,
-  Customer.View in 'src\Customer.View.pas' {CustomerView};
+  Dm.Models in 'src\Dm.Models.pas' {DmModels: TDataModule},
+  Customer.View in 'src\Customer.View.pas' {CustomerView},
+  InfraDB4D.Model.Base in '..\..\..\src\InfraDB4D.Model.Base.pas' {ModelBase: TDataModule},
+  InfraDB4D.Model.FireDAC in '..\..\..\src\InfraDB4D.Model.FireDAC.pas' {ModelFireDAC: TDataModule};
 
 {$R *.res}
 

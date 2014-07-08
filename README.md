@@ -7,7 +7,7 @@ Its premise is to facilitate the use layering (MVC) without losing productivity,
 
 This API allows the use of the main drivers of data access available for Delphi.
 
-The InfraDatabase4Delphi was developed and tested using Delphi XE5.
+The InfraDatabase4Delphi was developed and tested using Delphi XE6.
 
 Features
 ========
