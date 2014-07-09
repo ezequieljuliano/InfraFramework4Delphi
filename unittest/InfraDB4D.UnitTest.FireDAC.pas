@@ -167,6 +167,7 @@ begin
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetConnection <> nil);
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetDataSet <> nil);
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetModel<TFireDACModel>() <> nil);
+  CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetMaster<TFireDACMasterController>() <> nil);
 
   FreeAndNil(vMasterController);
 

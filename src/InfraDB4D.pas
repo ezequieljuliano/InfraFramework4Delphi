@@ -19,6 +19,8 @@ type
   EDataSetDoesNotExist = class(EInfraBaseException);
   EConnectionDoesNotExist = class(EInfraBaseException);
   EModelDoesNotExist = class(EInfraBaseException);
+  EMasterDoesNotExist = class(EInfraBaseException);
+  EMasterDoesNotCompatible = class(EInfraBaseException);
 
   TGlobalCriticalSection = class sealed
   public

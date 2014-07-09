@@ -70,6 +70,7 @@ type
     procedure DoCloseAll(); override;
     procedure DoDisableAllControls(); override;
     procedure DoEnableAllControls(); override;
+    procedure DoLinkMasterController(const pDetailController: TFireDACControllerAdapter); override;
     procedure DoLinkMasterDataSource(const pMasterController: TFireDACControllerAdapter); override;
     procedure DoLinkDetailOnMasterDataSource(const pDetail: TFireDACControllerAdapter); override;
   end;
@@ -280,6 +281,11 @@ procedure TFireDACDetailsAdapter.DoLinkDetailOnMasterDataSource(
   const pDetail: TFireDACControllerAdapter);
 begin
   pDetail.GetDataSet.MasterSource := GetMasterDataSource();
+end;
+
+procedure TFireDACDetailsAdapter.DoLinkMasterController(const pDetailController: TFireDACControllerAdapter);
+begin
+  pDetailController.SetMaster<TFireDACControllerAdapter>(GetMasterController());
 end;
 
 procedure TFireDACDetailsAdapter.DoLinkMasterDataSource(

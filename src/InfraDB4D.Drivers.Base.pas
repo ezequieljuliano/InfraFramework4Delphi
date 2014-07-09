@@ -146,6 +146,7 @@ type
     FConnection: TDrvConnection;
     FDataSet: TDataSet;
     FModel: TDataModule;
+    FMaster: TDriverController<TDataSet, TDrvConnection, TDrvDetails>;
     FModelDestroy: Boolean;
     FSQLInitial: string;
     FSQLParserSelect: ISQLParserSelect;
@@ -178,7 +179,11 @@ type
     function GetConnection(): TDrvConnection;
     function GetDetails(): TDrvDetails;
     function GetDataSet(): TDataSet;
+
     function GetModel<T: TDataModule>(): T;
+
+    function GetMaster<T: class>(): T;
+    procedure SetMaster<T: class>(const pMaster: T);
 
     procedure SQLInitialize(const pSQL: string);
     procedure SQLBuild(const pWhere: ISQLWhere; const pOpen: Boolean = True); overload;
@@ -215,6 +220,7 @@ type
     procedure DoCloseAll(); virtual; abstract;
     procedure DoDisableAllControls(); virtual; abstract;
     procedure DoEnableAllControls(); virtual; abstract;
+    procedure DoLinkMasterController(const pDetailController: TDrvController); virtual; abstract;
     procedure DoLinkMasterDataSource(const pMasterController: TDrvController); virtual; abstract;
     procedure DoLinkDetailOnMasterDataSource(const pDetail: TDrvController); virtual; abstract;
   public
@@ -657,6 +663,14 @@ begin
   Result := FDetails;
 end;
 
+function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetMaster<T>: T;
+begin
+  if (FMaster = nil) then
+    raise EMasterDoesNotExist.Create('Master Controller does not exist!');
+
+  Result := T(FMaster);
+end;
+
 function TDriverController<TDataSet, TDrvConnection, TDrvDetails>.GetModel<T>: T;
 begin
   if (FModel = nil) then
@@ -677,6 +691,7 @@ end;
 
 procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.InternalCreate;
 begin
+  FMaster := nil;
   FSQLParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
   SQLInitialize(DoGetSQLTextOfDataSet);
   DoConfigureDataSetConnection();
@@ -687,6 +702,14 @@ procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SetDetails(
   const pDBDetails: TDrvDetails);
 begin
   FDetails := pDBDetails;
+end;
+
+procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SetMaster<T>(const pMaster: T);
+begin
+  if not(pMaster is TDriverController<TDataSet, TDrvConnection, TDrvDetails>) then
+    raise EMasterDoesNotCompatible.Create('Master Controller does not compatible!');
+
+  FMaster := TDriverController<TDataSet, TDrvConnection, TDrvDetails>(pMaster);
 end;
 
 procedure TDriverController<TDataSet, TDrvConnection, TDrvDetails>.SetModel(
@@ -837,6 +860,7 @@ begin
   if not DetailIsRegistered(pKey) then
   begin
     FDetails.Add(pKey, TDetailProperties.Create(pDetail, pAutoDestroyDetail));
+    DoLinkMasterController(pDetail);
     DoLinkDetailOnMasterDataSource(pDetail);
   end
   else
