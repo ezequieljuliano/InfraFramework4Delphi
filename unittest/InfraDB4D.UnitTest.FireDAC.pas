@@ -168,6 +168,10 @@ begin
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetDataSet <> nil);
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetModel<TFireDACModel>() <> nil);
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetMaster<TFireDACMasterController>() <> nil);
+  CheckTrue(vMasterController.GetDetails.GetDetailAs<TFireDACDetailController>('Detail').GetDataSet <> nil);
+  CheckTrue(vMasterController.GetDetails.GetDetailAs<TFireDACDetailController>('Detail').ClassName = 'TFireDACDetailController');
+  CheckTrue(vMasterController.GetDetails.GetDetailByClass<TFireDACDetailController>().GetDataSet <> nil);
+  CheckTrue(vMasterController.GetDetails.GetDetailByClass<TFireDACDetailController>().ClassName = 'TFireDACDetailController');
 
   FreeAndNil(vMasterController);
 

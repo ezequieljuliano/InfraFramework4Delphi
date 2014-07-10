@@ -234,6 +234,8 @@ type
     procedure UnregisterAllDetails();
     function DetailIsRegistered(const pKey: TKey): Boolean;
     function GetDetail(const pKey: TKey): TDrvController;
+    function GetDetailAs<T: class>(const pKey: TKey): T;
+    function GetDetailByClass<T: class>(): T;
 
     procedure OpenAll();
     procedure CloseAll();
@@ -842,6 +844,27 @@ begin
     Result := FDetails.Items[pKey].Obj
   else
     raise EDetailUnregistered.Create('Detail unregistered!');
+end;
+
+function TDriverDetails<TKey, TDrvController>.GetDetailAs<T>(
+  const pKey: TKey): T;
+begin
+  Result := (GetDetail(pKey) as T);
+end;
+
+function TDriverDetails<TKey, TDrvController>.GetDetailByClass<T>: T;
+var
+  vDetailPair: TPair<TKey, TDetailProperties>;
+begin
+  Result := nil;
+  for vDetailPair in FDetails do
+  begin
+    if (vDetailPair.Value.Obj is T) then
+    begin
+      Result := (vDetailPair.Value.Obj as T);
+      Exit;
+    end;
+  end;
 end;
 
 function TDriverDetails<TKey, TDrvController>.GetDetailDictionary: TDictionary<TKey, TDetailProperties>;
