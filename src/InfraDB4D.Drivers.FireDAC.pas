@@ -25,6 +25,7 @@ type
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TFDQuery; override;
     function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
     function DoInternalBuildAsFloat(const pSQL: string): Double; override;
+    function DoInternalBuildAsString(const pSQL: string): string; override;
   end;
 
   TFireDACConnectionAdapter = class(TDriverConnection<TFireDACComponentAdapter, TFireDACStatementAdapter>)
@@ -160,6 +161,21 @@ begin
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsInteger;
+  finally
+    FreeAndNil(vDataSet);
+  end;
+end;
+
+function TFireDACStatementAdapter.DoInternalBuildAsString(const pSQL: string): string;
+var
+  vDataSet: TFDQuery;
+begin
+  Result := EmptyStr;
+
+  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  try
+    if not vDataSet.IsEmpty then
+      Result := vDataSet.Fields[0].AsString;
   finally
     FreeAndNil(vDataSet);
   end;

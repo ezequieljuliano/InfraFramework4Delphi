@@ -38,6 +38,7 @@ type
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TDataSet; virtual; abstract;
     function DoInternalBuildAsInteger(const pSQL: string): Integer; virtual; abstract;
     function DoInternalBuildAsFloat(const pSQL: string): Double; virtual; abstract;
+    function DoInternalBuildAsString(const pSQL: string): string; virtual; abstract;
   public
     constructor Create(const pConnection: TDrvConnection);
 
@@ -67,6 +68,12 @@ type
     function BuildAsFloat(const pGroupBy: ISQLGroupBy): Double; overload;
     function BuildAsFloat(const pHaving: ISQLHaving): Double; overload;
     function BuildAsFloat(const pOrderBy: ISQLOrderBy): Double; overload;
+
+    function BuildAsString(const pSelect: ISQLSelect): string; overload;
+    function BuildAsString(const pWhere: ISQLWhere): string; overload;
+    function BuildAsString(const pGroupBy: ISQLGroupBy): string; overload;
+    function BuildAsString(const pHaving: ISQLHaving): string; overload;
+    function BuildAsString(const pOrderBy: ISQLOrderBy): string; overload;
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -373,6 +380,36 @@ function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
   const pOrderBy: ISQLOrderBy): Integer;
 begin
   Result := DoInternalBuildAsInteger(pOrderBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
+  const pWhere: ISQLWhere): string;
+begin
+  Result := DoInternalBuildAsString(pWhere.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
+  const pSelect: ISQLSelect): string;
+begin
+  Result := DoInternalBuildAsString(pSelect.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
+  const pGroupBy: ISQLGroupBy): string;
+begin
+  Result := DoInternalBuildAsString(pGroupBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
+  const pOrderBy: ISQLOrderBy): string;
+begin
+  Result := DoInternalBuildAsString(pOrderBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
+  const pHaving: ISQLHaving): string;
+begin
+  Result := DoInternalBuildAsString(pHaving.ToString);
 end;
 
 function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
