@@ -1,4 +1,4 @@
-unit InfraDB4D.UnitTest.UniDAC.DataModule;
+unit InfraDB4D.UnitTest.IBX.DataModule;
 
 interface
 
@@ -7,7 +7,7 @@ uses
 
 type
 
-  TUniDACDataModule = class(TDataModule)
+  TIBXDataModule = class(TDataModule)
   private
     { Private declarations }
   public

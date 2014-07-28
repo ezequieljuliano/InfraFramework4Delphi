@@ -127,7 +127,6 @@ end;
 function TUniDACStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TUniQuery;
 begin
-  inherited;
   Result := TUniQuery.Create(nil);
   Result.Connection := GetConnection.GetComponent.GetConnection;
   if (pFetchRows > 0) then
@@ -150,7 +149,6 @@ function TUniDACStatementAdapter.DoInternalBuildAsFloat(
 var
   vDataSet: TUniQuery;
 begin
-  inherited;
   Result := 0;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -167,7 +165,6 @@ function TUniDACStatementAdapter.DoInternalBuildAsInteger(
 var
   vDataSet: TUniQuery;
 begin
-  inherited;
   Result := 0;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -184,7 +181,6 @@ function TUniDACStatementAdapter.DoInternalBuildAsString(
 var
   vDataSet: TUniQuery;
 begin
-  inherited;
   Result := EmptyStr;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -234,7 +230,6 @@ end;
 
 function TUniDACConnectionAdapter.DoInTransaction: Boolean;
 begin
-  inherited;
   Result := GetComponent.GetConnection.InTransaction;
 end;
 

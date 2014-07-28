@@ -123,7 +123,6 @@ end;
 function TFireDACStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TFDQuery;
 begin
-  inherited;
   Result := TFDQuery.Create(nil);
   Result.Connection := GetConnection.GetComponent.GetConnection;
   if (pFetchRows > 0) then
@@ -145,7 +144,6 @@ function TFireDACStatementAdapter.DoInternalBuildAsFloat(const pSQL: string): Do
 var
   vDataSet: TFDQuery;
 begin
-  inherited;
   Result := 0;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -161,7 +159,6 @@ function TFireDACStatementAdapter.DoInternalBuildAsInteger(const pSQL: string): 
 var
   vDataSet: TFDQuery;
 begin
-  inherited;
   Result := 0;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -177,7 +174,6 @@ function TFireDACStatementAdapter.DoInternalBuildAsString(const pSQL: string): s
 var
   vDataSet: TFDQuery;
 begin
-  inherited;
   Result := EmptyStr;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -223,7 +219,6 @@ end;
 
 function TFireDACConnectionAdapter.DoInTransaction: Boolean;
 begin
-  inherited;
   Result := GetComponent.GetConnection.InTransaction;
 end;
 

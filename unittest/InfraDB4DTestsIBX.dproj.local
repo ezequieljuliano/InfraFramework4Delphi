@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2014/07/28 14:42:12.531,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\src\InfraDB4D.pas</Transaction>
+    <Transaction>2014/07/28 14:42:22.667,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\src\InfraDB4D.Drivers.Base.pas</Transaction>
+    <Transaction>2014/07/28 14:43:20.000,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.pas</Transaction>
+    <Transaction>2014/07/28 14:43:31.150,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\src\InfraDB4D.Drivers.IBX.pas=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.pas</Transaction>
+    <Transaction>2014/07/28 15:08:19.036,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.pas</Transaction>
+    <Transaction>2014/07/28 15:08:56.459,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.DataModule.pas=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.pas</Transaction>
+    <Transaction>2014/07/28 15:08:56.459,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.DataModule.dfm=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.dfm</Transaction>
+    <Transaction>2014/07/28 15:09:31.689,=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.pas</Transaction>
+    <Transaction>2014/07/28 15:09:41.083,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.pas=\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>

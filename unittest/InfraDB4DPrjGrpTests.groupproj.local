@@ -2,6 +2,6 @@
 <BorlandProject>
 	<Transactions/>
 	<Default.Personality>
-		<Projects ActiveProject="\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4DTestsUniDAC.dproj"/>
+		<Projects ActiveProject="\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4DTestsFireDAC.dproj"/>
 	</Default.Personality>
 </BorlandProject>

@@ -9,6 +9,9 @@
         <Projects Include="InfraDB4DTestsUniDAC.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="InfraDB4DTestsIBX.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="InfraDB4DTestsUniDAC:Make">
         <MSBuild Projects="InfraDB4DTestsUniDAC.dproj" Targets="Make"/>
     </Target>
+    <Target Name="InfraDB4DTestsIBX">
+        <MSBuild Projects="InfraDB4DTestsIBX.dproj"/>
+    </Target>
+    <Target Name="InfraDB4DTestsIBX:Clean">
+        <MSBuild Projects="InfraDB4DTestsIBX.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraDB4DTestsIBX:Make">
+        <MSBuild Projects="InfraDB4DTestsIBX.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="InfraDB4DTestsFireDAC;InfraDB4DTestsUniDAC"/>
+        <CallTarget Targets="InfraDB4DTestsFireDAC;InfraDB4DTestsUniDAC;InfraDB4DTestsIBX"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="InfraDB4DTestsFireDAC:Clean;InfraDB4DTestsUniDAC:Clean"/>
+        <CallTarget Targets="InfraDB4DTestsFireDAC:Clean;InfraDB4DTestsUniDAC:Clean;InfraDB4DTestsIBX:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="InfraDB4DTestsFireDAC:Make;InfraDB4DTestsUniDAC:Make"/>
+        <CallTarget Targets="InfraDB4DTestsFireDAC:Make;InfraDB4DTestsUniDAC:Make;InfraDB4DTestsIBX:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
