@@ -1,4 +1,4 @@
-program InfraDB4DTests;
+program InfraDB4DTestsFireDAC;
 {
 
   Delphi DUnit Test Project
@@ -20,9 +20,8 @@ uses
   InfraDB4D in '..\src\InfraDB4D.pas',
   InfraDB4D.Drivers.FireDAC in '..\src\InfraDB4D.Drivers.FireDAC.pas',
   InfraDB4D.Drivers.Base in '..\src\InfraDB4D.Drivers.Base.pas',
-  InfraDB4D.Model.Base in '..\src\InfraDB4D.Model.Base.pas' {ModelBase: TDataModule} ,
-  InfraDB4D.Model.FireDAC in '..\src\InfraDB4D.Model.FireDAC.pas' {ModelFireDAC: TDataModule} ,
-  InfraDB4D.UnitTest.FireDAC in 'InfraDB4D.UnitTest.FireDAC.pas';
+  InfraDB4D.UnitTest.FireDAC in 'InfraDB4D.UnitTest.FireDAC.pas',
+  InfraDB4D.UnitTest.FireDAC.DataModule in 'InfraDB4D.UnitTest.FireDAC.DataModule.pas' {FireDACDataModule: TDataModule};
 
 {$R *.RES}
 

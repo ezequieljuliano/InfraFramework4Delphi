@@ -8,16 +8,17 @@ uses
   System.SysUtils,
   System.TypInfo,
   InfraDB4D,
-  InfraDB4D.Model.Base,
   InfraDB4D.Drivers.FireDAC,
+  InfraDB4D.UnitTest.FireDAC.DataModule,
   Data.DB,
   FireDAC.Comp.Client,
   FireDAC.Stan.Intf,
-  FireDAC.Stan.Def;
+  FireDAC.Stan.Def,
+  FireDAC.DApt;
 
 type
 
-  TFireDACDmConnection = class(TModelBase)
+  TFireDACDmConnection = class(TFireDACDataModule)
   private
     FConnection: TFDConnection;
   public
@@ -27,7 +28,7 @@ type
     property Connection: TFDConnection read FConnection write FConnection;
   end;
 
-  TFireDACModel = class(TModelBase)
+  TFireDACModel = class(TFireDACDataModule)
     Master: TFDQuery;
     Detail: TFDQuery;
   public
@@ -161,9 +162,7 @@ begin
   CheckTrue(vMasterController.GetDataSet <> nil);
   CheckTrue(vMasterController.GetModel<TFireDACModel>() <> nil);
 
-  vMasterController.GetDetails.RegisterDetail('Detail',
-    TFireDACDetailController.Create(vConnection, vModel, vModel.Detail)
-    );
+  vMasterController.GetDetails.RegisterDetail('Detail', TFireDACDetailController.Create(vConnection, vModel, vModel.Detail));
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetConnection <> nil);
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetDataSet <> nil);
   CheckTrue(vMasterController.GetDetails.GetDetail('Detail').GetModel<TFireDACModel>() <> nil);

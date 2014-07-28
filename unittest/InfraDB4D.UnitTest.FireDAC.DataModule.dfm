@@ -1,4 +1,4 @@
-object ModelBase: TModelBase
+object FireDACDataModule: TFireDACDataModule
   OldCreateOrder = False
   Height = 150
   Width = 215
