@@ -11,7 +11,8 @@ uses
   InfraDB4D.Drivers.Base,
   SQLBuilder4D,
   FireDAC.Comp.Client,
-  FireDAC.Stan.Option, Data.DB;
+  FireDAC.Stan.Option,
+  Data.DB;
 
 type
 
@@ -39,6 +40,8 @@ type
     procedure DoStartTransaction(); override;
     procedure DoCommit(); override;
     procedure DoRollback(); override;
+
+    procedure DoAfterBuild(); override;
   end;
 
   TFireDACSingletonConnectionAdapter = class(TDriverSingletonConnection<TFireDACConnectionAdapter>)
@@ -88,6 +91,7 @@ procedure TFireDACStatementAdapter.DoInternalBuild(const pSQL: string;
 var
   vDataSet: TFDQuery;
 begin
+  inherited;
   vDataSet := TFDQuery.Create(nil);
   try
     vDataSet.Connection := GetConnection.GetComponent.GetConnection;
@@ -119,6 +123,7 @@ end;
 function TFireDACStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TFDQuery;
 begin
+  inherited;
   Result := TFDQuery.Create(nil);
   Result.Connection := GetConnection.GetComponent.GetConnection;
   if (pFetchRows > 0) then
@@ -140,6 +145,7 @@ function TFireDACStatementAdapter.DoInternalBuildAsFloat(const pSQL: string): Do
 var
   vDataSet: TFDQuery;
 begin
+  inherited;
   Result := 0;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -155,6 +161,7 @@ function TFireDACStatementAdapter.DoInternalBuildAsInteger(const pSQL: string): 
 var
   vDataSet: TFDQuery;
 begin
+  inherited;
   Result := 0;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -170,6 +177,7 @@ function TFireDACStatementAdapter.DoInternalBuildAsString(const pSQL: string): s
 var
   vDataSet: TFDQuery;
 begin
+  inherited;
   Result := EmptyStr;
 
   vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
@@ -183,38 +191,51 @@ end;
 
 { TFireDACConnectionAdapter }
 
+procedure TFireDACConnectionAdapter.DoAfterBuild;
+begin
+  inherited;
+
+end;
+
 procedure TFireDACConnectionAdapter.DoCommit;
 begin
+  inherited;
   GetComponent.GetConnection.Commit();
 end;
 
 procedure TFireDACConnectionAdapter.DoConnect;
 begin
+  inherited;
   GetComponent.GetConnection.Open();
 end;
 
 procedure TFireDACConnectionAdapter.DoCreateStatement;
 begin
+  inherited;
   SetStatement(TFireDACStatementAdapter.Create(Self));
 end;
 
 procedure TFireDACConnectionAdapter.DoDisconect;
 begin
+  inherited;
   GetComponent.GetConnection.Close();
 end;
 
 function TFireDACConnectionAdapter.DoInTransaction: Boolean;
 begin
+  inherited;
   Result := GetComponent.GetConnection.InTransaction;
 end;
 
 procedure TFireDACConnectionAdapter.DoRollback;
 begin
+  inherited;
   GetComponent.GetConnection.Rollback();
 end;
 
 procedure TFireDACConnectionAdapter.DoStartTransaction;
 begin
+  inherited;
   GetComponent.GetConnection.StartTransaction();
 end;
 
@@ -238,32 +259,38 @@ end;
 
 procedure TFireDACControllerAdapter.DoChangeSQLTextOfDataSet;
 begin
+  inherited;
   GetDataSet.SQL.Clear;
   GetDataSet.SQL.Add(GetSQLParserSelect.GetSQLText);
 end;
 
 procedure TFireDACControllerAdapter.DoClose;
 begin
+  inherited;
   GetDataSet.Close();
 end;
 
 procedure TFireDACControllerAdapter.DoConfigureDataSetConnection;
 begin
+  inherited;
   GetDataSet.Connection := GetConnection.GetComponent.GetConnection;
 end;
 
 procedure TFireDACControllerAdapter.DoCreateDetails;
 begin
+  inherited;
   SetDetails(TFireDACDetailsAdapter.Create(Self));
 end;
 
 function TFireDACControllerAdapter.DoGetSQLTextOfDataSet: string;
 begin
+  inherited;
   Result := GetDataSet.SQL.Text;
 end;
 
 procedure TFireDACControllerAdapter.DoOpen;
 begin
+  inherited;
   GetDataSet.Open();
 end;
 
@@ -273,6 +300,7 @@ procedure TFireDACDetailsAdapter.DoCloseAll;
 var
   vPair: TPair<string, TDetailProperties>;
 begin
+  inherited;
   for vPair in GetDetailDictionary do
     vPair.Value.Obj.GetDataSet.Close;
 end;
@@ -281,6 +309,7 @@ procedure TFireDACDetailsAdapter.DoDisableAllControls;
 var
   vPair: TPair<string, TDetailProperties>;
 begin
+  inherited;
   for vPair in GetDetailDictionary do
     vPair.Value.Obj.GetDataSet.DisableControls();
 end;
@@ -289,6 +318,7 @@ procedure TFireDACDetailsAdapter.DoEnableAllControls;
 var
   vPair: TPair<string, TDetailProperties>;
 begin
+  inherited;
   for vPair in GetDetailDictionary do
     vPair.Value.Obj.GetDataSet.EnableControls();
 end;
@@ -296,17 +326,20 @@ end;
 procedure TFireDACDetailsAdapter.DoLinkDetailOnMasterDataSource(
   const pDetail: TFireDACControllerAdapter);
 begin
+  inherited;
   pDetail.GetDataSet.MasterSource := GetMasterDataSource();
 end;
 
 procedure TFireDACDetailsAdapter.DoLinkMasterController(const pDetailController: TFireDACControllerAdapter);
 begin
+  inherited;
   pDetailController.SetMaster<TFireDACControllerAdapter>(GetMasterController());
 end;
 
 procedure TFireDACDetailsAdapter.DoLinkMasterDataSource(
   const pMasterController: TFireDACControllerAdapter);
 begin
+  inherited;
   GetMasterDataSource.DataSet := pMasterController.GetDataSet;
 end;
 
@@ -314,6 +347,7 @@ procedure TFireDACDetailsAdapter.DoOpenAll;
 var
   vPair: TPair<string, TDetailProperties>;
 begin
+  inherited;
   for vPair in GetDetailDictionary do
     vPair.Value.Obj.GetDataSet.Open();
 end;

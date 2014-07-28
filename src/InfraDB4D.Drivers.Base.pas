@@ -93,6 +93,8 @@ type
     procedure DoStartTransaction(); virtual; abstract;
     procedure DoCommit(); virtual; abstract;
     procedure DoRollback(); virtual; abstract;
+
+    procedure DoAfterBuild(); virtual; abstract;
   public
     constructor Create();
     destructor Destroy(); override;
@@ -450,6 +452,7 @@ begin
   DestroyComponent();
   FComponent := pComponent;
   FAutoDestroyComponent := pAutoDestroyComponent;
+  DoAfterBuild();
 end;
 
 procedure TDriverConnection<TDrvComponent, TDrvStatement>.Commit;

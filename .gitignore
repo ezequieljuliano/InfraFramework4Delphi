@@ -19,3 +19,4 @@
 /samples/FireDAC/master-detail/__history
 /samples/FireDAC/master-detail/src/__history
 /samples/FireDAC/master-detail/Win32/Debug
+/unittest/*.~dsk

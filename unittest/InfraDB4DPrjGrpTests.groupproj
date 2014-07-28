@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{C2718A44-7ED8-4065-95B5-64F85B82AC8D}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="InfraDB4DTestsFireDAC.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="InfraDB4DTestsUniDAC.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="InfraDB4DTestsFireDAC">
+        <MSBuild Projects="InfraDB4DTestsFireDAC.dproj"/>
+    </Target>
+    <Target Name="InfraDB4DTestsFireDAC:Clean">
+        <MSBuild Projects="InfraDB4DTestsFireDAC.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraDB4DTestsFireDAC:Make">
+        <MSBuild Projects="InfraDB4DTestsFireDAC.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="InfraDB4DTestsUniDAC">
+        <MSBuild Projects="InfraDB4DTestsUniDAC.dproj"/>
+    </Target>
+    <Target Name="InfraDB4DTestsUniDAC:Clean">
+        <MSBuild Projects="InfraDB4DTestsUniDAC.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraDB4DTestsUniDAC:Make">
+        <MSBuild Projects="InfraDB4DTestsUniDAC.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="InfraDB4DTestsFireDAC;InfraDB4DTestsUniDAC"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="InfraDB4DTestsFireDAC:Clean;InfraDB4DTestsUniDAC:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="InfraDB4DTestsFireDAC:Make;InfraDB4DTestsUniDAC:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
