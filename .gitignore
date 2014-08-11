@@ -20,3 +20,6 @@
 /samples/FireDAC/master-detail/src/__history
 /samples/FireDAC/master-detail/Win32/Debug
 /unittest/*.~dsk
+/samples/FireDAC/*.dsk
+/samples/FireDAC/basic/*.skincfg
+/samples/FireDAC/master-detail/*.skincfg

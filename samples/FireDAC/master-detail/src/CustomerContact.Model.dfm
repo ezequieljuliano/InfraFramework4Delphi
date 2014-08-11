@@ -1,5 +1,8 @@
-inherited CustomerContactModel: TCustomerContactModel
-  inherited DataSet: TFDQuery
+object CustomerContactModel: TCustomerContactModel
+  OldCreateOrder = True
+  Height = 89
+  Width = 274
+  object DataSet: TFDQuery
     MasterSource = CustomerModel.DsCustomer
     MasterFields = 'CTR_CODE'
     Connection = ConnectionFireDAC.FDConnection
@@ -7,6 +10,8 @@ inherited CustomerContactModel: TCustomerContactModel
       'Select * From Customer_Contact'
       'Where'
       '(Customer_Contact.Ctr_Code = :Ctr_Code)')
+    Left = 114
+    Top = 21
     ParamData = <
       item
         Name = 'CTR_CODE'

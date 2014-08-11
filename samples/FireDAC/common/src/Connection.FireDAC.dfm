@@ -7,12 +7,10 @@ object ConnectionFireDAC: TConnectionFireDAC
   object FDConnection: TFDConnection
     Params.Strings = (
       
-        'Database=D:\GitHub\InfraDatabase4Delphi\samples\common\bd\CUSTOM' +
-        'ER.FDB'
+        'Database=D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibrarie' +
+        's\InfraDatabase4Delphi\samples\FireDAC\common\bd\CUSTOMER.FDB'
       'User_Name=SYSDBA'
       'Password=masterkey'
-      'Server=192.168.0.87'
-      'Protocol=TCPIP'
       'DriverID=FB')
     LoginPrompt = False
     Left = 88

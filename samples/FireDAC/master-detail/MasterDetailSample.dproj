@@ -119,16 +119,6 @@
             <Form>CustomerView</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="..\..\..\src\InfraDB4D.Model.Base.pas">
-            <Form>ModelBase</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
-        <DCCReference Include="..\..\..\src\InfraDB4D.Model.FireDAC.pas">
-            <Form>ModelFireDAC</Form>
-            <FormType>dfm</FormType>
-            <DesignClass>TDataModule</DesignClass>
-        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

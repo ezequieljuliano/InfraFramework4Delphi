@@ -1,8 +1,13 @@
-inherited ProvinceModel: TProvinceModel
-  inherited DataSet: TFDQuery
+object ProvinceModel: TProvinceModel
+  OldCreateOrder = True
+  Height = 117
+  Width = 236
+  object DataSet: TFDQuery
     Connection = ConnectionFireDAC.FDConnection
     SQL.Strings = (
       'Select * From Province')
+    Left = 100
+    Top = 38
     object DataSetPRO_CODE: TIntegerField
       DisplayLabel = 'Code'
       FieldName = 'PRO_CODE'

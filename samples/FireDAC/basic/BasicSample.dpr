@@ -9,9 +9,7 @@ uses
   Country.View in 'src\Country.View.pas' {CountryView},
   Province.Model in 'src\Province.Model.pas' {ProvinceModel: TDataModule},
   Province.Controller in 'src\Province.Controller.pas',
-  Dm.Models in 'src\Dm.Models.pas' {DmModels: TDataModule},
-  InfraDB4D.Model.Base in '..\..\..\src\InfraDB4D.Model.Base.pas' {ModelBase: TDataModule},
-  InfraDB4D.Model.FireDAC in '..\..\..\src\InfraDB4D.Model.FireDAC.pas' {ModelFireDAC: TDataModule};
+  Dm.Models in 'src\Dm.Models.pas' {DmModels: TDataModule};
 
 {$R *.res}
 

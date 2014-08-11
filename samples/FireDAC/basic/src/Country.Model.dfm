@@ -1,8 +1,13 @@
-inherited CountryModel: TCountryModel
-  inherited DataSet: TFDQuery
+object CountryModel: TCountryModel
+  OldCreateOrder = True
+  Height = 98
+  Width = 237
+  object DataSet: TFDQuery
     Connection = ConnectionFireDAC.FDConnection
     SQL.Strings = (
       'Select * From Country')
+    Left = 98
+    Top = 25
     object DataSetCTY_CODE: TIntegerField
       DisplayLabel = 'Code'
       FieldName = 'CTY_CODE'

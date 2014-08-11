@@ -9,9 +9,7 @@ uses
   Customer.Controller in 'src\Customer.Controller.pas',
   CustomerContact.Controller in 'src\CustomerContact.Controller.pas',
   Dm.Models in 'src\Dm.Models.pas' {DmModels: TDataModule},
-  Customer.View in 'src\Customer.View.pas' {CustomerView},
-  InfraDB4D.Model.Base in '..\..\..\src\InfraDB4D.Model.Base.pas' {ModelBase: TDataModule},
-  InfraDB4D.Model.FireDAC in '..\..\..\src\InfraDB4D.Model.FireDAC.pas' {ModelFireDAC: TDataModule};
+  Customer.View in 'src\Customer.View.pas' {CustomerView};
 
 {$R *.res}
 

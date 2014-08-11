@@ -1,9 +1,13 @@
-inherited CustomerModel: TCustomerModel
-  inherited DataSet: TFDQuery
+object CustomerModel: TCustomerModel
+  OldCreateOrder = True
+  Height = 141
+  Width = 311
+  object DataSet: TFDQuery
     Connection = ConnectionFireDAC.FDConnection
     SQL.Strings = (
       'Select * From Customer')
-    Top = 24
+    Left = 132
+    Top = 19
     object DataSetCTR_CODE: TIntegerField
       DisplayLabel = 'Code'
       FieldName = 'CTR_CODE'
@@ -22,7 +26,7 @@ inherited CustomerModel: TCustomerModel
   end
   object DsCustomer: TDataSource
     DataSet = DataSet
-    Left = 88
-    Top = 80
+    Left = 132
+    Top = 77
   end
 end
