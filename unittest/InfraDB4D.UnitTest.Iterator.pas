@@ -12,10 +12,13 @@ unit InfraDB4D.UnitTest.Iterator;
 interface
 
 uses
+  Data.DB, DBClient,
   TestFramework,InfraDB4D.Iterator, System.SysUtils;
 
 type
   TestTIteratorDataSet = class(TTestCase)
+  strict private
+    function BuildDataSet(): TClientDataSet;
   published
     procedure TestIteratorWithDataSet();
     procedure TestIteratorWithBuildAsDataSet();
@@ -24,24 +27,34 @@ type
 implementation
 
 uses
-  InfraDB4D,
-  Data.DB,
-  DBClient, InfraDB4D.Drivers.FireDAC;
+  InfraDB4D;
 
 
 { TestTIteratorDataSet }
+
+function TestTIteratorDataSet.BuildDataSet: TClientDataSet;
+begin
+  Result:= TClientDataSet.Create(nil);
+  Result.FieldDefs.Add( 'One', ftInteger );
+  Result.CreateDataSet();
+end;
 
 procedure TestTIteratorDataSet.TestIteratorWithBuildAsDataSet;
 var
   Iterator: IIteratorDataSet;
 begin
+
   Iterator:= TIteratorDataSetFactory.Get(
-    {use metod BuildAsDataSet } nil, True { Parameter TRUE destroy CdsDataSet } );
+    {use metod BuildAsDataSet } BuildDataSet(), True { Parameter TRUE destroy CdsDataSet } );
+
+  CheckTrue( Iterator.IsEmpty() );
+
   while (Iterator.HasNext) do // loop in dataset - Don't is need to use TDataSet.Next
   begin
     Iterator.RecIndex; // get index current record dataset
     // your code
   end;
+
 end;
 
 procedure TestTIteratorDataSet.TestIteratorWithDataSet;
@@ -76,6 +89,9 @@ begin
   CdsDataSet.IndexFieldNames:= 'City'; //order dataset for test
 
   Iterator:= TIteratorDataSetFactory.Get( CdsDataSet, True { Parameter TRUE destroy CdsDataSet } );
+
+  CheckFalse( Iterator.IsEmpty() );
+
   while (Iterator.HasNext) do  // loop in dataset - Don't is need to use TDataSet.Next
   begin
 

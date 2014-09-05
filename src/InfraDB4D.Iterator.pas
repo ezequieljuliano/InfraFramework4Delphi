@@ -14,6 +14,8 @@ type
 
     function RecIndex: Integer;
     function GetDataSet: TDataSet;
+
+    function IsEmpty(): Boolean;
   end;
 
   TIteratorDataSetFactory = class
@@ -44,6 +46,7 @@ type
     function GetDataSet: TDataSet;
 
     destructor Destroy(); override;
+    function IsEmpty(): Boolean;
   private
     constructor Create( const pDataSet: TDataSet; const pDestroyDataSet: Boolean ); overload;
   end;
@@ -100,6 +103,11 @@ begin
   Result:= not DataSet.Eof;
 end;
 
+
+function TIteratorDataSet.IsEmpty: Boolean;
+begin
+  Result:= DataSet.IsEmpty();
+end;
 
 function TIteratorDataSet.RecIndex: Integer;
 begin
