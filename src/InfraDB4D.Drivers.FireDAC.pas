@@ -22,14 +22,14 @@ type
 
   TFireDACStatementAdapter = class(TDriverStatement<TFDQuery, TFireDACConnectionAdapter>)
   strict protected
-    procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); override;
+    procedure DoInternalBuild(const pSQL: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean = False); override;
 
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TFDQuery; override;
+    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TFDQuery); override;
+
     function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
     function DoInternalBuildAsFloat(const pSQL: string): Double; override;
     function DoInternalBuildAsString(const pSQL: string): string; override;
-
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TFDQuery); override;
   end;
 
   TFireDACConnectionAdapter = class(TDriverConnection<TFireDACComponentAdapter, TFireDACStatementAdapter>)
@@ -89,14 +89,18 @@ var
 
   { TFireDACStatementAdapter }
 
-procedure TFireDACStatementAdapter.DoInternalBuild(const pSQL: string;
-  const pAutoCommit: Boolean);
+procedure TFireDACStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean);
 var
   vDataSet: TFDQuery;
 begin
   inherited;
-  vDataSet := TFDQuery.Create(nil);
+  if (pDataSet = nil) then
+    vDataSet := TFDQuery.Create(nil)
+  else
+    vDataSet := pDataSet;
   try
+    vDataSet.Close;
+    vDataSet.SQL.Clear;
     vDataSet.Connection := GetConnection.GetComponent.GetConnection;
     vDataSet.SQL.Add(pSQL);
     if pAutoCommit then
@@ -119,7 +123,8 @@ begin
   finally
     vDataSet.Close;
     vDataSet.Connection := nil;
-    FreeAndNil(vDataSet);
+    if (pDataSet = nil) then
+      FreeAndNil(vDataSet);
   end;
 end;
 

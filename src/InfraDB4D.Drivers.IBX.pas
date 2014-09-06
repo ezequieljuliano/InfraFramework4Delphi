@@ -22,14 +22,14 @@ type
 
   TIBXStatementAdapter = class(TDriverStatement<TIBDataSet, TIBXConnectionAdapter>)
   strict protected
-    procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); override;
+    procedure DoInternalBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean = False); override;
 
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TIBDataSet; override;
+    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet); override;
+
     function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
     function DoInternalBuildAsFloat(const pSQL: string): Double; override;
     function DoInternalBuildAsString(const pSQL: string): string; override;
-
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet); override;
   end;
 
   TIBXConnectionAdapter = class(TDriverConnection<TIBXComponentAdapter, TIBXStatementAdapter>)
@@ -89,14 +89,18 @@ var
 
   { TIBXStatementAdapter }
 
-procedure TIBXStatementAdapter.DoInternalBuild(const pSQL: string;
-  const pAutoCommit: Boolean);
+procedure TIBXStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean);
 var
   vDataSet: TIBDataSet;
 begin
   inherited;
-  vDataSet := TIBDataSet.Create(nil);
+  if (pDataSet = nil) then
+    vDataSet := TIBDataSet.Create(nil)
+  else
+    vDataSet := pDataSet;
   try
+    vDataSet.Close;
+    vDataSet.SelectSQL.Clear;
     vDataSet.Database := GetConnection.GetComponent.GetConnection;
     vDataSet.SelectSQL.Add(pSQL);
     if pAutoCommit then
@@ -119,7 +123,8 @@ begin
   finally
     vDataSet.Close;
     vDataSet.Database := nil;
-    FreeAndNil(vDataSet);
+    if (pDataSet = nil) then
+      FreeAndNil(vDataSet);
   end;
 end;
 

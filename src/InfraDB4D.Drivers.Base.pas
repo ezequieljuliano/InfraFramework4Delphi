@@ -34,14 +34,14 @@ type
   strict protected
     function GetConnection(): TDrvConnection;
 
-    procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); virtual; abstract;
+    procedure DoInternalBuild(const pSQL: string; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); virtual; abstract;
 
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TDataSet; virtual; abstract;
+    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TDataSet); virtual; abstract;
+
     function DoInternalBuildAsInteger(const pSQL: string): Integer; virtual; abstract;
     function DoInternalBuildAsFloat(const pSQL: string): Double; virtual; abstract;
     function DoInternalBuildAsString(const pSQL: string): string; virtual; abstract;
-
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TDataSet); virtual; abstract;
   public
     constructor Create(const pConnection: TDrvConnection);
 
@@ -55,12 +55,29 @@ type
     procedure Build(const pHaving: ISQLHaving; const pAutoCommit: Boolean = False); overload;
     procedure Build(const pOrderBy: ISQLOrderBy; const pAutoCommit: Boolean = False); overload;
 
+    procedure Build(const pInsert: ISQLInsert; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pUpdate: ISQLUpdate; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pDelete: ISQLDelete; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pSQL: string; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+
+    procedure Build(const pWhere: ISQLWhere; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pHaving: ISQLHaving; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet; const pAutoCommit: Boolean = False); overload;
+
     function BuildAsDataSet(const pSelect: ISQLSelect; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pWhere: ISQLWhere; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pGroupBy: ISQLGroupBy; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pHaving: ISQLHaving; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pOrderBy: ISQLOrderBy; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pSQL: string; const pFetchRows: Integer = 0): TDataSet; overload;
+
+    procedure BuildInDataSet(const pSelect: ISQLSelect; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pWhere: ISQLWhere; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pHaving: ISQLHaving; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pSQL: string; const pDataSet: TDataSet); overload;
 
     function BuildAsInteger(const pSelect: ISQLSelect): Integer; overload;
     function BuildAsInteger(const pWhere: ISQLWhere): Integer; overload;
@@ -82,13 +99,6 @@ type
     function BuildAsString(const pHaving: ISQLHaving): string; overload;
     function BuildAsString(const pOrderBy: ISQLOrderBy): string; overload;
     function BuildAsString(const pSQL: string): string; overload;
-
-    procedure BuildInDataSet(const pSelect: ISQLSelect; const pDataSet: TDataSet); overload;
-    procedure BuildInDataSet(const pWhere: ISQLWhere; const pDataSet: TDataSet); overload;
-    procedure BuildInDataSet(const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet); overload;
-    procedure BuildInDataSet(const pHaving: ISQLHaving; const pDataSet: TDataSet); overload;
-    procedure BuildInDataSet(const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet); overload;
-    procedure BuildInDataSet(const pSQL: string; const pDataSet: TDataSet); overload;
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -276,49 +286,104 @@ implementation
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pDelete: ISQLDelete; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pDelete.ToString, pAutoCommit);
+  DoInternalBuild(pDelete.ToString, nil, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pWhere: ISQLWhere; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pWhere.ToString, pAutoCommit);
+  DoInternalBuild(pWhere.ToString, nil, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pInsert: ISQLInsert; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pInsert.ToString, pAutoCommit);
+  DoInternalBuild(pInsert.ToString, nil, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pUpdate: ISQLUpdate; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pUpdate.ToString, pAutoCommit);
+  DoInternalBuild(pUpdate.ToString, nil, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pOrderBy: ISQLOrderBy; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pOrderBy.ToString, pAutoCommit);
+  DoInternalBuild(pOrderBy.ToString, nil, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pUpdate: ISQLUpdate; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pUpdate.ToString, pDataSet, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pInsert: ISQLInsert; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pInsert.ToString, pDataSet, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(const pSQL: string;
+  const pDataSet: TDataSet; const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pSQL, pDataSet, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pDelete: ISQLDelete; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pDelete.ToString, pDataSet, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pSQL: string; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pSQL, pAutoCommit);
+  DoInternalBuild(pSQL, nil, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pHaving: ISQLHaving; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pHaving.ToString, pAutoCommit);
+  DoInternalBuild(pHaving.ToString, nil, pAutoCommit);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pGroupBy: ISQLGroupBy; const pAutoCommit: Boolean);
 begin
-  DoInternalBuild(pGroupBy.ToString, pAutoCommit);
+  DoInternalBuild(pGroupBy.ToString, nil, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pGroupBy.ToString, pDataSet, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pWhere: ISQLWhere; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pWhere.ToString, pDataSet, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pOrderBy.ToString, pDataSet, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pHaving: ISQLHaving; const pDataSet: TDataSet;
+  const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pHaving.ToString, pDataSet, pAutoCommit);
 end;
 
 function TDriverStatement<TDataSet, TDrvConnection>.BuildAsDataSet(

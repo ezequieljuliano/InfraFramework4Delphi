@@ -2,6 +2,6 @@
 <BorlandProject>
 	<Transactions/>
 	<Default.Personality>
-		<Projects ActiveProject="D:\projetos-estudo\InfraDatabase4Delphi\unittest\InfraDB4DTestsIterator.dproj"/>
+		<Projects ActiveProject="D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4DTestsFireDAC.dproj"/>
 	</Default.Personality>
 </BorlandProject>

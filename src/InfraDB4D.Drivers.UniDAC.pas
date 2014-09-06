@@ -21,14 +21,14 @@ type
 
   TUniDACStatementAdapter = class(TDriverStatement<TUniQuery, TUniDACConnectionAdapter>)
   strict protected
-    procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); override;
+    procedure DoInternalBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean = False); override;
 
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TUniQuery; override;
+    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TUniQuery); override;
+
     function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
     function DoInternalBuildAsFloat(const pSQL: string): Double; override;
     function DoInternalBuildAsString(const pSQL: string): string; override;
-
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TUniQuery); override;
   end;
 
   TUniDACConnectionAdapter = class(TDriverConnection<TUniDACComponentAdapter, TUniDACStatementAdapter>)
@@ -93,14 +93,18 @@ var
 
   { TUniDACStatementAdapter }
 
-procedure TUniDACStatementAdapter.DoInternalBuild(const pSQL: string;
-  const pAutoCommit: Boolean);
+procedure TUniDACStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean);
 var
   vDataSet: TUniQuery;
 begin
   inherited;
-  vDataSet := TUniQuery.Create(nil);
+  if (pDataSet = nil) then
+    vDataSet := TUniQuery.Create(nil)
+  else
+    vDataSet := pDataSet;
   try
+    vDataSet.Close;
+    vDataSet.SQL.Clear;
     vDataSet.Connection := GetConnection.GetComponent.GetConnection;
     vDataSet.SQL.Add(pSQL);
     if pAutoCommit then
@@ -123,7 +127,8 @@ begin
   finally
     vDataSet.Close;
     vDataSet.Connection := nil;
-    FreeAndNil(vDataSet);
+    if (pDataSet = nil) then
+      FreeAndNil(vDataSet);
   end;
 end;
 
