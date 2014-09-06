@@ -23,10 +23,13 @@ type
   TIBXStatementAdapter = class(TDriverStatement<TIBDataSet, TIBXConnectionAdapter>)
   strict protected
     procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); override;
+
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TIBDataSet; override;
     function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
     function DoInternalBuildAsFloat(const pSQL: string): Double; override;
     function DoInternalBuildAsString(const pSQL: string): string; override;
+
+    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet); override;
   end;
 
   TIBXConnectionAdapter = class(TDriverConnection<TIBXComponentAdapter, TIBXStatementAdapter>)
@@ -176,6 +179,19 @@ begin
   finally
     FreeAndNil(vDataSet);
   end;
+end;
+
+procedure TIBXStatementAdapter.DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet);
+begin
+  inherited;
+  if (pDataSet = nil) then
+    raise EDataSetDoesNotExist.Create('DataSet does not exist!');
+
+  pDataSet.Close;
+  pDataSet.Database := GetConnection.GetComponent.GetConnection;
+  pDataSet.SelectSQL.Add(pSQL);
+  pDataSet.Prepare;
+  pDataSet.Open;
 end;
 
 { TIBXConnectionAdapter }

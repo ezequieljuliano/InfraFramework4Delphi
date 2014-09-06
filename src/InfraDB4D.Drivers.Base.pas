@@ -35,10 +35,13 @@ type
     function GetConnection(): TDrvConnection;
 
     procedure DoInternalBuild(const pSQL: string; const pAutoCommit: Boolean = False); virtual; abstract;
+
     function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TDataSet; virtual; abstract;
     function DoInternalBuildAsInteger(const pSQL: string): Integer; virtual; abstract;
     function DoInternalBuildAsFloat(const pSQL: string): Double; virtual; abstract;
     function DoInternalBuildAsString(const pSQL: string): string; virtual; abstract;
+
+    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TDataSet); virtual; abstract;
   public
     constructor Create(const pConnection: TDrvConnection);
 
@@ -74,6 +77,12 @@ type
     function BuildAsString(const pGroupBy: ISQLGroupBy): string; overload;
     function BuildAsString(const pHaving: ISQLHaving): string; overload;
     function BuildAsString(const pOrderBy: ISQLOrderBy): string; overload;
+
+    procedure BuildInDataSet(const pSelect: ISQLSelect; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pWhere: ISQLWhere; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pHaving: ISQLHaving; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet); overload;
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -406,6 +415,36 @@ function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
   const pOrderBy: ISQLOrderBy): string;
 begin
   Result := DoInternalBuildAsString(pOrderBy.ToString);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
+  const pWhere: ISQLWhere; const pDataSet: TDataSet);
+begin
+  DoInternalBuildInDataSet(pWhere.ToString, pDataSet);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
+  const pSelect: ISQLSelect; const pDataSet: TDataSet);
+begin
+  DoInternalBuildInDataSet(pSelect.ToString, pDataSet);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
+  const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet);
+begin
+  DoInternalBuildInDataSet(pGroupBy.ToString, pDataSet);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
+  const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet);
+begin
+  DoInternalBuildInDataSet(pOrderBy.ToString, pDataSet);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
+  const pHaving: ISQLHaving; const pDataSet: TDataSet);
+begin
+  DoInternalBuildInDataSet(pHaving.ToString, pDataSet);
 end;
 
 function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
