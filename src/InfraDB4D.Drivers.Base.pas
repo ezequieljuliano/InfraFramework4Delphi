@@ -48,6 +48,7 @@ type
     procedure Build(const pInsert: ISQLInsert; const pAutoCommit: Boolean = False); overload;
     procedure Build(const pUpdate: ISQLUpdate; const pAutoCommit: Boolean = False); overload;
     procedure Build(const pDelete: ISQLDelete; const pAutoCommit: Boolean = False); overload;
+    procedure Build(const pSQL: string; const pAutoCommit: Boolean = False); overload;
 
     procedure Build(const pWhere: ISQLWhere; const pAutoCommit: Boolean = False); overload;
     procedure Build(const pGroupBy: ISQLGroupBy; const pAutoCommit: Boolean = False); overload;
@@ -59,30 +60,35 @@ type
     function BuildAsDataSet(const pGroupBy: ISQLGroupBy; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pHaving: ISQLHaving; const pFetchRows: Integer = 0): TDataSet; overload;
     function BuildAsDataSet(const pOrderBy: ISQLOrderBy; const pFetchRows: Integer = 0): TDataSet; overload;
+    function BuildAsDataSet(const pSQL: string; const pFetchRows: Integer = 0): TDataSet; overload;
 
     function BuildAsInteger(const pSelect: ISQLSelect): Integer; overload;
     function BuildAsInteger(const pWhere: ISQLWhere): Integer; overload;
     function BuildAsInteger(const pGroupBy: ISQLGroupBy): Integer; overload;
     function BuildAsInteger(const pHaving: ISQLHaving): Integer; overload;
     function BuildAsInteger(const pOrderBy: ISQLOrderBy): Integer; overload;
+    function BuildAsInteger(const pSQL: string): Integer; overload;
 
     function BuildAsFloat(const pSelect: ISQLSelect): Double; overload;
     function BuildAsFloat(const pWhere: ISQLWhere): Double; overload;
     function BuildAsFloat(const pGroupBy: ISQLGroupBy): Double; overload;
     function BuildAsFloat(const pHaving: ISQLHaving): Double; overload;
     function BuildAsFloat(const pOrderBy: ISQLOrderBy): Double; overload;
+    function BuildAsFloat(const pSQL: string): Double; overload;
 
     function BuildAsString(const pSelect: ISQLSelect): string; overload;
     function BuildAsString(const pWhere: ISQLWhere): string; overload;
     function BuildAsString(const pGroupBy: ISQLGroupBy): string; overload;
     function BuildAsString(const pHaving: ISQLHaving): string; overload;
     function BuildAsString(const pOrderBy: ISQLOrderBy): string; overload;
+    function BuildAsString(const pSQL: string): string; overload;
 
     procedure BuildInDataSet(const pSelect: ISQLSelect; const pDataSet: TDataSet); overload;
     procedure BuildInDataSet(const pWhere: ISQLWhere; const pDataSet: TDataSet); overload;
     procedure BuildInDataSet(const pGroupBy: ISQLGroupBy; const pDataSet: TDataSet); overload;
     procedure BuildInDataSet(const pHaving: ISQLHaving; const pDataSet: TDataSet); overload;
     procedure BuildInDataSet(const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet); overload;
+    procedure BuildInDataSet(const pSQL: string; const pDataSet: TDataSet); overload;
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -298,6 +304,12 @@ begin
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
+  const pSQL: string; const pAutoCommit: Boolean);
+begin
+  DoInternalBuild(pSQL, pAutoCommit);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.Build(
   const pHaving: ISQLHaving; const pAutoCommit: Boolean);
 begin
   DoInternalBuild(pHaving.ToString, pAutoCommit);
@@ -357,10 +369,22 @@ begin
   Result := DoInternalBuildAsFloat(pGroupBy.ToString);
 end;
 
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsDataSet(
+  const pSQL: string; const pFetchRows: Integer): TDataSet;
+begin
+  Result := DoInternalBuildAsDataSet(pSQL, pFetchRows);
+end;
+
 function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
   const pOrderBy: ISQLOrderBy): Double;
 begin
   Result := DoInternalBuildAsFloat(pOrderBy.ToString);
+end;
+
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
+  const pSQL: string): Double;
+begin
+  Result := DoInternalBuildAsFloat(pSQL);
 end;
 
 function TDriverStatement<TDataSet, TDrvConnection>.BuildAsFloat(
@@ -393,6 +417,12 @@ begin
   Result := DoInternalBuildAsInteger(pOrderBy.ToString);
 end;
 
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsInteger(
+  const pSQL: string): Integer;
+begin
+  Result := DoInternalBuildAsInteger(pSQL);
+end;
+
 function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
   const pWhere: ISQLWhere): string;
 begin
@@ -417,6 +447,12 @@ begin
   Result := DoInternalBuildAsString(pOrderBy.ToString);
 end;
 
+function TDriverStatement<TDataSet, TDrvConnection>.BuildAsString(
+  const pSQL: string): string;
+begin
+  Result := DoInternalBuildAsString(pSQL);
+end;
+
 procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
   const pWhere: ISQLWhere; const pDataSet: TDataSet);
 begin
@@ -439,6 +475,12 @@ procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
   const pOrderBy: ISQLOrderBy; const pDataSet: TDataSet);
 begin
   DoInternalBuildInDataSet(pOrderBy.ToString, pDataSet);
+end;
+
+procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
+  const pSQL: string; const pDataSet: TDataSet);
+begin
+  DoInternalBuildInDataSet(pSQL, pDataSet);
 end;
 
 procedure TDriverStatement<TDataSet, TDrvConnection>.BuildInDataSet(
