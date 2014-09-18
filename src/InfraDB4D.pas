@@ -23,28 +23,31 @@ type
   EMasterDoesNotCompatible = class(EInfraBaseException);
 
   TGlobalCriticalSection = class sealed
+  strict private
+    class var SingletonCS: TCriticalSection;
+    class constructor Create;
+    class destructor Destroy;
   public
     class function GetInstance(): TCriticalSection; static;
   end;
 
 implementation
 
-var
-  _vCriticalSection: TCriticalSection;
+{ TGlobalCriticalSection }
 
-  { TGlobalCriticalSection }
+class constructor TGlobalCriticalSection.Create;
+begin
+  SingletonCS := TCriticalSection.Create();
+end;
+
+class destructor TGlobalCriticalSection.Destroy;
+begin
+  FreeAndNil(SingletonCS);
+end;
 
 class function TGlobalCriticalSection.GetInstance: TCriticalSection;
 begin
-  Result := _vCriticalSection;
+  Result := SingletonCS;
 end;
-
-initialization
-
-_vCriticalSection := TCriticalSection.Create();
-
-finalization
-
-FreeAndNil(_vCriticalSection);
 
 end.

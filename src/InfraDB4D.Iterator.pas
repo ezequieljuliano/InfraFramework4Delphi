@@ -7,10 +7,12 @@ uses
   Data.DB;
 
 type
+
   IIteratorDataSet = interface
+    ['{E3E84A64-DF07-498F-80C6-E3640EB37C9A}']
     function HasNext(): Boolean;
     function Fields: TFields;
-    function FieldByName( const pFieldName: string ): TField;
+    function FieldByName(const pFieldName: string): TField;
 
     function RecIndex: Integer;
     function GetDataSet: TDataSet;
@@ -18,20 +20,17 @@ type
     function IsEmpty(): Boolean;
   end;
 
-  TIteratorDataSetFactory = class
+  TIteratorDataSetFactory = class sealed
   public
-    class function Get( const pDataSet: TDataSet ): IIteratorDataSet; overload; static;
-    class function Get( const pDataSet: TDataSet; const pDestroyDataSet: Boolean ): IIteratorDataSet; overload;
+    class function Get(const pDataSet: TDataSet): IIteratorDataSet; overload; static;
+    class function Get(const pDataSet: TDataSet; const pDestroyDataSet: Boolean): IIteratorDataSet; overload; static;
   end;
-
 
 implementation
 
-{ TIteratorDataSet }
-
 type
 
-  TIteratorDataSet = class(TInterfacedObject, IIteratorDataSet)
+  TIteratorDataSet = class sealed(TInterfacedObject, IIteratorDataSet)
   strict private
     CurrentCount: Integer;
     DataSet: TDataSet;
@@ -39,7 +38,7 @@ type
 
     function HasNext(): Boolean;
     function Fields: TFields;
-    function FieldByName( const pFieldName: string ): TField;
+    function FieldByName(const pFieldName: string): TField;
 
     function RecIndex: Integer;
 
@@ -48,85 +47,80 @@ type
     destructor Destroy(); override;
     function IsEmpty(): Boolean;
   private
-    constructor Create( const pDataSet: TDataSet; const pDestroyDataSet: Boolean ); overload;
+    constructor Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean); overload;
   end;
 
+{ TIteratorDataSet }
 
 constructor TIteratorDataSet.Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean);
 begin
-  DataSet:= pDataSet;
+  DataSet := pDataSet;
 
-  if ( not ( DataSet.Active ) ) then
+  if (not(DataSet.Active)) then
     DataSet.Open;
 
   DataSet.First();
-  CurrentCount:= 0;
+  CurrentCount := 0;
 
-  DestroyDataSet:= False;
-  DestroyDataSet:= pDestroyDataSet;
+  DestroyDataSet := False;
+  DestroyDataSet := pDestroyDataSet;
 end;
 
 function TIteratorDataSet.GetDataSet: TDataSet;
 begin
-  Result:= DataSet;
+  Result := DataSet;
 end;
 
 destructor TIteratorDataSet.Destroy;
 begin
-  if ( DestroyDataSet ) then
-    FreeAndNil( DataSet);
-
+  if (DestroyDataSet) then
+    FreeAndNil(DataSet);
   inherited;
 end;
 
 function TIteratorDataSet.FieldByName(const pFieldName: string): TField;
 begin
-  Result:= DataSet.FieldByName( pFieldName );
+  Result := DataSet.FieldByName(pFieldName);
 end;
 
 function TIteratorDataSet.Fields: TFields;
 begin
-  Result:= DataSet.Fields;
+  Result := DataSet.Fields;
 end;
-
 
 function TIteratorDataSet.HasNext: Boolean;
 begin
-  if ( CurrentCount = 0 ) then
-    CurrentCount:= 1
+  if (CurrentCount = 0) then
+    CurrentCount := 1
   else
-    Inc( CurrentCount );
+    Inc(CurrentCount);
 
-  if ( CurrentCount > 1 ) then
+  if (CurrentCount > 1) then
     DataSet.Next();
 
-  Result:= not DataSet.Eof;
+  Result := not DataSet.Eof;
 end;
-
 
 function TIteratorDataSet.IsEmpty: Boolean;
 begin
-  Result:= DataSet.IsEmpty();
+  Result := DataSet.IsEmpty();
 end;
 
 function TIteratorDataSet.RecIndex: Integer;
 begin
-  Result:= CurrentCount;
+  Result := CurrentCount;
 end;
-
 
 { TIteratorDataSetFactory }
 
-class function TIteratorDataSetFactory.Get(
-  const pDataSet: TDataSet): IIteratorDataSet;
+class function TIteratorDataSetFactory.Get(const pDataSet: TDataSet): IIteratorDataSet;
 begin
-  Result:=  TIteratorDataSet.Create( pDataSet, False );
+  Result := TIteratorDataSet.Create(pDataSet, False);
 end;
 
-class function TIteratorDataSetFactory.Get(const pDataSet: TDataSet;
-  const pDestroyDataSet: Boolean): IIteratorDataSet;
+class function TIteratorDataSetFactory.Get(const pDataSet: TDataSet; const pDestroyDataSet: Boolean): IIteratorDataSet;
 begin
-  Result:=  TIteratorDataSet.Create( pDataSet, pDestroyDataSet );
+  Result := TIteratorDataSet.Create(pDataSet, pDestroyDataSet);
 end;
 
 end.

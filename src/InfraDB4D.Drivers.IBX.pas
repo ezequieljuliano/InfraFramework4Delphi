@@ -48,6 +48,10 @@ type
   end;
 
   TIBXSingletonConnectionAdapter = class(TDriverSingletonConnection<TIBXConnectionAdapter>)
+  strict private
+    class var SingletonConnectionAdapter: TIBXConnectionAdapter;
+    class constructor Create;
+    class destructor Destroy;
   public
     class function Get(): TIBXConnectionAdapter; static;
   end;
@@ -84,10 +88,7 @@ type
 
 implementation
 
-var
-  _vIBXConnection: TIBXConnectionAdapter = nil;
-
-  { TIBXStatementAdapter }
+{ TIBXStatementAdapter }
 
 procedure TIBXStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean);
 var
@@ -250,18 +251,29 @@ end;
 
 { TIBXSingletonConnectionAdapter }
 
+class constructor TIBXSingletonConnectionAdapter.Create;
+begin
+  SingletonConnectionAdapter := nil;
+end;
+
+class destructor TIBXSingletonConnectionAdapter.Destroy;
+begin
+  if (SingletonConnectionAdapter <> nil) then
+    FreeAndNil(SingletonConnectionAdapter);
+end;
+
 class function TIBXSingletonConnectionAdapter.Get: TIBXConnectionAdapter;
 begin
-  if (_vIBXConnection = nil) then
+  if (SingletonConnectionAdapter = nil) then
   begin
     TGlobalCriticalSection.GetInstance.Enter;
     try
-      _vIBXConnection := TIBXConnectionAdapter.Create;
+      SingletonConnectionAdapter := TIBXConnectionAdapter.Create;
     finally
       TGlobalCriticalSection.GetInstance.Leave;
     end;
   end;
-  Result := _vIBXConnection;
+  Result := SingletonConnectionAdapter;
 end;
 
 { TIBXControllerAdapter }
@@ -360,14 +372,5 @@ begin
   for vPair in GetDetailDictionary do
     vPair.Value.Obj.GetDataSet.Open();
 end;
-
-initialization
-
-_vIBXConnection := nil;
-
-finalization
-
-if (_vIBXConnection <> nil) then
-  FreeAndNil(_vIBXConnection);
 
 end.

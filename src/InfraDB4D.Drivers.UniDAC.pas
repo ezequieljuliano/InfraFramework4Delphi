@@ -52,6 +52,10 @@ type
   end;
 
   TUniDACSingletonConnectionAdapter = class(TDriverSingletonConnection<TUniDACConnectionAdapter>)
+  strict private
+    class var SingletonConnectionAdapter: TUniDACConnectionAdapter;
+    class constructor Create;
+    class destructor Destroy;
   public
     class function Get(): TUniDACConnectionAdapter; static;
   end;
@@ -88,10 +92,7 @@ type
 
 implementation
 
-var
-  _vUniDACConnection: TUniDACConnectionAdapter = nil;
-
-  { TUniDACStatementAdapter }
+{ TUniDACStatementAdapter }
 
 procedure TUniDACStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean);
 var
@@ -141,11 +142,6 @@ begin
   begin
     Result.SpecificOptions.Values['FetchAll'] := 'False';
     Result.FetchRows := pFetchRows;
-  end
-  else
-  begin
-    Result.SpecificOptions.Values['FetchAll'] := 'True';
-    Result.FetchRows := -1;
   end;
   Result.SQL.Add(pSQL);
   Result.Prepare;
@@ -274,18 +270,29 @@ end;
 
 { TUniDACSingletonConnectionAdapter }
 
+class constructor TUniDACSingletonConnectionAdapter.Create;
+begin
+  SingletonConnectionAdapter := nil;
+end;
+
+class destructor TUniDACSingletonConnectionAdapter.Destroy;
+begin
+  if (SingletonConnectionAdapter <> nil) then
+    FreeAndNil(SingletonConnectionAdapter);
+end;
+
 class function TUniDACSingletonConnectionAdapter.Get: TUniDACConnectionAdapter;
 begin
-  if (_vUniDACConnection = nil) then
+  if (SingletonConnectionAdapter = nil) then
   begin
     TGlobalCriticalSection.GetInstance.Enter;
     try
-      _vUniDACConnection := TUniDACConnectionAdapter.Create;
+      SingletonConnectionAdapter := TUniDACConnectionAdapter.Create;
     finally
       TGlobalCriticalSection.GetInstance.Leave;
     end;
   end;
-  Result := _vUniDACConnection;
+  Result := SingletonConnectionAdapter;
 end;
 
 { TUniDACControllerAdapter }
@@ -385,14 +392,5 @@ begin
   for vPair in GetDetailDictionary do
     vPair.Value.Obj.GetDataSet.Open();
 end;
-
-initialization
-
-_vUniDACConnection := nil;
-
-finalization
-
-if (_vUniDACConnection <> nil) then
-  FreeAndNil(_vUniDACConnection);
 
 end.

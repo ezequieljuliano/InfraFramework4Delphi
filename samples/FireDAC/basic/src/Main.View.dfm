@@ -2,7 +2,7 @@ object MainView: TMainView
   Left = 0
   Top = 0
   Caption = 'MainView'
-  ClientHeight = 116
+  ClientHeight = 145
   ClientWidth = 488
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -66,5 +66,14 @@ object MainView: TMainView
     Caption = 'Country With Separate Model Option 3'
     TabOrder = 5
     OnClick = Button6Click
+  end
+  object Button7: TButton
+    Left = 24
+    Top = 109
+    Width = 424
+    Height = 25
+    Caption = 'Test Metadata Info'
+    TabOrder = 6
+    OnClick = Button7Click
   end
 end

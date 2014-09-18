@@ -15,12 +15,14 @@ type
     Button4: TButton;
     Button5: TButton;
     Button6: TButton;
+    Button7: TButton;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
+    procedure Button7Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -34,7 +36,7 @@ implementation
 
 uses
   Country.Model, Country.Controller, Country.View, Province.Model, Province.Controller,
-  SQLBuilder4D, Dm.Models;
+  SQLBuilder4D, Dm.Models, InfraDB4D.Drivers.FireDAC;
 
 {$R *.dfm}
 
@@ -192,6 +194,35 @@ begin
     FreeAndNil(vCountryView);
     FreeAndNil(vCountryController);
   end;
+end;
+
+procedure TMainView.Button7Click(Sender: TObject);
+var
+  vMetaInfo: IFireDACMetaInfoAdapter;
+begin
+  vMetaInfo := TFireDACMetaInfoFactory.Get(ConnectionFireDAC.GetDatabase);
+  if vMetaInfo.TableExists('COUNTRY') then
+    ShowMessage('Country Exists');
+
+  vMetaInfo := TFireDACMetaInfoFactory.Get(ConnectionFireDAC.GetDatabase);
+  if vMetaInfo.FieldExists('COUNTRY', 'CTY_CODE') then
+    ShowMessage('Country Code Exists');
+
+  vMetaInfo := TFireDACMetaInfoFactory.Get(ConnectionFireDAC.GetDatabase);
+  if vMetaInfo.PrimaryKeyExists('COUNTRY', 'PK_COUNTRY') then
+    ShowMessage('Country PK Exists');
+
+  vMetaInfo := TFireDACMetaInfoFactory.Get(ConnectionFireDAC.GetDatabase);
+  if vMetaInfo.IndexExists('COUNTRY', 'PK_COUNTRY') then
+    ShowMessage('Country Index Exists');
+
+  vMetaInfo := TFireDACMetaInfoFactory.Get(ConnectionFireDAC.GetDatabase);
+  if vMetaInfo.ForeignKeyExists('CUSTOMER_CONTACT', 'FK_CTC_CTR') then
+    ShowMessage('Country FK Exists');
+
+  vMetaInfo := TFireDACMetaInfoFactory.Get(ConnectionFireDAC.GetDatabase);
+  if vMetaInfo.GeneratorExists('GEN_COUNTRY') then
+    ShowMessage('Generator Exists');
 end;
 
 end.
