@@ -25,3 +25,5 @@
 /samples/FireDAC/master-detail/*.skincfg
 /samples/FireDAC/PrjGrpSamples.~dsk
 /unittest/InfraDB4DPrjGrpTests.$$$
+/unittest/*.dsk
+/unittest/*.skincfg

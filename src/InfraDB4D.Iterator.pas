@@ -20,7 +20,7 @@ type
     function IsEmpty(): Boolean;
   end;
 
-  TIteratorDataSetFactory = class sealed
+  TIteratorDataSetFactory = class
   public
     class function Get(const pDataSet: TDataSet): IIteratorDataSet; overload; static;
     class function Get(const pDataSet: TDataSet; const pDestroyDataSet: Boolean): IIteratorDataSet; overload; static;
@@ -30,85 +30,84 @@ implementation
 
 type
 
-  TIteratorDataSet = class sealed(TInterfacedObject, IIteratorDataSet)
+  TIteratorDataSet = class(TInterfacedObject, IIteratorDataSet)
   strict private
-    CurrentCount: Integer;
-    DataSet: TDataSet;
-    DestroyDataSet: Boolean;
+    FCurrentCount: Integer;
+    FDataSet: TDataSet;
+    FDestroyDataSet: Boolean;
 
     function HasNext(): Boolean;
     function Fields: TFields;
     function FieldByName(const pFieldName: string): TField;
 
     function RecIndex: Integer;
-
     function GetDataSet: TDataSet;
 
-    destructor Destroy(); override;
     function IsEmpty(): Boolean;
-  private
-    constructor Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean); overload;
+  public
+    constructor Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean);
+    destructor Destroy(); override;
   end;
 
-{ TIteratorDataSet }
+  { TIteratorDataSet }
 
 constructor TIteratorDataSet.Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean);
 begin
-  DataSet := pDataSet;
+  FDataSet := pDataSet;
 
-  if (not(DataSet.Active)) then
-    DataSet.Open;
+  if (not(FDataSet.Active)) then
+    FDataSet.Open;
 
-  DataSet.First();
-  CurrentCount := 0;
+  FDataSet.First();
+  FCurrentCount := 0;
 
-  DestroyDataSet := False;
-  DestroyDataSet := pDestroyDataSet;
+  FDestroyDataSet := False;
+  FDestroyDataSet := pDestroyDataSet;
 end;
 
 function TIteratorDataSet.GetDataSet: TDataSet;
 begin
-  Result := DataSet;
+  Result := FDataSet;
 end;
 
 destructor TIteratorDataSet.Destroy;
 begin
-  if (DestroyDataSet) then
-    FreeAndNil(DataSet);
+  if (FDestroyDataSet) then
+    FreeAndNil(FDataSet);
   inherited;
 end;
 
 function TIteratorDataSet.FieldByName(const pFieldName: string): TField;
 begin
-  Result := DataSet.FieldByName(pFieldName);
+  Result := FDataSet.FieldByName(pFieldName);
 end;
 
 function TIteratorDataSet.Fields: TFields;
 begin
-  Result := DataSet.Fields;
+  Result := FDataSet.Fields;
 end;
 
 function TIteratorDataSet.HasNext: Boolean;
 begin
-  if (CurrentCount = 0) then
-    CurrentCount := 1
+  if (FCurrentCount = 0) then
+    FCurrentCount := 1
   else
-    Inc(CurrentCount);
+    Inc(FCurrentCount);
 
-  if (CurrentCount > 1) then
-    DataSet.Next();
+  if (FCurrentCount > 1) then
+    FDataSet.Next();
 
-  Result := not DataSet.Eof;
+  Result := not FDataSet.Eof;
 end;
 
 function TIteratorDataSet.IsEmpty: Boolean;
 begin
-  Result := DataSet.IsEmpty();
+  Result := FDataSet.IsEmpty();
 end;
 
 function TIteratorDataSet.RecIndex: Integer;
 begin
-  Result := CurrentCount;
+  Result := FCurrentCount;
 end;
 
 { TIteratorDataSetFactory }

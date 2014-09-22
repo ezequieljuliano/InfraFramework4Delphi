@@ -90,10 +90,6 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="InfraDB4D.UnitTest.Iterator.pas"/>
-        <DCCReference Include="..\src\InfraDB4D.Drivers.Base.pas"/>
-        <DCCReference Include="..\src\InfraDB4D.Drivers.FireDAC.pas"/>
-        <DCCReference Include="..\src\InfraDB4D.Drivers.IBX.pas"/>
-        <DCCReference Include="..\src\InfraDB4D.Drivers.UniDAC.pas"/>
         <DCCReference Include="..\src\InfraDB4D.Iterator.pas"/>
         <DCCReference Include="..\src\InfraDB4D.pas"/>
         <BuildConfiguration Include="Release">
