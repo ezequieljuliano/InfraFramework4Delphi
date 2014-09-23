@@ -92,6 +92,7 @@
         <DCCReference Include="InfraDB4D.UnitTest.Iterator.pas"/>
         <DCCReference Include="..\src\InfraDB4D.Iterator.pas"/>
         <DCCReference Include="..\src\InfraDB4D.pas"/>
+        <DCCReference Include="..\src\InfraDB4D.Iterator.Impl.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -17,6 +17,7 @@ type
   published
     procedure TestIteratorWithDataSet();
     procedure TestIteratorWithBuildAsDataSet();
+    procedure TestIteratorWithBuildAsGenericDataSet();
   end;
 
 implementation
@@ -48,7 +49,23 @@ begin
     Iterator.RecIndex; // get index current record dataset
     // your code
   end;
+end;
 
+procedure TestTIteratorDataSet.TestIteratorWithBuildAsGenericDataSet;
+var
+  Iterator: IIterator<TClientDataSet>;
+begin
+
+  Iterator := TIteratorFactory<TClientDataSet>.Get(
+    { use metod BuildAsDataSet } BuildDataSet(), True { Parameter TRUE destroy CdsDataSet } );
+
+  CheckTrue(Iterator.IsEmpty());
+
+  while (Iterator.HasNext) do // loop in dataset - Don't is need to use TDataSet.Next
+  begin
+    Iterator.RecIndex; // get index current record dataset
+    // your code
+  end;
 end;
 
 procedure TestTIteratorDataSet.TestIteratorWithDataSet;

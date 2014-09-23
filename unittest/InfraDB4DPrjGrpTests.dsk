@@ -1,4 +1,21 @@
-﻿[Modules]
+﻿[Closed Files]
+File_0=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Iterator.pas',0,1,1,50,8,0,0,,
+File_1=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.Iterator.pas',0,1,91,43,13,0,0,,
+File_2=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Iterator.Impl.pas',0,1,4,3,31,0,0,,
+File_3=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.FireDAC.pas',0,1,1,17,21,0,0,,
+File_4=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.FireDAC.DataModule.pas',0,1,1,21,10,0,0,,
+File_5=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.pas',0,1,1,32,6,0,0,,
+File_6=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.Base.pas',0,1,22,35,29,0,0,,
+File_7=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.FireDAC.pas',0,1,10,54,17,0,0,,
+File_8=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.UniDAC.pas',0,1,8,44,16,0,0,,
+File_9=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.IBX.pas',0,1,1,52,90,0,0,,
+File_10=TSourceModule,'c:\program files (x86)\embarcadero\studio\14.0\source\data\firedac\FireDAC.Comp.Client.pas',0,1,10212,3,10231,0,0,,
+File_11=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.pas',0,1,1,1,1,0,0,,
+File_12=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.UniDAC.pas',0,1,13,1,1,0,0,,
+File_13=TSourceModule,'\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.pas',0,1,1,28,8,0,0,,
+File_14=TSourceModule,'\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.FireDAC.pas',0,1,163,1,151,0,0,,
+
+[Modules]
 Count=0
 EditWindowCount=1
 
@@ -223,6 +240,25 @@ ClientWidth=2339
 ClientHeight=1240
 TBDockHeight=4827
 LRDockWidth=3562
+Dockable=1
+StayOnTop=0
+
+[UsagesView]
+PercentageSizes=1
+Create=1
+Visible=0
+Docked=0
+State=0
+Left=3927
+Top=5173
+Width=5333
+Height=4615
+MaxLeft=-5
+MaxTop=-10
+ClientWidth=5250
+ClientHeight=4288
+TBDockHeight=4615
+LRDockWidth=5333
 Dockable=1
 StayOnTop=0
 
@@ -628,7 +664,7 @@ HostDockSite=RightTabDock
 DockSiteType=1
 PercentageSizes=1
 Create=1
-Visible=0
+Visible=1
 Docked=1
 State=0
 Left=4
@@ -697,40 +733,4 @@ TabDockClients=ToolForm,TemplateView
 
 [ActiveProject]
 ActiveProject=4
-
-[Closed Files]
-File_0=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.Iterator.pas',0,1,28,111,42,0,0,,
-File_1=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Iterator.pas',0,1,1,32,7,0,0,,
-File_2=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.FireDAC.pas',0,1,1,17,21,0,0,,
-File_3=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.FireDAC.DataModule.pas',0,1,1,21,10,0,0,,
-File_4=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.pas',0,1,1,32,6,0,0,,
-File_5=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.Base.pas',0,1,22,35,29,0,0,,
-File_6=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.FireDAC.pas',0,1,10,54,17,0,0,,
-File_7=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.UniDAC.pas',0,1,8,44,16,0,0,,
-File_8=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\src\InfraDB4D.Drivers.IBX.pas',0,1,1,52,90,0,0,,
-File_9=TSourceModule,'c:\program files (x86)\embarcadero\studio\14.0\source\data\firedac\FireDAC.Comp.Client.pas',0,1,10212,3,10231,0,0,,
-File_10=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.pas',0,1,1,1,1,0,0,,
-File_11=TSourceModule,'D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.UniDAC.pas',0,1,13,1,1,0,0,,
-File_12=TSourceModule,'\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.IBX.pas',0,1,1,28,8,0,0,,
-File_13=TSourceModule,'\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\unittest\InfraDB4D.UnitTest.FireDAC.pas',0,1,163,1,151,0,0,,
-File_14=TSourceModule,'\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\src\InfraDB4D.Drivers.IBX.pas',0,1,1,1,14,0,0,,
-
-[UsagesView]
-PercentageSizes=1
-Create=1
-Visible=0
-Docked=0
-State=0
-Left=3927
-Top=5173
-Width=5333
-Height=4615
-MaxLeft=-5
-MaxTop=-10
-ClientWidth=5250
-ClientHeight=4288
-TBDockHeight=4615
-LRDockWidth=5333
-Dockable=1
-StayOnTop=0
 

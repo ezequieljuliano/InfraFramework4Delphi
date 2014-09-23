@@ -18,7 +18,8 @@ uses
   DUnitTestRunner,
   InfraDB4D.UnitTest.Iterator in 'InfraDB4D.UnitTest.Iterator.pas',
   InfraDB4D.Iterator in '..\src\InfraDB4D.Iterator.pas',
-  InfraDB4D in '..\src\InfraDB4D.pas';
+  InfraDB4D in '..\src\InfraDB4D.pas',
+  InfraDB4D.Iterator.Impl in '..\src\InfraDB4D.Iterator.Impl.pas';
 
 {$R *.RES}
 

@@ -4,20 +4,30 @@ interface
 
 uses
   System.SysUtils,
-  Data.DB;
+  Data.DB,
+  System.Generics.Collections;
 
 type
 
-  IIteratorDataSet = interface
-    ['{E3E84A64-DF07-498F-80C6-E3640EB37C9A}']
+  IIterator<T: TDataSet> = interface
+    ['{D992FC27-DD57-42D4-8E14-EF087B742BDC}']
     function HasNext(): Boolean;
+    function RecIndex: Integer;
+    function IsEmpty(): Boolean;
     function Fields: TFields;
     function FieldByName(const pFieldName: string): TField;
 
-    function RecIndex: Integer;
-    function GetDataSet: TDataSet;
+    function GetDataSet: T;
+  end;
 
-    function IsEmpty(): Boolean;
+  TIteratorFactory<T: TDataSet> = class
+  public
+    class function Get(const pDataSet: T): IIterator<T>; overload; static;
+    class function Get(const pDataSet: T; const pDestroyDataSet: Boolean): IIterator<T>; overload; static;
+  end;
+
+  IIteratorDataSet = interface(IIterator<TDataSet>)
+    ['{754D235E-8941-4534-A193-C5696DABDB34}']
   end;
 
   TIteratorDataSetFactory = class
@@ -28,86 +38,19 @@ type
 
 implementation
 
-type
+uses
+  InfraDB4D.Iterator.Impl;
 
-  TIteratorDataSet = class(TInterfacedObject, IIteratorDataSet)
-  strict private
-    FCurrentCount: Integer;
-    FDataSet: TDataSet;
-    FDestroyDataSet: Boolean;
+{ TIteratorFactory<T> }
 
-    function HasNext(): Boolean;
-    function Fields: TFields;
-    function FieldByName(const pFieldName: string): TField;
-
-    function RecIndex: Integer;
-    function GetDataSet: TDataSet;
-
-    function IsEmpty(): Boolean;
-  public
-    constructor Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean);
-    destructor Destroy(); override;
-  end;
-
-  { TIteratorDataSet }
-
-constructor TIteratorDataSet.Create(const pDataSet: TDataSet; const pDestroyDataSet: Boolean);
+class function TIteratorFactory<T>.Get(const pDataSet: T): IIterator<T>;
 begin
-  FDataSet := pDataSet;
-
-  if (not(FDataSet.Active)) then
-    FDataSet.Open;
-
-  FDataSet.First();
-  FCurrentCount := 0;
-
-  FDestroyDataSet := False;
-  FDestroyDataSet := pDestroyDataSet;
+  Result := TIterator<T>.Create(pDataSet, False);
 end;
 
-function TIteratorDataSet.GetDataSet: TDataSet;
+class function TIteratorFactory<T>.Get(const pDataSet: T; const pDestroyDataSet: Boolean): IIterator<T>;
 begin
-  Result := FDataSet;
-end;
-
-destructor TIteratorDataSet.Destroy;
-begin
-  if (FDestroyDataSet) then
-    FreeAndNil(FDataSet);
-  inherited;
-end;
-
-function TIteratorDataSet.FieldByName(const pFieldName: string): TField;
-begin
-  Result := FDataSet.FieldByName(pFieldName);
-end;
-
-function TIteratorDataSet.Fields: TFields;
-begin
-  Result := FDataSet.Fields;
-end;
-
-function TIteratorDataSet.HasNext: Boolean;
-begin
-  if (FCurrentCount = 0) then
-    FCurrentCount := 1
-  else
-    Inc(FCurrentCount);
-
-  if (FCurrentCount > 1) then
-    FDataSet.Next();
-
-  Result := not FDataSet.Eof;
-end;
-
-function TIteratorDataSet.IsEmpty: Boolean;
-begin
-  Result := FDataSet.IsEmpty();
-end;
-
-function TIteratorDataSet.RecIndex: Integer;
-begin
-  Result := FCurrentCount;
+  Result := TIterator<T>.Create(pDataSet, pDestroyDataSet);
 end;
 
 { TIteratorDataSetFactory }
