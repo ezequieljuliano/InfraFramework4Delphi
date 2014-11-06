@@ -454,7 +454,10 @@ var
 begin
   inherited;
   for vPair in GetDetailDictionary do
+  begin
     vPair.Value.Obj.GetDataSet.Close;
+    vPair.Value.Obj.GetDetails.CloseAll;
+  end;
 end;
 
 procedure TFireDACDetailsAdapter.DoDisableAllControls;
@@ -463,7 +466,10 @@ var
 begin
   inherited;
   for vPair in GetDetailDictionary do
+  begin
     vPair.Value.Obj.GetDataSet.DisableControls();
+    vPair.Value.Obj.GetDetails.DisableAllControls();
+  end;
 end;
 
 procedure TFireDACDetailsAdapter.DoEnableAllControls;
@@ -472,7 +478,10 @@ var
 begin
   inherited;
   for vPair in GetDetailDictionary do
+  begin
     vPair.Value.Obj.GetDataSet.EnableControls();
+    vPair.Value.Obj.GetDetails.EnableAllControls();
+  end;
 end;
 
 procedure TFireDACDetailsAdapter.DoLinkDetailOnMasterDataSource(
@@ -501,7 +510,10 @@ var
 begin
   inherited;
   for vPair in GetDetailDictionary do
+  begin
     vPair.Value.Obj.GetDataSet.Open();
+    vPair.Value.Obj.GetDetails.OpenAll();
+  end;
 end;
 
 { TFireDACMetaInfoAdapter }
