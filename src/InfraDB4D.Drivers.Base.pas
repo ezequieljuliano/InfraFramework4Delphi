@@ -205,6 +205,8 @@ type
   strict private
     FConnection: TDrvConnection;
     FDataSet: TDrvDataSet;
+    FIterator: IIterator<TDrvDataSet>;
+    FIteratorDataSet: IIteratorDataSet;
     FModel: TDataModule;
     FMaster: TDriverController<TDrvDataSet, TDrvConnection, TDrvDetails>;
     FModelDestroy: Boolean;
@@ -238,7 +240,10 @@ type
 
     function GetConnection(): TDrvConnection;
     function GetDetails(): TDrvDetails;
+
     function GetDataSet(): TDrvDataSet;
+    function GetIterator(): IIterator<TDrvDataSet>;
+    function GetIteratorDataSet(): IIteratorDataSet;
 
     function GetModel<T: TDataModule>(): T;
 
@@ -938,11 +943,15 @@ end;
 
 destructor TDriverController<TDrvDataSet, TDrvConnection, TDrvDetails>.Destroy;
 begin
+  FIterator := nil;
+  FIteratorDataSet := nil;
+
   if (FDetails <> nil) then
     FreeAndNil(FDetails);
 
   if FModelDestroy then
     FreeAndNil(FModel);
+
   inherited Destroy();
 end;
 
@@ -983,6 +992,20 @@ begin
   Result := FDetails;
 end;
 
+function TDriverController<TDrvDataSet, TDrvConnection, TDrvDetails>.GetIterator: IIterator<TDrvDataSet>;
+begin
+  if (FIterator = nil) then
+    FIterator := TIteratorFactory<TDrvDataSet>.Get(GetDataSet, False);
+  Result := FIterator;
+end;
+
+function TDriverController<TDrvDataSet, TDrvConnection, TDrvDetails>.GetIteratorDataSet: IIteratorDataSet;
+begin
+  if (FIteratorDataSet = nil) then
+    FIteratorDataSet := TIteratorDataSetFactory.Get(GetDataSet, False);
+  Result := FIteratorDataSet;
+end;
+
 function TDriverController<TDrvDataSet, TDrvConnection, TDrvDetails>.GetMaster<T>: T;
 begin
   if (FMaster = nil) then
@@ -1016,6 +1039,8 @@ begin
   SQLInitialize(DoGetSQLTextOfDataSet);
   DoConfigureDataSetConnection();
   DoCreateDetails();
+  FIterator := nil;
+  FIteratorDataSet := nil;
 end;
 
 procedure TDriverController<TDrvDataSet, TDrvConnection, TDrvDetails>.SetDetails(

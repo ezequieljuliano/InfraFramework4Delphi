@@ -43,7 +43,7 @@ constructor TIterator<T>.Create(const pDataSet: T; const pDestroyDataSet: Boolea
 begin
   FDataSet := pDataSet;
 
-  if (not(FDataSet.Active)) then
+  if not(FDataSet.Active) then
     FDataSet.Open;
 
   FDataSet.First();
