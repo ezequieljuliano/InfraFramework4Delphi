@@ -7,11 +7,12 @@ uses
   System.SysUtils,
   System.SyncObjs,
   System.Generics.Collections,
+  Data.DB,
   InfraDB4D,
   InfraDB4D.Drivers.Base,
+  InfraDB4D.Iterator,
   SQLBuilder4D,
-  Uni,
-  Data.DB;
+  Uni;
 
 type
 
@@ -21,14 +22,18 @@ type
 
   TUniDACStatementAdapter = class(TDriverStatement<TUniQuery, TUniDACConnectionAdapter>)
   strict protected
-    procedure DoInternalBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean = False); override;
+    procedure DoBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean = False); override;
 
-    function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TUniQuery; override;
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TUniQuery); override;
+    procedure DoBuildInDataSet(const pSQL: string; const pDataSet: TUniQuery); override;
+    procedure DoBuildInIterator(const pSQL: string; const pIterator: IIterator<TUniQuery>); override;
 
-    function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
-    function DoInternalBuildAsFloat(const pSQL: string): Double; override;
-    function DoInternalBuildAsString(const pSQL: string): string; override;
+    function DoBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TUniQuery; override;
+    function DoBuildAsIteratorDataSet(const pSQL: string): IIteratorDataSet; override;
+    function DoBuildAsIterator(const pSQL: string; const pFetchRows: Integer): IIterator<TUniQuery>; override;
+
+    function DoBuildAsInteger(const pSQL: string): Integer; override;
+    function DoBuildAsFloat(const pSQL: string): Double; override;
+    function DoBuildAsString(const pSQL: string): string; override;
   end;
 
   TUniDACConnectionAdapter = class(TDriverConnection<TUniDACComponentAdapter, TUniDACStatementAdapter>)
@@ -94,7 +99,7 @@ implementation
 
 { TUniDACStatementAdapter }
 
-procedure TUniDACStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean);
+procedure TUniDACStatementAdapter.DoBuild(const pSQL: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean);
 var
   vDataSet: TUniQuery;
 begin
@@ -133,7 +138,7 @@ begin
   end;
 end;
 
-function TUniDACStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
+function TUniDACStatementAdapter.DoBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TUniQuery;
 begin
   Result := TUniQuery.Create(nil);
@@ -148,14 +153,14 @@ begin
   Result.Open;
 end;
 
-function TUniDACStatementAdapter.DoInternalBuildAsFloat(
+function TUniDACStatementAdapter.DoBuildAsFloat(
   const pSQL: string): Double;
 var
   vDataSet: TUniQuery;
 begin
   Result := 0;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsFloat;
@@ -164,14 +169,14 @@ begin
   end;
 end;
 
-function TUniDACStatementAdapter.DoInternalBuildAsInteger(
+function TUniDACStatementAdapter.DoBuildAsInteger(
   const pSQL: string): Integer;
 var
   vDataSet: TUniQuery;
 begin
   Result := 0;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsInteger;
@@ -180,14 +185,25 @@ begin
   end;
 end;
 
-function TUniDACStatementAdapter.DoInternalBuildAsString(
+function TUniDACStatementAdapter.DoBuildAsIterator(const pSQL: string;
+  const pFetchRows: Integer): IIterator<TUniQuery>;
+begin
+  Result := TIteratorFactory<TUniQuery>.Get(DoBuildAsDataSet(pSQL, 0), True);
+end;
+
+function TUniDACStatementAdapter.DoBuildAsIteratorDataSet(const pSQL: string): IIteratorDataSet;
+begin
+  Result := TIteratorDataSetFactory.Get(DoBuildAsDataSet(pSQL, 0), True);
+end;
+
+function TUniDACStatementAdapter.DoBuildAsString(
   const pSQL: string): string;
 var
   vDataSet: TUniQuery;
 begin
   Result := EmptyStr;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsString;
@@ -196,7 +212,7 @@ begin
   end;
 end;
 
-procedure TUniDACStatementAdapter.DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TUniQuery);
+procedure TUniDACStatementAdapter.DoBuildInDataSet(const pSQL: string; const pDataSet: TUniQuery);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -207,6 +223,13 @@ begin
   pDataSet.SQL.Add(pSQL);
   pDataSet.Prepare;
   pDataSet.Open;
+end;
+
+procedure TUniDACStatementAdapter.DoBuildInIterator(const pSQL: string;
+  const pIterator: IIterator<TUniQuery>);
+begin
+  inherited;
+  DoBuildInDataSet(pSQL, pIterator.GetDataSet);
 end;
 
 { TUniDACConnectionAdapter }

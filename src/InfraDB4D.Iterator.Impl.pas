@@ -16,16 +16,21 @@ type
     FDataSet: T;
     FDestroyDataSet: Boolean;
   public
+    constructor Create(const pDataSet: T; const pDestroyDataSet: Boolean);
+    destructor Destroy(); override;
+
     function HasNext(): Boolean;
     function RecIndex: Integer;
     function IsEmpty(): Boolean;
     function Fields: TFields;
     function FieldByName(const pFieldName: string): TField;
 
-    function GetDataSet: T;
+    procedure FillSameFields(const pTarget: T); overload;
+    procedure FillSameFields(const pTarget: IIterator<T>); overload;
+    procedure SetSameFieldsValues(const pProvider: T); overload;
+    procedure SetSameFieldsValues(const pProvider: IIterator<T>); overload;
 
-    constructor Create(const pDataSet: T; const pDestroyDataSet: Boolean);
-    destructor Destroy(); override;
+    function GetDataSet: T;
   end;
 
   TIteratorDataSet = class(TIterator<TDataSet>, IIteratorDataSet);
@@ -64,6 +69,25 @@ begin
   Result := FDataSet.Fields;
 end;
 
+procedure TIterator<T>.FillSameFields(const pTarget: IIterator<T>);
+begin
+  FillSameFields(pTarget.GetDataSet);
+end;
+
+procedure TIterator<T>.FillSameFields(const pTarget: T);
+var
+  I, J: Integer;
+begin
+  for I := 0 to Pred(FDataSet.FieldCount) do
+    for J := 0 to Pred(pTarget.FieldCount) do
+      if (UpperCase(FDataSet.Fields[I].FieldName) = UpperCase(pTarget.Fields[J].FieldName)) then
+      begin
+        if not(pTarget.State in [dsInsert, dsEdit]) then
+          pTarget.Edit;
+        pTarget.Fields[J].Value := FDataSet.Fields[I].Value;
+      end;
+end;
+
 function TIterator<T>.GetDataSet: T;
 begin
   Result := FDataSet;
@@ -90,6 +114,25 @@ end;
 function TIterator<T>.RecIndex: Integer;
 begin
   Result := FCurrentCount;
+end;
+
+procedure TIterator<T>.SetSameFieldsValues(const pProvider: T);
+var
+  I, J: Integer;
+begin
+  for I := 0 to Pred(pProvider.FieldCount) do
+    for J := 0 to Pred(FDataSet.FieldCount) do
+      if (UpperCase(pProvider.Fields[I].FieldName) = UpperCase(FDataSet.Fields[J].FieldName)) then
+      begin
+        if not(FDataSet.State in [dsInsert, dsEdit]) then
+          FDataSet.Edit;
+        FDataSet.Fields[J].Value := pProvider.Fields[I].Value;
+      end;
+end;
+
+procedure TIterator<T>.SetSameFieldsValues(const pProvider: IIterator<T>);
+begin
+  SetSameFieldsValues(pProvider.GetDataSet);
 end;
 
 end.

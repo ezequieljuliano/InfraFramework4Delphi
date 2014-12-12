@@ -10,6 +10,7 @@ uses
   Data.DB,
   InfraDB4D,
   InfraDB4D.Drivers.Base,
+  InfraDB4D.Iterator,
   SQLBuilder4D,
   IBX.IBDatabase,
   IBX.IBCustomDataSet;
@@ -22,14 +23,18 @@ type
 
   TIBXStatementAdapter = class(TDriverStatement<TIBDataSet, TIBXConnectionAdapter>)
   strict protected
-    procedure DoInternalBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean = False); override;
+    procedure DoBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean = False); override;
 
-    function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TIBDataSet; override;
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet); override;
+    procedure DoBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet); override;
+    procedure DoBuildInIterator(const pSQL: string; const pIterator: IIterator<TIBDataSet>); override;
 
-    function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
-    function DoInternalBuildAsFloat(const pSQL: string): Double; override;
-    function DoInternalBuildAsString(const pSQL: string): string; override;
+    function DoBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TIBDataSet; override;
+    function DoBuildAsIteratorDataSet(const pSQL: string): IIteratorDataSet; override;
+    function DoBuildAsIterator(const pSQL: string; const pFetchRows: Integer): IIterator<TIBDataSet>; override;
+
+    function DoBuildAsInteger(const pSQL: string): Integer; override;
+    function DoBuildAsFloat(const pSQL: string): Double; override;
+    function DoBuildAsString(const pSQL: string): string; override;
   end;
 
   TIBXConnectionAdapter = class(TDriverConnection<TIBXComponentAdapter, TIBXStatementAdapter>)
@@ -90,7 +95,7 @@ implementation
 
 { TIBXStatementAdapter }
 
-procedure TIBXStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean);
+procedure TIBXStatementAdapter.DoBuild(const pSQL: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean);
 var
   vDataSet: TIBDataSet;
 begin
@@ -129,7 +134,7 @@ begin
   end;
 end;
 
-function TIBXStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
+function TIBXStatementAdapter.DoBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TIBDataSet;
 begin
   Result := TIBDataSet.Create(nil);
@@ -139,14 +144,14 @@ begin
   Result.Open;
 end;
 
-function TIBXStatementAdapter.DoInternalBuildAsFloat(
+function TIBXStatementAdapter.DoBuildAsFloat(
   const pSQL: string): Double;
 var
   vDataSet: TIBDataSet;
 begin
   Result := 0;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsFloat;
@@ -155,14 +160,14 @@ begin
   end;
 end;
 
-function TIBXStatementAdapter.DoInternalBuildAsInteger(
+function TIBXStatementAdapter.DoBuildAsInteger(
   const pSQL: string): Integer;
 var
   vDataSet: TIBDataSet;
 begin
   Result := 0;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsInteger;
@@ -171,14 +176,25 @@ begin
   end;
 end;
 
-function TIBXStatementAdapter.DoInternalBuildAsString(
+function TIBXStatementAdapter.DoBuildAsIterator(const pSQL: string;
+  const pFetchRows: Integer): IIterator<TIBDataSet>;
+begin
+  Result := TIteratorFactory<TIBDataSet>.Get(DoBuildAsDataSet(pSQL, 0), True);
+end;
+
+function TIBXStatementAdapter.DoBuildAsIteratorDataSet(const pSQL: string): IIteratorDataSet;
+begin
+  Result := TIteratorDataSetFactory.Get(DoBuildAsDataSet(pSQL, 0), True);
+end;
+
+function TIBXStatementAdapter.DoBuildAsString(
   const pSQL: string): string;
 var
   vDataSet: TIBDataSet;
 begin
   Result := EmptyStr;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsString;
@@ -187,7 +203,7 @@ begin
   end;
 end;
 
-procedure TIBXStatementAdapter.DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet);
+procedure TIBXStatementAdapter.DoBuildInDataSet(const pSQL: string; const pDataSet: TIBDataSet);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -198,6 +214,13 @@ begin
   pDataSet.SelectSQL.Add(pSQL);
   pDataSet.Prepare;
   pDataSet.Open;
+end;
+
+procedure TIBXStatementAdapter.DoBuildInIterator(const pSQL: string;
+  const pIterator: IIterator<TIBDataSet>);
+begin
+  inherited;
+  DoBuildInDataSet(pSQL, pIterator.GetDataSet);
 end;
 
 { TIBXConnectionAdapter }
@@ -305,6 +328,7 @@ end;
 
 function TIBXControllerAdapter.DoGetSQLTextOfDataSet: string;
 begin
+  inherited;
   Result := GetDataSet.SelectSQL.Text;
 end;
 

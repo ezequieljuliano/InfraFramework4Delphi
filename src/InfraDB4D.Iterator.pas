@@ -17,6 +17,11 @@ type
     function Fields: TFields;
     function FieldByName(const pFieldName: string): TField;
 
+    procedure FillSameFields(const pTarget: T); overload;
+    procedure FillSameFields(const pTarget: IIterator<T>); overload;
+    procedure SetSameFieldsValues(const pProvider: T); overload;
+    procedure SetSameFieldsValues(const pProvider: IIterator<T>); overload;
+
     function GetDataSet: T;
   end;
 

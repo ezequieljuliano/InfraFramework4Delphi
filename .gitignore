@@ -27,3 +27,4 @@
 /unittest/InfraDB4DPrjGrpTests.$$$
 /unittest/*.dsk
 /unittest/*.skincfg
+/unittest/*.tvsconfig

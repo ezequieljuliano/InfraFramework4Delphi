@@ -18,6 +18,8 @@ type
     procedure TestIteratorWithDataSet();
     procedure TestIteratorWithBuildAsDataSet();
     procedure TestIteratorWithBuildAsGenericDataSet();
+    procedure TestIteratorFillSameFields();
+    procedure TestIteratorSetSameFieldsValues();
   end;
 
 implementation
@@ -31,7 +33,89 @@ function TestTIteratorDataSet.BuildDataSet: TClientDataSet;
 begin
   Result := TClientDataSet.Create(nil);
   Result.FieldDefs.Add('One', ftInteger);
+  Result.FieldDefs.Add('Two', ftInteger);
+  Result.FieldDefs.Add('Three', ftInteger);
   Result.CreateDataSet();
+end;
+
+procedure TestTIteratorDataSet.TestIteratorFillSameFields;
+var
+  Iterator1: IIteratorDataSet;
+  Iterator2: IIteratorDataSet;
+begin
+  Iterator1 := TIteratorDataSetFactory.Get(
+    { use metod BuildAsDataSet } BuildDataSet(), True { Parameter TRUE destroy CdsDataSet } );
+
+  Iterator1.GetDataSet.Append;
+  Iterator1.GetDataSet.FieldByName('One').AsInteger := 1;
+  Iterator1.GetDataSet.FieldByName('Two').AsInteger := 2;
+  Iterator1.GetDataSet.FieldByName('Three').AsInteger := 3;
+  Iterator1.GetDataSet.Post;
+
+  Iterator2 := TIteratorDataSetFactory.Get(
+    { use metod BuildAsDataSet } BuildDataSet(), True { Parameter TRUE destroy CdsDataSet } );
+
+  Iterator1.FillSameFields(Iterator2.GetDataSet);
+
+  CheckTrue(
+    (Iterator1.FieldByName('One').AsInteger = Iterator2.FieldByName('One').AsInteger) and
+    (Iterator1.FieldByName('Two').AsInteger = Iterator2.FieldByName('Two').AsInteger) and
+    (Iterator1.FieldByName('Three').AsInteger = Iterator2.FieldByName('Three').AsInteger)
+    );
+
+  Iterator1.GetDataSet.Edit;
+  Iterator1.GetDataSet.FieldByName('One').AsInteger := 4;
+  Iterator1.GetDataSet.FieldByName('Two').AsInteger := 5;
+  Iterator1.GetDataSet.FieldByName('Three').AsInteger := 6;
+  Iterator1.GetDataSet.Post;
+
+  Iterator1.FillSameFields(Iterator2);
+
+  CheckTrue(
+    (Iterator1.FieldByName('One').AsInteger = Iterator2.FieldByName('One').AsInteger) and
+    (Iterator1.FieldByName('Two').AsInteger = Iterator2.FieldByName('Two').AsInteger) and
+    (Iterator1.FieldByName('Three').AsInteger = Iterator2.FieldByName('Three').AsInteger)
+    );
+end;
+
+procedure TestTIteratorDataSet.TestIteratorSetSameFieldsValues;
+var
+  Iterator1: IIteratorDataSet;
+  Iterator2: IIteratorDataSet;
+begin
+  Iterator2 := TIteratorDataSetFactory.Get(
+    { use metod BuildAsDataSet } BuildDataSet(), True { Parameter TRUE destroy CdsDataSet } );
+
+  Iterator2.GetDataSet.Append;
+  Iterator2.GetDataSet.FieldByName('One').AsInteger := 1;
+  Iterator2.GetDataSet.FieldByName('Two').AsInteger := 2;
+  Iterator2.GetDataSet.FieldByName('Three').AsInteger := 3;
+  Iterator2.GetDataSet.Post;
+
+  Iterator1 := TIteratorDataSetFactory.Get(
+    { use metod BuildAsDataSet } BuildDataSet(), True { Parameter TRUE destroy CdsDataSet } );
+
+  Iterator1.SetSameFieldsValues(Iterator2.GetDataSet);
+
+  CheckTrue(
+    (Iterator1.FieldByName('One').AsInteger = Iterator2.FieldByName('One').AsInteger) and
+    (Iterator1.FieldByName('Two').AsInteger = Iterator2.FieldByName('Two').AsInteger) and
+    (Iterator1.FieldByName('Three').AsInteger = Iterator2.FieldByName('Three').AsInteger)
+    );
+
+  Iterator2.GetDataSet.Edit;
+  Iterator2.GetDataSet.FieldByName('One').AsInteger := 4;
+  Iterator2.GetDataSet.FieldByName('Two').AsInteger := 5;
+  Iterator2.GetDataSet.FieldByName('Three').AsInteger := 6;
+  Iterator2.GetDataSet.Post;
+
+  Iterator1.SetSameFieldsValues(Iterator2);
+
+  CheckTrue(
+    (Iterator1.FieldByName('One').AsInteger = Iterator2.FieldByName('One').AsInteger) and
+    (Iterator1.FieldByName('Two').AsInteger = Iterator2.FieldByName('Two').AsInteger) and
+    (Iterator1.FieldByName('Three').AsInteger = Iterator2.FieldByName('Three').AsInteger)
+    );
 end;
 
 procedure TestTIteratorDataSet.TestIteratorWithBuildAsDataSet;

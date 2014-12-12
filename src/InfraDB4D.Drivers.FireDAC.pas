@@ -7,13 +7,13 @@ uses
   System.SysUtils,
   System.SyncObjs,
   System.Generics.Collections,
+  Data.DB,
   InfraDB4D,
   InfraDB4D.Drivers.Base,
   InfraDB4D.Iterator,
   SQLBuilder4D,
   FireDAC.Comp.Client,
-  FireDAC.Stan.Option,
-  Data.DB;
+  FireDAC.Stan.Option;
 
 type
 
@@ -23,14 +23,18 @@ type
 
   TFireDACStatementAdapter = class(TDriverStatement<TFDQuery, TFireDACConnectionAdapter>)
   strict protected
-    procedure DoInternalBuild(const pSQL: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean = False); override;
+    procedure DoBuild(const pSQL: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean = False); override;
 
-    function DoInternalBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TFDQuery; override;
-    procedure DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TFDQuery); override;
+    procedure DoBuildInDataSet(const pSQL: string; const pDataSet: TFDQuery); override;
+    procedure DoBuildInIterator(const pSQL: string; const pIterator: IIterator<TFDQuery>); override;
 
-    function DoInternalBuildAsInteger(const pSQL: string): Integer; override;
-    function DoInternalBuildAsFloat(const pSQL: string): Double; override;
-    function DoInternalBuildAsString(const pSQL: string): string; override;
+    function DoBuildAsDataSet(const pSQL: string; const pFetchRows: Integer): TFDQuery; override;
+    function DoBuildAsIteratorDataSet(const pSQL: string): IIteratorDataSet; override;
+    function DoBuildAsIterator(const pSQL: string; const pFetchRows: Integer): IIterator<TFDQuery>; override;
+
+    function DoBuildAsInteger(const pSQL: string): Integer; override;
+    function DoBuildAsFloat(const pSQL: string): Double; override;
+    function DoBuildAsString(const pSQL: string): string; override;
   end;
 
   TFireDACConnectionAdapter = class(TDriverConnection<TFireDACComponentAdapter, TFireDACStatementAdapter>)
@@ -214,7 +218,7 @@ type
 
   { TFireDACStatementAdapter }
 
-procedure TFireDACStatementAdapter.DoInternalBuild(const pSQL: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean);
+procedure TFireDACStatementAdapter.DoBuild(const pSQL: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean);
 var
   vDataSet: TFDQuery;
 begin
@@ -253,7 +257,7 @@ begin
   end;
 end;
 
-function TFireDACStatementAdapter.DoInternalBuildAsDataSet(const pSQL: string;
+function TFireDACStatementAdapter.DoBuildAsDataSet(const pSQL: string;
   const pFetchRows: Integer): TFDQuery;
 begin
   Result := TFDQuery.Create(nil);
@@ -273,13 +277,13 @@ begin
   Result.Open;
 end;
 
-function TFireDACStatementAdapter.DoInternalBuildAsFloat(const pSQL: string): Double;
+function TFireDACStatementAdapter.DoBuildAsFloat(const pSQL: string): Double;
 var
   vDataSet: TFDQuery;
 begin
   Result := 0;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsFloat;
@@ -288,13 +292,13 @@ begin
   end;
 end;
 
-function TFireDACStatementAdapter.DoInternalBuildAsInteger(const pSQL: string): Integer;
+function TFireDACStatementAdapter.DoBuildAsInteger(const pSQL: string): Integer;
 var
   vDataSet: TFDQuery;
 begin
   Result := 0;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsInteger;
@@ -303,13 +307,25 @@ begin
   end;
 end;
 
-function TFireDACStatementAdapter.DoInternalBuildAsString(const pSQL: string): string;
+function TFireDACStatementAdapter.DoBuildAsIterator(const pSQL: string;
+  const pFetchRows: Integer): IIterator<TFDQuery>;
+begin
+  Result := TIteratorFactory<TFDQuery>.Get(DoBuildAsDataSet(pSQL, 0), True);
+end;
+
+function TFireDACStatementAdapter.DoBuildAsIteratorDataSet(
+  const pSQL: string): IIteratorDataSet;
+begin
+  Result := TIteratorDataSetFactory.Get(DoBuildAsDataSet(pSQL, 0), True);
+end;
+
+function TFireDACStatementAdapter.DoBuildAsString(const pSQL: string): string;
 var
   vDataSet: TFDQuery;
 begin
   Result := EmptyStr;
 
-  vDataSet := DoInternalBuildAsDataSet(pSQL, 1);
+  vDataSet := DoBuildAsDataSet(pSQL, 1);
   try
     if not vDataSet.IsEmpty then
       Result := vDataSet.Fields[0].AsString;
@@ -318,7 +334,7 @@ begin
   end;
 end;
 
-procedure TFireDACStatementAdapter.DoInternalBuildInDataSet(const pSQL: string; const pDataSet: TFDQuery);
+procedure TFireDACStatementAdapter.DoBuildInDataSet(const pSQL: string; const pDataSet: TFDQuery);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -329,6 +345,13 @@ begin
   pDataSet.SQL.Add(pSQL);
   pDataSet.Prepare;
   pDataSet.Open;
+end;
+
+procedure TFireDACStatementAdapter.DoBuildInIterator(const pSQL: string;
+  const pIterator: IIterator<TFDQuery>);
+begin
+  inherited;
+  DoBuildInDataSet(pSQL, pIterator.GetDataSet);
 end;
 
 { TFireDACConnectionAdapter }

@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<BorlandProject>
-	<Transactions>
-    <Transaction>2014/04/29 10:30:02.000.061,\\VBOXSVR\d_drive\GitHub\InfraDatabase4Delphi\samples\PrjGrpSamples.groupproj=C:\Users\Admin\Documents\RAD Studio\Projects\ProjectGroup1.groupproj</Transaction>
-  </Transactions>
-	<Default.Personality>
-		<Projects ActiveProject="D:\Projetos\MsysFramework\Delphi\Trunk\3rdPartyLibraries\InfraDatabase4Delphi\samples\FireDAC\basic\BasicSample.dproj"/>
-	</Default.Personality>
-</BorlandProject>
