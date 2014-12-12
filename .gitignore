@@ -28,3 +28,5 @@
 /unittest/*.dsk
 /unittest/*.skincfg
 /unittest/*.tvsconfig
+/unittest/*.local
+/unittest/*.identcache
