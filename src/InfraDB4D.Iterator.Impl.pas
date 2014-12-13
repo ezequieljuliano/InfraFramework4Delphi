@@ -46,9 +46,14 @@ begin
   if not(FDataSet.Active) then
     FDataSet.Open;
 
-  FDataSet.First();
+  if not(FDataset.State in [dsInsert, dsEdit]) then
+  begin
+    FDataSet.First();
+    FCurrentCount := 0;
+  end
+  else
+    FCurrentCount := FDataSet.RecNo;
 
-  FCurrentCount := 0;
   FDestroyDataSet := pDestroyDataSet;
 end;
 
