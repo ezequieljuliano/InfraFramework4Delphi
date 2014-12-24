@@ -1,6 +1,0 @@
-[submodule "dependencies/SQLBuilder4Delphi"]
-	path = dependencies/SQLBuilder4Delphi
-	url = https://github.com/ezequieljuliano/SQLBuilder4Delphi.git
-[submodule "dependencies/PropertiesFile4Delphi"]
-	path = dependencies/PropertiesFile4Delphi
-	url = https://github.com/ezequieljuliano/PropertiesFile4Delphi.git
