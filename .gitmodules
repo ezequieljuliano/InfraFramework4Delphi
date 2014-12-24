@@ -1,0 +1,3 @@
+[submodule "dependencies/SQLBuilder4Delphi"]
+	path = dependencies/SQLBuilder4Delphi
+	url = https://github.com/ezequieljuliano/SQLBuilder4Delphi.git
