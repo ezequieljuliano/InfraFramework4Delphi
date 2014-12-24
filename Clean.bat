@@ -18,9 +18,16 @@ del /f /q /s *.o
 del /f /q /s *.rsm
 del /f /q /s *.skincfg
 del /f /q /s *.log
-del /f /q /s *.xml
 
 for /f "tokens=* delims=" %%i in ('dir /s /b /a:d __history') do (
+  rd /s /q "%%i"
+)
+
+for /f "tokens=* delims=" %%i in ('dir /s /b /a:d Win32') do (
+  rd /s /q "%%i"
+)
+
+for /f "tokens=* delims=" %%i in ('dir /s /b /a:d Win64') do (
   rd /s /q "%%i"
 )
 
