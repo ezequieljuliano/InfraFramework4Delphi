@@ -40,6 +40,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;..\..\..\dependencies\SQLBuilder4Delphi\dependencies\gaSQLParser\src;..\..\..\dependencies\SQLBuilder4Delphi\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_DcpOutput>.\$(Platform)\$(Config)\dcp</DCC_DcpOutput>
         <DCC_BplOutput>.\$(Platform)\$(Config)\pkg</DCC_BplOutput>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
