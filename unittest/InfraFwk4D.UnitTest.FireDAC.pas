@@ -5,45 +5,16 @@ interface
 uses
   TestFramework,
   System.SysUtils,
-  InfraFwk4D.UnitTest.DataModule,
   InfraFwk4D.Driver.FireDAC,
-  InfraFwk4D.Attributes,
   FireDAC.Comp.Client,
   FireDAC.Stan.Intf,
   FireDAC.Stan.Def,
-  FireDAC.DApt;
+  FireDAC.DApt,
+  InfraFwk4D.UnitTest.FireDAC.Connection,
+  InfraFwk4D.UnitTest.FireDAC.DAO,
+  InfraFwk4D.UnitTest.FireDAC.BC;
 
 type
-
-  TFireDACDmConnection = class(TInfraFwkDataModule)
-  private
-    FConnection: TFDConnection;
-  public
-    procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
-
-    property Connection: TFDConnection read FConnection;
-  end;
-
-  TFireDACDAO = class(TInfraFwkDataModule, IFireDACPersistenceAdapter)
-    Master: TFDQuery;
-    Detail: TFDQuery;
-  public
-    procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
-
-    function GetConnection(): TFireDACConnectionAdapter;
-
-    property Connection: TFireDACConnectionAdapter read GetConnection;
-  end;
-
-  [DataSetComponent('Master')]
-  TFireDACMasterBC = class(TFireDACBusinessAdapter<TFireDACDAO>)
-  end;
-
-  [DataSetComponent('Detail')]
-  TFireDACDetailBC = class(TFireDACBusinessAdapter<TFireDACDAO>)
-  end;
 
   TTestInfraFwkFireDAC = class(TTestCase)
   private
@@ -56,7 +27,6 @@ type
     procedure TestConnectionSingleton();
     procedure TestConnectionManager();
     procedure TestBusinessController();
-    procedure TestBusinessDetails();
   end;
 
 implementation
@@ -80,7 +50,7 @@ var
   vConnection: TFireDACConnectionAdapter;
 begin
   vConnection := TFireDACConnectionAdapter.Create;
-  vConnection.Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FConnection), True);
+  vConnection.Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FDConnection), True);
 
   CheckTrue(vConnection.Component <> nil);
   CheckTrue(vConnection.Statement <> nil);
@@ -95,7 +65,7 @@ var
 begin
   vConnectionManager := TFireDACConnectionManagerAdapter.Create;
   vConnection := TFireDACConnectionAdapter.Create;
-  vConnection.Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FConnection));
+  vConnection.Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FDConnection));
 
   vConnectionManager.RegisterConnection('Conn1', vConnection);
   CheckTrue(vConnectionManager.Count = 1);
@@ -103,7 +73,7 @@ begin
   CheckTrue(vConnectionManager.ConnectionIsRegistered('Conn1'));
 
   vConnectionManager.RegisterConnection('Conn2', TFireDACConnectionAdapter);
-  vConnectionManager.GetConnection('Conn2').Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FConnection));
+  vConnectionManager.GetConnection('Conn2').Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FDConnection));
   CheckTrue(vConnectionManager.Count = 2);
   CheckTrue(vConnectionManager.GetConnection('Conn2') <> nil);
   CheckTrue(vConnectionManager.ConnectionIsRegistered('Conn2'));
@@ -127,7 +97,7 @@ begin
 
   CheckTrue(vConnection <> nil);
 
-  vConnection.Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FConnection), True);
+  vConnection.Build(TFireDACComponentAdapter.Create(FFireDACDmConnection.FDConnection), True);
 
   CheckTrue(vConnection.Component <> nil);
   CheckTrue(vConnection.Statement <> nil);
@@ -136,99 +106,53 @@ end;
 procedure TTestInfraFwkFireDAC.TestBusinessController;
 var
   vDAO: TFireDACDAO;
-  vMasterBC: TFireDACMasterBC;
+  vBC: TFireDACBC;
 begin
   vDAO := TFireDACDAO.Create(nil);
-  vMasterBC := TFireDACMasterBC.Create(vDAO);
+  vBC := TFireDACBC.Create(vDAO);
   try
-    CheckTrue(vMasterBC.Persistence <> nil);
-    CheckTrue(vMasterBC.Persistence.Connection <> nil);
-    CheckTrue(vMasterBC.DataSet <> nil);
+    CheckTrue(vBC.Persistence <> nil);
+    CheckTrue(vBC.Persistence.Connection <> nil);
+    CheckTrue(vBC.Persistence.Master <> nil);
+    CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Detail') <> nil);
   finally
-    FreeAndNil(vMasterBC);
+    FreeAndNil(vBC);
   end;
 
   vDAO := TFireDACDAO.Create(nil);
-  vMasterBC := TFireDACMasterBC.Create(vDAO, False);
+  vBC := TFireDACBC.Create(vDAO, False);
   try
-    CheckTrue(vMasterBC.Persistence <> nil);
-    CheckTrue(vMasterBC.Persistence.Connection <> nil);
-    CheckTrue(vMasterBC.DataSet <> nil);
+    CheckTrue(vBC.Persistence <> nil);
+    CheckTrue(vBC.Persistence.Connection <> nil);
+    CheckTrue(vBC.Persistence.Master <> nil);
+    CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Detail') <> nil);
   finally
-    FreeAndNil(vMasterBC);
+    FreeAndNil(vBC);
     FreeAndNil(vDAO);
     CheckTrue(vDAO = nil);
   end;
 
-  vMasterBC := TFireDACMasterBC.Create(TFireDACDAO);
+  vBC := TFireDACBC.Create(TFireDACDAO);
   try
-    CheckTrue(vMasterBC.Persistence <> nil);
-    CheckTrue(vMasterBC.Persistence.Connection <> nil);
-    CheckTrue(vMasterBC.DataSet <> nil);
+    CheckTrue(vBC.Persistence <> nil);
+    CheckTrue(vBC.Persistence.Connection <> nil);
+    CheckTrue(vBC.Persistence.Master <> nil);
+    CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Detail') <> nil);
   finally
-    FreeAndNil(vMasterBC);
+    FreeAndNil(vBC);
   end;
-end;
-
-procedure TTestInfraFwkFireDAC.TestBusinessDetails;
-var
-  vDAO: TFireDACDAO;
-  vMasterBC: TFireDACMasterBC;
-begin
-  vDAO := TFireDACDAO.Create(nil);
-  vMasterBC := TFireDACMasterBC.Create(vDAO);
-  try
-    CheckTrue(vMasterBC.Persistence <> nil);
-    CheckTrue(vMasterBC.Persistence.Connection <> nil);
-    CheckTrue(vMasterBC.DataSet <> nil);
-
-    vMasterBC.Details.RegisterDetail('Detail', TFireDACDetailBC.Create(vMasterBC.Persistence, False));
-
-    CheckTrue(vMasterBC.Details.GetDetail('Detail').Persistence <> nil);
-    CheckTrue(vMasterBC.Details.GetDetail('Detail').Persistence.Connection <> nil);
-    CheckTrue(vMasterBC.Details.GetDetail('Detail').DataSet <> nil);
-    CheckTrue(vMasterBC.Details.GetDetailAs<TFireDACDetailBC>('Detail').DataSet <> nil);
-    CheckTrue(vMasterBC.Details.GetDetailAs<TFireDACDetailBC>('Detail').ClassName = 'TFireDACDetailBC');
-    CheckTrue(vMasterBC.Details.GetDetailByClass<TFireDACDetailBC>().DataSet <> nil);
-    CheckTrue(vMasterBC.Details.GetDetailByClass<TFireDACDetailBC>().ClassName = 'TFireDACDetailBC');
-  finally
-    FreeAndNil(vMasterBC);
-  end;
-end;
-
-{ TFireDACDmConnection }
-
-procedure TFireDACDmConnection.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  FConnection := TFDConnection.Create(nil);
-end;
-
-procedure TFireDACDmConnection.BeforeDestruction;
-begin
-  FreeAndNil(FConnection);
-  inherited BeforeDestruction;
-end;
-
-{ TFireDACPersistence }
-
-procedure TFireDACDAO.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  Master := TFDQuery.Create(nil);
-  Detail := TFDQuery.Create(nil);
-end;
-
-procedure TFireDACDAO.BeforeDestruction;
-begin
-  FreeAndNil(Master);
-  FreeAndNil(Detail);
-  inherited BeforeDestruction;
-end;
-
-function TFireDACDAO.GetConnection: TFireDACConnectionAdapter;
-begin
-  Result := FireDACSingletonConnectionAdapter.Instance;
 end;
 
 initialization

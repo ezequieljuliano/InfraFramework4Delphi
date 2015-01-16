@@ -51,7 +51,7 @@ var
 begin
   vId := InputBox('Country', 'Id', '');
   FCountryBC.FilterById(StrToIntDef(vId, 0));
-  if FCountryBC.DataSet.IsEmpty then
+  if FCountryBC.Persistence.Country.IsEmpty then
     ShowMessage('Not found!');
 end;
 

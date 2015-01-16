@@ -6,11 +6,11 @@ uses
   System.SysUtils, System.Classes, Database.FireDAC, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   FireDAC.Stan.Async, FireDAC.DApt, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
-  InfraFwk4D.Driver.FireDAC;
+  InfraFwk4D.Driver.FireDAC, InfraFwk4D.Driver.FireDAC.Persistence;
 
 type
 
-  TProvinceDAO = class(TDataModule, IFireDACPersistenceAdapter)
+  TProvinceDAO = class(TFireDACPersistenceAdapter)
     Province: TFDQuery;
     City: TFDQuery;
     ProvinceID: TIntegerField;
@@ -19,8 +19,10 @@ type
     CityID: TIntegerField;
     CityNAME: TStringField;
     CityPROVINCEID: TIntegerField;
-  private
-    function GetConnection(): TFireDACConnectionAdapter;
+    DsProvince: TDataSource;
+  strict protected
+    function GetConnection(): TFireDACConnectionAdapter; override;
+    procedure ConfigureDataSetsConnection(); override;
   public
     property Connection: TFireDACConnectionAdapter read GetConnection;
   end;
@@ -32,6 +34,13 @@ implementation
 {$R *.dfm}
 
 { TProvinceDAO }
+
+procedure TProvinceDAO.ConfigureDataSetsConnection;
+begin
+  inherited;
+  Province.Connection := Connection.Component.Connection;
+  City.Connection := Connection.Component.Connection;
+end;
 
 function TProvinceDAO.GetConnection: TFireDACConnectionAdapter;
 begin

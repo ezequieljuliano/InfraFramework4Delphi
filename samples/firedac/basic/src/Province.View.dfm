@@ -25,8 +25,6 @@ object ProvinceView: TProvinceView
     Align = alTop
     Caption = 'Province'
     TabOrder = 0
-    ExplicitLeft = -8
-    ExplicitTop = -6
     object DBNavigator1: TDBNavigator
       Left = 2
       Top = 15
@@ -93,9 +91,6 @@ object ProvinceView: TProvinceView
     Align = alClient
     Caption = 'Cities'
     TabOrder = 1
-    ExplicitTop = 8
-    ExplicitWidth = 635
-    ExplicitHeight = 139
     object DBNavigator2: TDBNavigator
       Left = 2
       Top = 15
@@ -104,7 +99,6 @@ object ProvinceView: TProvinceView
       DataSource = DsoCities
       Align = alTop
       TabOrder = 0
-      ExplicitTop = 17
     end
     object DBGrid2: TDBGrid
       Left = 2

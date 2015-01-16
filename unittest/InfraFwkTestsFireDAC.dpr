@@ -19,10 +19,12 @@ uses
   InfraFwk4D in '..\src\InfraFwk4D.pas',
   InfraFwk4D.Driver in '..\src\InfraFwk4D.Driver.pas',
   InfraFwk4D.Iterator.DataSet in '..\src\InfraFwk4D.Iterator.DataSet.pas',
-  InfraFwk4D.Attributes in '..\src\InfraFwk4D.Attributes.pas',
   InfraFwk4D.Driver.FireDAC in '..\src\InfraFwk4D.Driver.FireDAC.pas',
   InfraFwk4D.UnitTest.FireDAC in 'InfraFwk4D.UnitTest.FireDAC.pas',
-  InfraFwk4D.UnitTest.DataModule in 'InfraFwk4D.UnitTest.DataModule.pas' {InfraFwkDataModule: TDataModule};
+  InfraFwk4D.Driver.FireDAC.Persistence in '..\src\InfraFwk4D.Driver.FireDAC.Persistence.pas' {FireDACPersistenceAdapter: TDataModule},
+  InfraFwk4D.UnitTest.FireDAC.Connection in 'InfraFwk4D.UnitTest.FireDAC.Connection.pas' {FireDACDmConnection: TDataModule},
+  InfraFwk4D.UnitTest.FireDAC.DAO in 'InfraFwk4D.UnitTest.FireDAC.DAO.pas' {FireDACDAO: TDataModule},
+  InfraFwk4D.UnitTest.FireDAC.BC in 'InfraFwk4D.UnitTest.FireDAC.BC.pas';
 
 {$R *.RES}
 

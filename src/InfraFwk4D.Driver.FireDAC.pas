@@ -10,6 +10,8 @@ uses
   Data.DB,
   FireDAC.Comp.Client,
   FireDAC.Stan.Option,
+  SQLBuilder4D,
+  SQLBuilder4D.Parser,
   InfraFwk4D.Driver,
   InfraFwk4D.Iterator.DataSet;
 
@@ -51,38 +53,14 @@ type
 
   TFireDACConnectionManagerAdapter = class(TDriverConnectionManager<string, TFireDACConnectionAdapter>);
 
-  IFireDACPersistenceAdapter = interface(IDriverPersistence<TFireDACConnectionAdapter>)
-    ['{35B5023D-CA6B-4006-9A07-5B34CC0AAC8C}']
-  end;
-
-  TFireDACDetailsAdapter<TFireDACPersistence: TDataModule> = class;
-
-  TFireDACBusinessAdapter<TFireDACPersistence: TDataModule> = class(TDriverBusiness<TFireDACPersistence, TFDQuery,
-    TFireDACConnectionAdapter, TFireDACDetailsAdapter<TFireDACPersistence>>)
-  strict protected
-    function DoCreateDetails(): TFireDACDetailsAdapter<TFireDACPersistence>; override;
-    function DoGetDataSetQuery(): string; override;
-    procedure DoDataSetChangeQuery(); override;
-    procedure DoDataSetConfigureConnection(); override;
-    procedure DoDataSetOpen(); override;
-    procedure DoDataSetClose(); override;
-  end;
-
-  TFireDACDetailsAdapter<TFireDACPersistence: TDataModule> = class(TDriverDetails <string, TFireDACBusinessAdapter <TFireDACPersistence>>)
-  strict protected
-    procedure DoOpenAll(); override;
-    procedure DoCloseAll(); override;
-    procedure DoDisableAllControls(); override;
-    procedure DoEnableAllControls(); override;
-    procedure DoLinkMasterDataSource(const pMasterBusiness: TFireDACBusinessAdapter<TFireDACPersistence>); override;
-    procedure DoLinkDetailOnMasterDataSource(const pDetail: TFireDACBusinessAdapter<TFireDACPersistence>); override;
-  end;
+  TFireDACBusinessAdapter<TFireDACPersistence: TDataModule> = class(TDriverBusiness<TFireDACPersistence>);
 
   IFireDACSingletonConnectionAdapter = interface(IDriverSingletonConnection<TFireDACConnectionAdapter>)
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;
 
 function FireDACSingletonConnectionAdapter(): IFireDACSingletonConnectionAdapter;
+function CreateFireDACQueryBuilder(const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
 
 implementation
 
@@ -107,9 +85,41 @@ type
     property Instance: TFireDACConnectionAdapter read GetInstance;
   end;
 
+  TFireDACQueryBuilder = class(TInterfacedObject, IDriverQueryBuilder<TFDQuery>)
+  private
+    FDataSet: TFDQuery;
+    FQueryBegin: string;
+    FQueryParserSelect: ISQLParserSelect;
+  public
+    constructor Create(const pDataSet: TFDQuery);
+    destructor Destroy; override;
+
+    function Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
+
+    function Restore(): IDriverQueryBuilder<TFDQuery>;
+
+    function Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
+
+    procedure Activate;
+  end;
+
 function FireDACSingletonConnectionAdapter(): IFireDACSingletonConnectionAdapter;
 begin
   Result := TFireDACSingletonConnectionAdapter.SingletonConnection;
+end;
+
+function CreateFireDACQueryBuilder(const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := TFireDACQueryBuilder.Create(pDataSet);
 end;
 
 { TFireDACStatementAdapter }
@@ -294,107 +304,6 @@ begin
   Component.Connection.StartTransaction();
 end;
 
-{ TFireDACBusinessAdapter<TFireDACPersistence> }
-
-function TFireDACBusinessAdapter<TFireDACPersistence>.DoCreateDetails: TFireDACDetailsAdapter<TFireDACPersistence>;
-begin
-  Result := TFireDACDetailsAdapter<TFireDACPersistence>.Create(Self);
-end;
-
-procedure TFireDACBusinessAdapter<TFireDACPersistence>.DoDataSetChangeQuery;
-begin
-  inherited;
-  DataSet.SQL.Clear;
-  DataSet.SQL.Add(GetQueryParserSelect.GetSQLText);
-end;
-
-procedure TFireDACBusinessAdapter<TFireDACPersistence>.DoDataSetClose;
-begin
-  inherited;
-  DataSet.Close();
-end;
-
-procedure TFireDACBusinessAdapter<TFireDACPersistence>.DoDataSetConfigureConnection;
-begin
-  inherited;
-  DataSet.Connection := GetConnection.Component.Connection;
-end;
-
-procedure TFireDACBusinessAdapter<TFireDACPersistence>.DoDataSetOpen;
-begin
-  inherited;
-  DataSet.Open();
-end;
-
-function TFireDACBusinessAdapter<TFireDACPersistence>.DoGetDataSetQuery: string;
-begin
-  Result := DataSet.SQL.Text;
-end;
-
-{ TFireDACDetailsAdapter<TFireDACPersistence> }
-
-procedure TFireDACDetailsAdapter<TFireDACPersistence>.DoCloseAll;
-var
-  vPair: TPair<string, TDetailProperties>;
-begin
-  inherited;
-  for vPair in GetDetailDictionary do
-  begin
-    vPair.Value.Obj.DataSet.Close;
-    vPair.Value.Obj.Details.CloseAll;
-  end;
-end;
-
-procedure TFireDACDetailsAdapter<TFireDACPersistence>.DoDisableAllControls;
-var
-  vPair: TPair<string, TDetailProperties>;
-begin
-  inherited;
-  for vPair in GetDetailDictionary do
-  begin
-    vPair.Value.Obj.DataSet.DisableControls;
-    vPair.Value.Obj.Details.DisableAllControls;
-  end;
-end;
-
-procedure TFireDACDetailsAdapter<TFireDACPersistence>.DoEnableAllControls;
-var
-  vPair: TPair<string, TDetailProperties>;
-begin
-  inherited;
-  for vPair in GetDetailDictionary do
-  begin
-    vPair.Value.Obj.DataSet.EnableControls;
-    vPair.Value.Obj.Details.EnableAllControls;
-  end;
-end;
-
-procedure TFireDACDetailsAdapter<TFireDACPersistence>.DoLinkDetailOnMasterDataSource(
-  const pDetail: TFireDACBusinessAdapter<TFireDACPersistence>);
-begin
-  inherited;
-  pDetail.DataSet.MasterSource := GetMasterDataSource();
-end;
-
-procedure TFireDACDetailsAdapter<TFireDACPersistence>.DoLinkMasterDataSource(
-  const pMasterBusiness: TFireDACBusinessAdapter<TFireDACPersistence>);
-begin
-  inherited;
-  GetMasterDataSource.DataSet := pMasterBusiness.DataSet;
-end;
-
-procedure TFireDACDetailsAdapter<TFireDACPersistence>.DoOpenAll;
-var
-  vPair: TPair<string, TDetailProperties>;
-begin
-  inherited;
-  for vPair in GetDetailDictionary do
-  begin
-    vPair.Value.Obj.DataSet.Open();
-    vPair.Value.Obj.Details.OpenAll();
-  end;
-end;
-
 { TFireDACSingletonConnectionAdapter }
 
 constructor TFireDACSingletonConnectionAdapter.Create;
@@ -426,6 +335,108 @@ end;
 class destructor TFireDACSingletonConnectionAdapter.Destroy;
 begin
   SingletonConnection := nil;
+end;
+
+{ TFireDACQueryBuilder }
+
+procedure TFireDACQueryBuilder.Activate;
+begin
+  FDataSet.Open();
+end;
+
+function TFireDACQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
+begin
+  Restore();
+  FQueryParserSelect.AddOrSetOrderBy(pOrderBy.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  Result := Self;
+end;
+
+function TFireDACQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
+begin
+  Restore();
+  FQueryParserSelect.AddOrSetHaving(pHaving.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  Result := Self;
+end;
+
+function TFireDACQueryBuilder.Build(const pQuery: string): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Initialize(pQuery);
+end;
+
+constructor TFireDACQueryBuilder.Create(const pDataSet: TFDQuery);
+begin
+  if (pDataSet = nil) then
+    raise EDataSetDoesNotExist.Create('DataSet does not exist in Class ' + Self.ClassName);
+  FDataSet := pDataSet;
+  FQueryParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
+  Initialize(pDataSet.SQL.Text);
+end;
+
+destructor TFireDACQueryBuilder.Destroy;
+begin
+  FQueryParserSelect := nil;
+  inherited;
+end;
+
+function TFireDACQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
+begin
+  Restore();
+  FQueryParserSelect.AddOrSetGroupBy(pGroupBy.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  Result := Self;
+end;
+
+function TFireDACQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
+begin
+  Restore();
+  FQueryParserSelect.AddOrSetWhere(pWhere.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  Result := Self;
+end;
+
+function TFireDACQueryBuilder.Initialize(
+  const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Initialize(pOrderBy.ToString);
+end;
+
+function TFireDACQueryBuilder.Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Initialize(pHaving.ToString);
+end;
+
+function TFireDACQueryBuilder.Initialize(const pQuery: string): IDriverQueryBuilder<TFDQuery>;
+begin
+  FDataSet.Close;
+  FQueryBegin := pQuery;
+  FQueryParserSelect.Parse(FQueryBegin);
+  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  Result := Self;
+end;
+
+function TFireDACQueryBuilder.Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Initialize(pSelect.ToString);
+end;
+
+function TFireDACQueryBuilder.Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Initialize(pWhere.ToString);
+end;
+
+function TFireDACQueryBuilder.Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Initialize(pGroupBy.ToString);
+end;
+
+function TFireDACQueryBuilder.Restore: IDriverQueryBuilder<TFDQuery>;
+begin
+  FDataSet.Close;
+  FQueryParserSelect.Parse(FQueryBegin);
+  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  Result := Self;
 end;
 
 end.

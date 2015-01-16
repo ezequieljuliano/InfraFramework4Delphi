@@ -7,10 +7,8 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   System.SyncObjs,
-  System.Rtti,
   Data.DB,
   SQLBuilder4D,
-  SQLBuilder4D.Parser,
   InfraFwk4D.Iterator.DataSet;
 
 type
@@ -152,43 +150,36 @@ type
     property Count: Integer read GetCount;
   end;
 
-  IDriverPersistence<TDrvConnection: class> = interface
-    ['{23D9C938-499A-4E62-8404-8ADA73FFDF5A}']
-    function GetConnection(): TDrvConnection;
+  IDriverQueryBuilder<TDrvDataSet: TDataSet> = interface
+    ['{EFA518A7-79BE-475D-8991-7A59A8D6685B}']
+    function Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
 
-    property Connection: TDrvConnection read GetConnection;
+    function Restore(): IDriverQueryBuilder<TDrvDataSet>;
+
+    function Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
+
+    procedure Activate;
   end;
 
   TDriverPersistenceClass = class of TDataModule;
 
-  TDriverBusiness<TDrvPersistence: TDataModule; TDrvDataSet: TDataSet; TDrvConnection, TDrvDetails: class> = class abstract
+  TDriverBusiness<TDrvPersistence: TDataModule> = class abstract
   strict private
     FPersistence: TDrvPersistence;
     FOwnsPersistence: Boolean;
-    FDataSet: TDrvDataSet;
-    FIterator: IIteratorDataSet;
-    FConnection: TDrvConnection;
-    FDetails: TDrvDetails;
-    FQueryBegin: string;
-    FQueryParserSelect: ISQLParserSelect;
     procedure InternalCreate(const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
-    function FindDataSetOnPersistence(): TDrvDataSet;
-    function FindConnectionOnPersistence(): TDrvConnection;
     function GetPersistence(): TDrvPersistence;
-    function GetDataSet(): TDrvDataSet;
-    function GetIterator(): IIteratorDataSet;
-    function GetDetails(): TDrvDetails;
   strict protected
-    function GetConnection(): TDrvConnection;
-    function GetQueryBegin(): string;
-    function GetQueryParserSelect(): ISQLParserSelect;
 
-    function DoCreateDetails(): TDrvDetails; virtual; abstract;
-    function DoGetDataSetQuery(): string; virtual; abstract;
-    procedure DoDataSetChangeQuery(); virtual; abstract;
-    procedure DoDataSetConfigureConnection(); virtual; abstract;
-    procedure DoDataSetOpen(); virtual; abstract;
-    procedure DoDataSetClose(); virtual; abstract;
   public
     constructor Create(const pPersistence: TDrvPersistence); overload;
     constructor Create(const pPersistence: TDriverPersistenceClass); overload;
@@ -196,86 +187,13 @@ type
 
     destructor Destroy; override;
 
-    procedure QueryInitialize(const pQuery: string);
-
-    procedure QueryRestore(); overload;
-    procedure QueryRestore(const pOpen: Boolean); overload;
-
-    procedure QueryBuild(const pWhere: ISQLWhere); overload;
-    procedure QueryBuild(const pWhere: ISQLWhere; const pOpen: Boolean); overload;
-
-    procedure QueryBuild(const pGroupBy: ISQLGroupBy); overload;
-    procedure QueryBuild(const pGroupBy: ISQLGroupBy; const pOpen: Boolean); overload;
-
-    procedure QueryBuild(const pOrderBy: ISQLOrderBy); overload;
-    procedure QueryBuild(const pOrderBy: ISQLOrderBy; const pOpen: Boolean); overload;
-
-    procedure QueryBuild(const pHaving: ISQLHaving); overload;
-    procedure QueryBuild(const pHaving: ISQLHaving; const pOpen: Boolean); overload;
-
     property Persistence: TDrvPersistence read GetPersistence;
-    property DataSet: TDrvDataSet read GetDataSet;
-    property Iterator: IIteratorDataSet read GetIterator;
-    property Details: TDrvDetails read GetDetails;
-  end;
-
-  TDriverDetails<TKey; TDrvBusiness: class> = class abstract
-  strict protected
-  type
-    TDetailProperties = class
-    strict private
-      FObj: TDrvBusiness;
-      FOwnsObj: Boolean;
-    public
-      constructor Create(const pObj: TDrvBusiness; const pOwnsObj: Boolean);
-      destructor Destroy(); override;
-
-      property Obj: TDrvBusiness read FObj;
-      property OwnsObj: Boolean read FOwnsObj;
-    end;
-  strict private
-    FDetails: TObjectDictionary<TKey, TDetailProperties>;
-    FMasterBusiness: TDrvBusiness;
-    FMasterDataSource: TDataSource;
-    function GetCount: Integer;
-  strict protected
-    function GetMasterBusiness(): TDrvBusiness;
-    function GetMasterDataSource(): TDataSource;
-    function GetDetailDictionary(): TDictionary<TKey, TDetailProperties>;
-
-    procedure DoOpenAll(); virtual; abstract;
-    procedure DoCloseAll(); virtual; abstract;
-    procedure DoDisableAllControls(); virtual; abstract;
-    procedure DoEnableAllControls(); virtual; abstract;
-    procedure DoLinkMasterDataSource(const pMasterController: TDrvBusiness); virtual; abstract;
-    procedure DoLinkDetailOnMasterDataSource(const pDetail: TDrvBusiness); virtual; abstract;
-  public
-    constructor Create(const pMasterBusiness: TDrvBusiness);
-    destructor Destroy(); override;
-
-    procedure RegisterDetail(const pKey: TKey; const pDetail: TDrvBusiness; const pOwnsDetail: Boolean = True);
-    procedure UnregisterDetail(const pKey: TKey);
-    procedure UnregisterAllDetails();
-
-    function DetailIsRegistered(const pKey: TKey): Boolean;
-
-    function GetDetail(const pKey: TKey): TDrvBusiness;
-    function GetDetailAs<T: class>(const pKey: TKey): T;
-    function GetDetailByClass<T: class>(): T;
-
-    procedure OpenAll();
-    procedure CloseAll();
-    procedure DisableAllControls();
-    procedure EnableAllControls();
-
-    property Count: Integer read GetCount;
   end;
 
 implementation
 
 uses
-  InfraFwk4D,
-  InfraFwk4D.Attributes;
+  InfraFwk4D;
 
 { TDriverComponent<TConnection> }
 
@@ -605,377 +523,43 @@ begin
     raise EConnectionUnregistered.Create('Database connection unregistered!');
 end;
 
-{ TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails> }
+{ TDriverBusiness<TDrvPersistence> }
 
-constructor TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.Create(
-  const pPersistence: TDrvPersistence);
+constructor TDriverBusiness<TDrvPersistence>.Create(const pPersistence: TDrvPersistence);
 begin
   InternalCreate(pPersistence, True);
 end;
 
-constructor TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.Create(
+constructor TDriverBusiness<TDrvPersistence>.Create(
   const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
 begin
   InternalCreate(pPersistence, pOwnsPersistence);
 end;
 
-constructor TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.Create(
-  const pPersistence: TDriverPersistenceClass);
+constructor TDriverBusiness<TDrvPersistence>.Create(const pPersistence: TDriverPersistenceClass);
 begin
   InternalCreate(pPersistence.Create(nil), True);
 end;
 
-destructor TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.Destroy;
+destructor TDriverBusiness<TDrvPersistence>.Destroy;
 begin
-  if (FDetails <> nil) then
-    FreeAndNil(FDetails);
   if FOwnsPersistence and (FPersistence <> nil) then
     FreeAndNil(FPersistence);
-  FIterator := nil;
-  FQueryParserSelect := nil;
   inherited Destroy();
 end;
 
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.FindConnectionOnPersistence: TDrvConnection;
-var
-  vCtx: TRttiContext;
-  vType: TRttiType;
-  vProp: TRttiProperty;
-  vConnection: TValue;
-begin
-  Result := nil;
-  vCtx := TRttiContext.Create();
-  try
-    vType := vCtx.GetType(GetPersistence.ClassType);
-    vProp := vType.GetProperty('Connection');
-    if (vProp <> nil) then
-    begin
-      vConnection := vProp.GetValue(Pointer(GetPersistence));
-      Result := vConnection.AsType<TDrvConnection>;
-    end;
-  finally
-    vCtx.Free;
-  end;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.FindDataSetOnPersistence: TDrvDataSet;
-var
-  vBusinessCtx, vPersistenceCtx: TRttiContext;
-  vBusinessType, vPersistenceType: TRttiType;
-  vBusinessAttr: TCustomAttribute;
-  vDataSet: TValue;
-begin
-  Result := nil;
-  vBusinessCtx := TRttiContext.Create();
-  try
-    vBusinessType := vBusinessCtx.GetType(Self.ClassType);
-    for vBusinessAttr in vBusinessType.GetAttributes() do
-      if vBusinessAttr is DataSetComponentAttribute then
-      begin
-        if not DataSetComponentAttribute(vBusinessAttr).ComponentName.IsEmpty then
-        begin
-          vPersistenceCtx := TRttiContext.Create();
-          try
-            vPersistenceType := vPersistenceCtx.GetType(Persistence.ClassType);
-            vDataSet := vPersistenceType.GetField(DataSetComponentAttribute(vBusinessAttr).ComponentName).GetValue(Pointer(Persistence));
-            Result := vDataSet.AsType<TDrvDataSet>;
-          finally
-            vPersistenceCtx.Free;
-          end;
-        end;
-        Break;
-      end;
-  finally
-    vBusinessCtx.Free;
-  end;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetConnection: TDrvConnection;
-begin
-  if (FConnection = nil) then
-    raise EConnectionDoesNotExist.Create('Connection does not exist or Persistence Class ' + GetPersistence.ClassName +
-      ' not implements IDriverPersistence!');
-  Result := FConnection;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetDataSet: TDrvDataSet;
-begin
-  if (FDataSet = nil) then
-    raise EDataSetDoesNotExist.Create('DataSet does not exist or DataSetComponent attribute not set in Business Class ' + Self.ClassName);
-  Result := FDataSet;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetDetails: TDrvDetails;
-begin
-  if (FDetails = nil) then
-    raise EDetailUnregistered.Create('Details unregistered!');
-  Result := FDetails;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetIterator: IIteratorDataSet;
-begin
-  if (FIterator = nil) then
-    FIterator := IteratorDataSetFactory.Build(GetDataSet, False);
-  Result := FIterator;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetPersistence: TDrvPersistence;
+function TDriverBusiness<TDrvPersistence>.GetPersistence: TDrvPersistence;
 begin
   if (FPersistence = nil) then
     raise EPersistenceDoesNotExist.Create('Persistence does not exist!');
   Result := FPersistence;
 end;
 
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetQueryBegin: string;
-begin
-  Result := FQueryBegin;
-end;
-
-function TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.GetQueryParserSelect: ISQLParserSelect;
-begin
-  Result := FQueryParserSelect;
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.InternalCreate(
+procedure TDriverBusiness<TDrvPersistence>.InternalCreate(
   const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
 begin
   FPersistence := pPersistence;
   FOwnsPersistence := pOwnsPersistence;
-  FDataSet := FindDataSetOnPersistence();
-  FIterator := nil;
-  FConnection := FindConnectionOnPersistence();
-  DoDataSetConfigureConnection();
-  FQueryBegin := EmptyStr;
-  FQueryParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
-  QueryInitialize(DoGetDataSetQuery);
-  FDetails := DoCreateDetails();
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pGroupBy: ISQLGroupBy);
-begin
-  QueryBuild(pGroupBy, True);
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pGroupBy: ISQLGroupBy; const pOpen: Boolean);
-begin
-  QueryRestore(False);
-  DoDataSetClose();
-  FQueryParserSelect.AddOrSetGroupBy(pGroupBy.ToString);
-  DoDataSetChangeQuery();
-  if pOpen then
-    DoDataSetOpen();
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pWhere: ISQLWhere);
-begin
-  QueryBuild(pWhere, True);
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pWhere: ISQLWhere; const pOpen: Boolean);
-begin
-  QueryRestore(False);
-  DoDataSetClose();
-  FQueryParserSelect.AddOrSetWhere(pWhere.ToString);
-  DoDataSetChangeQuery();
-  if pOpen then
-    DoDataSetOpen();
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pOrderBy: ISQLOrderBy);
-begin
-  QueryBuild(pOrderBy, True);
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pHaving: ISQLHaving; const pOpen: Boolean);
-begin
-  QueryRestore(False);
-  DoDataSetClose();
-  FQueryParserSelect.AddOrSetHaving(pHaving.ToString);
-  DoDataSetChangeQuery();
-  if pOpen then
-    DoDataSetOpen();
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pHaving: ISQLHaving);
-begin
-  QueryBuild(pHaving, True);
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryBuild(
-  const pOrderBy: ISQLOrderBy; const pOpen: Boolean);
-begin
-  QueryRestore(False);
-  DoDataSetClose();
-  FQueryParserSelect.AddOrSetOrderBy(pOrderBy.ToString);
-  DoDataSetChangeQuery();
-  if pOpen then
-    DoDataSetOpen();
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryInitialize(
-  const pQuery: string);
-begin
-  if not pQuery.IsEmpty then
-  begin
-    DoDataSetClose();
-    FQueryBegin := pQuery;
-    FQueryParserSelect.Parse(FQueryBegin);
-    DoDataSetChangeQuery();
-  end;
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryRestore;
-begin
-  QueryRestore(True);
-end;
-
-procedure TDriverBusiness<TDrvPersistence, TDrvDataSet, TDrvConnection, TDrvDetails>.QueryRestore(
-  const pOpen: Boolean);
-begin
-  DoDataSetClose();
-  FQueryParserSelect.Parse(FQueryBegin);
-  DoDataSetChangeQuery();
-  if pOpen then
-    DoDataSetOpen();
-end;
-
-{ TDriverDetails<TKey, TDrvBusiness>.TDetailProperties }
-
-constructor TDriverDetails<TKey, TDrvBusiness>.TDetailProperties.Create(const pObj: TDrvBusiness;
-  const pOwnsObj: Boolean);
-begin
-  FObj := pObj;
-  FOwnsObj := pOwnsObj;
-end;
-
-destructor TDriverDetails<TKey, TDrvBusiness>.TDetailProperties.Destroy;
-begin
-  if (FOwnsObj) then
-    FreeAndNil(FObj);
-  inherited Destroy();
-end;
-
-{ TDriverDetails<TKey, TDrvBusiness> }
-
-procedure TDriverDetails<TKey, TDrvBusiness>.CloseAll;
-begin
-  DoCloseAll();
-end;
-
-constructor TDriverDetails<TKey, TDrvBusiness>.Create(const pMasterBusiness: TDrvBusiness);
-begin
-  FDetails := TObjectDictionary<TKey, TDetailProperties>.Create([doOwnsValues]);;
-  FMasterBusiness := pMasterBusiness;
-  FMasterDataSource := TDataSource.Create(nil);
-  DoLinkMasterDataSource(FMasterBusiness);
-end;
-
-destructor TDriverDetails<TKey, TDrvBusiness>.Destroy;
-begin
-  UnregisterAllDetails();
-  FreeAndNil(FDetails);
-  FreeAndNil(FMasterDataSource);
-  inherited Destroy();
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.DetailIsRegistered(const pKey: TKey): Boolean;
-begin
-  Result := FDetails.ContainsKey(pKey);
-end;
-
-procedure TDriverDetails<TKey, TDrvBusiness>.DisableAllControls;
-begin
-  DoDisableAllControls();
-end;
-
-procedure TDriverDetails<TKey, TDrvBusiness>.EnableAllControls;
-begin
-  DoEnableAllControls();
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetCount: Integer;
-begin
-  Result := FDetails.Count;
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetDetail(const pKey: TKey): TDrvBusiness;
-begin
-  if DetailIsRegistered(pKey) then
-    Result := FDetails.Items[pKey].Obj
-  else
-    raise EDetailUnregistered.Create('Detail unregistered!');
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetDetailAs<T>(const pKey: TKey): T;
-begin
-  Result := (Self.GetDetail(pKey) as T);
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetDetailByClass<T>: T;
-var
-  vDetailPair: TPair<TKey, TDetailProperties>;
-begin
-  Result := nil;
-  for vDetailPair in FDetails do
-  begin
-    if (vDetailPair.Value.Obj is T) then
-    begin
-      Result := (vDetailPair.Value.Obj as T);
-      Exit;
-    end;
-  end;
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetDetailDictionary: TDictionary<TKey, TDetailProperties>;
-begin
-  Result := FDetails;
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetMasterBusiness: TDrvBusiness;
-begin
-  Result := FMasterBusiness;
-end;
-
-function TDriverDetails<TKey, TDrvBusiness>.GetMasterDataSource: TDataSource;
-begin
-  Result := FMasterDataSource;
-end;
-
-procedure TDriverDetails<TKey, TDrvBusiness>.OpenAll;
-begin
-  DoOpenAll();
-end;
-
-procedure TDriverDetails<TKey, TDrvBusiness>.RegisterDetail(const pKey: TKey;
-  const pDetail: TDrvBusiness; const pOwnsDetail: Boolean);
-begin
-  if not DetailIsRegistered(pKey) then
-  begin
-    FDetails.Add(pKey, TDetailProperties.Create(pDetail, pOwnsDetail));
-    DoLinkDetailOnMasterDataSource(pDetail);
-  end
-  else
-    raise EDetailAlreadyRegistered.Create('Detail already registered!');
-end;
-
-procedure TDriverDetails<TKey, TDrvBusiness>.UnregisterAllDetails;
-begin
-  FDetails.Clear;
-end;
-
-procedure TDriverDetails<TKey, TDrvBusiness>.UnregisterDetail(const pKey: TKey);
-begin
-  if DetailIsRegistered(pKey) then
-    FDetails.Remove(pKey)
-  else
-    raise EDetailUnregistered.Create('Detail unregistered!');
 end;
 
 end.

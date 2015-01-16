@@ -41,11 +41,11 @@ procedure TProvinceView.Button1Click(Sender: TObject);
 var
   vId: string;
 begin
-  if (FProvinceBC.DataSet.State in [dsInsert, dsEdit]) then
+  if (FProvinceBC.Persistence.Province.State in [dsInsert, dsEdit]) then
   begin
     vId := InputBox('Country', 'Id', '');
     FCountryBC.FilterById(StrToIntDef(vId, 0));
-    if FCountryBC.DataSet.IsEmpty then
+    if FProvinceBC.Persistence.Province.IsEmpty then
     begin
       ShowMessage('Not found!');
       Exit;

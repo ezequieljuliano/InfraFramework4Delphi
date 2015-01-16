@@ -1,7 +1,6 @@
-object CountryDAO: TCountryDAO
-  OldCreateOrder = False
+inherited CountryDAO: TCountryDAO
+  OldCreateOrder = True
   Height = 90
-  Width = 215
   object Country: TFDQuery
     Connection = DatabaseFireDAC.FDConnection
     SQL.Strings = (

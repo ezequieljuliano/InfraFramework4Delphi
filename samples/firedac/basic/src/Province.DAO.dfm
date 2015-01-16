@@ -1,7 +1,6 @@
-object ProvinceDAO: TProvinceDAO
-  OldCreateOrder = False
-  Height = 122
-  Width = 215
+inherited ProvinceDAO: TProvinceDAO
+  OldCreateOrder = True
+  Height = 189
   object Province: TFDQuery
     Connection = DatabaseFireDAC.FDConnection
     SQL.Strings = (
@@ -28,11 +27,13 @@ object ProvinceDAO: TProvinceDAO
     end
   end
   object City: TFDQuery
+    MasterSource = DsProvince
+    MasterFields = 'ID'
     Connection = DatabaseFireDAC.FDConnection
     SQL.Strings = (
       'Select * From City Where ProvinceId = :ID')
-    Left = 90
-    Top = 66
+    Left = 91
+    Top = 113
     ParamData = <
       item
         Name = 'ID'
@@ -58,5 +59,10 @@ object ProvinceDAO: TProvinceDAO
       Origin = 'PROVINCEID'
       ProviderFlags = [pfInUpdate]
     end
+  end
+  object DsProvince: TDataSource
+    DataSet = Province
+    Left = 91
+    Top = 60
   end
 end

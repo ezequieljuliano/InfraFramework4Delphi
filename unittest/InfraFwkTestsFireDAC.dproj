@@ -91,14 +91,24 @@
         <DCCReference Include="..\src\InfraFwk4D.pas"/>
         <DCCReference Include="..\src\InfraFwk4D.Driver.pas"/>
         <DCCReference Include="..\src\InfraFwk4D.Iterator.DataSet.pas"/>
-        <DCCReference Include="..\src\InfraFwk4D.Attributes.pas"/>
         <DCCReference Include="..\src\InfraFwk4D.Driver.FireDAC.pas"/>
         <DCCReference Include="InfraFwk4D.UnitTest.FireDAC.pas"/>
-        <DCCReference Include="InfraFwk4D.UnitTest.DataModule.pas">
-            <Form>InfraFwkDataModule</Form>
+        <DCCReference Include="..\src\InfraFwk4D.Driver.FireDAC.Persistence.pas">
+            <Form>FireDACPersistenceAdapter</Form>
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
+        <DCCReference Include="InfraFwk4D.UnitTest.FireDAC.Connection.pas">
+            <Form>FireDACDmConnection</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="InfraFwk4D.UnitTest.FireDAC.DAO.pas">
+            <Form>FireDACDAO</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="InfraFwk4D.UnitTest.FireDAC.BC.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
