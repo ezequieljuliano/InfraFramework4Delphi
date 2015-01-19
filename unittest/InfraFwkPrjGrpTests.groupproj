@@ -9,6 +9,9 @@
         <Projects Include="InfraFwkTestsIteratorDataSet.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="InfraFwkTestsUniDAC.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="InfraFwkTestsIteratorDataSet:Make">
         <MSBuild Projects="InfraFwkTestsIteratorDataSet.dproj" Targets="Make"/>
     </Target>
+    <Target Name="InfraFwkTestsUniDAC">
+        <MSBuild Projects="InfraFwkTestsUniDAC.dproj"/>
+    </Target>
+    <Target Name="InfraFwkTestsUniDAC:Clean">
+        <MSBuild Projects="InfraFwkTestsUniDAC.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraFwkTestsUniDAC:Make">
+        <MSBuild Projects="InfraFwkTestsUniDAC.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="InfraFwkTestsFireDAC;InfraFwkTestsIteratorDataSet"/>
+        <CallTarget Targets="InfraFwkTestsFireDAC;InfraFwkTestsIteratorDataSet;InfraFwkTestsUniDAC"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="InfraFwkTestsFireDAC:Clean;InfraFwkTestsIteratorDataSet:Clean"/>
+        <CallTarget Targets="InfraFwkTestsFireDAC:Clean;InfraFwkTestsIteratorDataSet:Clean;InfraFwkTestsUniDAC:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="InfraFwkTestsFireDAC:Make;InfraFwkTestsIteratorDataSet:Make"/>
+        <CallTarget Targets="InfraFwkTestsFireDAC:Make;InfraFwkTestsIteratorDataSet:Make;InfraFwkTestsUniDAC:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

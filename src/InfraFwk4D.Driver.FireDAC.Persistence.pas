@@ -40,14 +40,6 @@ implementation
 
 { TFireDACPersistenceAdapter }
 
-function TFireDACPersistenceAdapter.QueryBuilder(
-  const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
-begin
-  if not FQueryDictionary.ContainsKey(pDataSet.Name) then
-    FQueryDictionary.AddOrSetValue(pDataSet.Name, CreateFireDACQueryBuilder(pDataSet));
-  Result := FQueryDictionary.Items[pDataSet.Name];
-end;
-
 procedure TFireDACPersistenceAdapter.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -61,14 +53,22 @@ begin
   inherited BeforeDestruction;
 end;
 
+function TFireDACPersistenceAdapter.BuildIterator(const pDataSetName: string): IIteratorDataSet;
+begin
+  Result := BuildIterator(TFDQuery(FindComponent(pDataSetName)));
+end;
+
 function TFireDACPersistenceAdapter.BuildIterator(const pDataSet: TFDQuery): IIteratorDataSet;
 begin
   Result := IteratorDataSetFactory.Build(pDataSet, False);
 end;
 
-function TFireDACPersistenceAdapter.BuildIterator(const pDataSetName: string): IIteratorDataSet;
+function TFireDACPersistenceAdapter.QueryBuilder(
+  const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
 begin
-  Result := BuildIterator(TFDQuery(FindComponent(pDataSetName)));
+  if not FQueryDictionary.ContainsKey(pDataSet.Name) then
+    FQueryDictionary.AddOrSetValue(pDataSet.Name, CreateFireDACQueryBuilder(pDataSet));
+  Result := FQueryDictionary.Items[pDataSet.Name];
 end;
 
 function TFireDACPersistenceAdapter.QueryBuilder(
