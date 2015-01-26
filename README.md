@@ -9,10 +9,10 @@ Usually, applications are composed of at least three layers, so it is common to 
 
 Its premise is to facilitate the use layering without losing productivity, ie, enables the use of all the power of DBware components. In InfraFramework4Delphi the Persistence layer is represented by Data Modules with their corresponding data access components, the Business layer is represented by a derived class of TDriverController and is responsible for all business rule, and the View layer is represented by Form and components of interaction with the user.
 
-The InfraFramework4Delphi further provides libraries useful auxiliary for developing any Delphi application.
+The InfraFramework4Delphi further provides libraries useful auxiliary for developing any Delphi application and requires Delphi XE or greater.
 
 
-Drivers Adapters
+Persistence Adapters Drivers
 =================
 
 The InfraFramework4Delphi is available for the following data access drivers:
