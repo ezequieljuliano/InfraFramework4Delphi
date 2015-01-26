@@ -53,8 +53,6 @@ type
 
   TFireDACConnectionManagerAdapter = class(TDriverConnectionManager<string, TFireDACConnectionAdapter>);
 
-  TFireDACBusinessAdapter<TFireDACPersistence: TDataModule> = class(TDriverBusiness<TFireDACPersistence>);
-
   IFireDACSingletonConnectionAdapter = interface(IDriverSingletonConnection<TFireDACConnectionAdapter>)
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;

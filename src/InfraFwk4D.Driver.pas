@@ -190,6 +190,8 @@ type
     property Persistence: TDrvPersistence read GetPersistence;
   end;
 
+  TBusinessAdapter<TDrvPersistence: TDataModule> = class(TDriverBusiness<TDrvPersistence>);
+
 implementation
 
 uses

@@ -57,8 +57,6 @@ type
 
   TUniDACConnectionManagerAdapter = class(TDriverConnectionManager<string, TUniDACConnectionAdapter>);
 
-  TUniDACBusinessAdapter<TUniDACPersistence: TDataModule> = class(TDriverBusiness<TUniDACPersistence>);
-
   IUniDACSingletonConnectionAdapter = interface(IDriverSingletonConnection<TUniDACConnectionAdapter>)
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;

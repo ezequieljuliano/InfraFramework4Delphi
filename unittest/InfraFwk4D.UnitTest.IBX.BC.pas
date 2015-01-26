@@ -3,12 +3,12 @@ unit InfraFwk4D.UnitTest.IBX.BC;
 interface
 
 uses
-  InfraFwk4D.Driver.IBX,
+  InfraFwk4D.Driver,
   InfraFwk4D.UnitTest.IBX.DAO;
 
 type
 
-  TIBXBC = class(TIBXBusinessAdapter<TIBXDAO>)
+  TIBXBC = class(TBusinessAdapter<TIBXDAO>)
 
   end;
 

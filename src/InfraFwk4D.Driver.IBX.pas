@@ -53,8 +53,6 @@ type
 
   TIBXConnectionManagerAdapter = class(TDriverConnectionManager<string, TIBXConnectionAdapter>);
 
-  TIBXBusinessAdapter<TIBXPersistence: TDataModule> = class(TDriverBusiness<TIBXPersistence>);
-
   IIBXSingletonConnectionAdapter = interface(IDriverSingletonConnection<TIBXConnectionAdapter>)
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;

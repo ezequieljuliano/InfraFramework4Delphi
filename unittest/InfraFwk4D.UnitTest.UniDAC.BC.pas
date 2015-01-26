@@ -3,11 +3,11 @@ unit InfraFwk4D.UnitTest.UniDAC.BC;
 interface
 
 uses
-  InfraFwk4D.Driver.UniDAC, InfraFwk4D.UnitTest.UniDAC.DAO;
+  InfraFwk4D.Driver, InfraFwk4D.UnitTest.UniDAC.DAO;
 
 type
 
-  TUniDACBC = class(TUniDACBusinessAdapter<TUniDACDAO>)
+  TUniDACBC = class(TBusinessAdapter<TUniDACDAO>)
 
   end;
 

@@ -3,11 +3,11 @@ unit Country.BC;
 interface
 
 uses
-  InfraFwk4D.Driver.FireDAC, Country.DAO, InfraFwk4D.Iterator.DataSet;
+  InfraFwk4D.Driver, Country.DAO, InfraFwk4D.Iterator.DataSet;
 
 type
 
-  TCountryBC = class(TFireDACBusinessAdapter<TCountryDAO>)
+  TCountryBC = class(TBusinessAdapter<TCountryDAO>)
   public
     function FindByName(const pName: string): IIteratorDataSet;
     procedure FilterById(const pId: Integer);
