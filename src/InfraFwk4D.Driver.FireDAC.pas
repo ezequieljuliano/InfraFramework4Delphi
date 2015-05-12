@@ -12,6 +12,7 @@ uses
   FireDAC.Stan.Option,
   SQLBuilder4D,
   SQLBuilder4D.Parser,
+  SQLBuilder4D.Parser.GaSQLParser,
   InfraFwk4D.Driver,
   InfraFwk4D.Iterator.DataSet;
 
@@ -345,16 +346,16 @@ end;
 function TFireDACQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetOrderBy(pOrderBy.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddOrderBy(pOrderBy.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
 function TFireDACQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetHaving(pHaving.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddHaving(pHaving.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -368,7 +369,7 @@ begin
   if (pDataSet = nil) then
     raise EDataSetDoesNotExist.Create('DataSet does not exist in Class ' + Self.ClassName);
   FDataSet := pDataSet;
-  FQueryParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
+  FQueryParserSelect := TGaSQLParserFactory.Select();
   Initialize(pDataSet.SQL.Text);
 end;
 
@@ -381,16 +382,16 @@ end;
 function TFireDACQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetGroupBy(pGroupBy.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddGroupBy(pGroupBy.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
 function TFireDACQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetWhere(pWhere.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddWhere(pWhere.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -410,7 +411,7 @@ begin
   FDataSet.Close;
   FQueryBegin := pQuery;
   FQueryParserSelect.Parse(FQueryBegin);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -433,7 +434,7 @@ function TFireDACQueryBuilder.Restore: IDriverQueryBuilder<TFDQuery>;
 begin
   FDataSet.Close;
   FQueryParserSelect.Parse(FQueryBegin);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 

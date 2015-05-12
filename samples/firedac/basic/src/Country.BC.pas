@@ -22,7 +22,7 @@ uses
 
 procedure TCountryBC.FilterById(const pId: Integer);
 begin
-  Persistence.QueryBuilder('Country').Build(TSQLBuilder.Where('Id').Equal(pId)).Activate;
+  Persistence.QueryBuilder('Country').Build(SQL.Where('Id').Equal(pId)).Activate;
 end;
 
 function TCountryBC.FindByName(const pName: string): IIteratorDataSet;

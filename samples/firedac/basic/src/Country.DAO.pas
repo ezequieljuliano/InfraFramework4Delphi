@@ -41,7 +41,7 @@ end;
 function TCountryDAO.FindByName(const pName: string): IIteratorDataSet;
 begin
   Result := Connection.Statement.Build(
-    TSQLBuilder.Select.AllColumns.From('Country').Where('Name').Like(pName, False, loContaining)
+    SQL.Select.AllColumns.From('Country').Where('Name').Like(SQL.Value(pName).Like(loContaining).Insensetive)
     ).AsIterator;
 end;
 

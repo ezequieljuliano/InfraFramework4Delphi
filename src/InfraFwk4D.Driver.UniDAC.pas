@@ -11,6 +11,7 @@ uses
   Uni,
   SQLBuilder4D,
   SQLBuilder4D.Parser,
+  SQLBuilder4D.Parser.GaSQLParser,
   InfraFwk4D.Driver,
   InfraFwk4D.Iterator.DataSet;
 
@@ -354,16 +355,16 @@ end;
 function TUniDACQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetOrderBy(pOrderBy.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddOrderBy(pOrderBy.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
 function TUniDACQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetHaving(pHaving.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddHaving(pHaving.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -375,16 +376,16 @@ end;
 function TUniDACQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetGroupBy(pGroupBy.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddGroupBy(pGroupBy.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
 function TUniDACQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetWhere(pWhere.ToString);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddWhere(pWhere.ToString);
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -393,7 +394,7 @@ begin
   if (pDataSet = nil) then
     raise EDataSetDoesNotExist.Create('DataSet does not exist in Class ' + Self.ClassName);
   FDataSet := pDataSet;
-  FQueryParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
+  FQueryParserSelect := TGaSQLParserFactory.Select();
   Initialize(pDataSet.SQL.Text);
 end;
 
@@ -418,7 +419,7 @@ begin
   FDataSet.Close;
   FQueryBegin := pQuery;
   FQueryParserSelect.Parse(FQueryBegin);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -443,7 +444,7 @@ function TUniDACQueryBuilder.Restore: IDriverQueryBuilder<TUniQuery>;
 begin
   FDataSet.Close;
   FQueryParserSelect.Parse(FQueryBegin);
-  FDataSet.SQL.Text := FQueryParserSelect.GetSQLText;
+  FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 

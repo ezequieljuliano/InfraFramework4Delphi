@@ -12,6 +12,7 @@ uses
   IBX.IBCustomDataSet,
   SQLBuilder4D,
   SQLBuilder4D.Parser,
+  SQLBuilder4D.Parser.GaSQLParser,
   InfraFwk4D.Driver,
   InfraFwk4D.Iterator.DataSet;
 
@@ -335,16 +336,16 @@ end;
 function TIBXQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetOrderBy(pOrderBy.ToString);
-  FDataSet.SelectSQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddOrderBy(pOrderBy.ToString);
+  FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
 function TIBXQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetHaving(pHaving.ToString);
-  FDataSet.SelectSQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddHaving(pHaving.ToString);
+  FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -356,16 +357,16 @@ end;
 function TIBXQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetGroupBy(pGroupBy.ToString);
-  FDataSet.SelectSQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddGroupBy(pGroupBy.ToString);
+  FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
 function TIBXQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
-  FQueryParserSelect.AddOrSetWhere(pWhere.ToString);
-  FDataSet.SelectSQL.Text := FQueryParserSelect.GetSQLText;
+  FQueryParserSelect.AddWhere(pWhere.ToString);
+  FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -374,7 +375,7 @@ begin
   if (pDataSet = nil) then
     raise EDataSetDoesNotExist.Create('DataSet does not exist in Class ' + Self.ClassName);
   FDataSet := pDataSet;
-  FQueryParserSelect := TSQLParserFactory.GetSelectInstance(prGaSQLParser);
+  FQueryParserSelect := TGaSQLParserFactory.Select();
   Initialize(pDataSet.SelectSQL.Text);
 end;
 
@@ -399,7 +400,7 @@ begin
   FDataSet.Close;
   FQueryBegin := pQuery;
   FQueryParserSelect.Parse(FQueryBegin);
-  FDataSet.SelectSQL.Text := FQueryParserSelect.GetSQLText;
+  FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
@@ -422,7 +423,7 @@ function TIBXQueryBuilder.Restore: IDriverQueryBuilder<TIBDataSet>;
 begin
   FDataSet.Close;
   FQueryParserSelect.Parse(FQueryBegin);
-  FDataSet.SelectSQL.Text := FQueryParserSelect.GetSQLText;
+  FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
 end;
 
