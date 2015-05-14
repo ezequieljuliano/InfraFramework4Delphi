@@ -44,6 +44,7 @@ type
   public
     constructor Create(const pConnection: TDrvConnection);
 
+    function Build(const pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
     function Build(const pInsert: ISQLInsert): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
     function Build(const pUpdate: ISQLUpdate): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
     function Build(const pDelete: ISQLDelete): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
@@ -282,6 +283,13 @@ function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
   const pQuery: string): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pQuery;
+  Result := Self;
+end;
+
+function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
+  const pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>;
+begin
+  FQuery := pSelect.ToString;
   Result := Self;
 end;
 
