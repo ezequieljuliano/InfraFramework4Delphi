@@ -18,7 +18,7 @@ type
     FConnection: TConnection;
     function GetConnection(): TConnection;
   public
-    constructor Create(const pConnection: TConnection);
+    constructor Create(pConnection: TConnection);
 
     property Connection: TConnection read GetConnection;
   end;
@@ -30,7 +30,7 @@ type
   strict protected
     function GetConnection(): TDrvConnection;
 
-    procedure DoExecute(const pQuery: string; const pDataSet: TDrvDataSet; const pAutoCommit: Boolean); virtual; abstract;
+    procedure DoExecute(const pQuery: string; pDataSet: TDrvDataSet; const pAutoCommit: Boolean); virtual; abstract;
 
     function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TDrvDataSet; virtual; abstract;
     function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; virtual; abstract;
@@ -39,23 +39,23 @@ type
     function DoAsString(const pQuery: string): string; virtual; abstract;
     function DoAsVariant(const pQuery: string): Variant; virtual; abstract;
 
-    procedure DoInDataSet(const pQuery: string; const pDataSet: TDrvDataSet); virtual; abstract;
-    procedure DoInIterator(const pQuery: string; const pIterator: IIteratorDataSet); virtual; abstract;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TDrvDataSet); virtual; abstract;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); virtual; abstract;
   public
-    constructor Create(const pConnection: TDrvConnection);
+    constructor Create(pConnection: TDrvConnection);
 
-    function Build(const pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pInsert: ISQLInsert): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pUpdate: ISQLUpdate): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pDelete: ISQLDelete): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pWhere: ISQLWhere): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pGroupBy: ISQLGroupBy): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pHaving: ISQLHaving): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
-    function Build(const pOrderBy: ISQLOrderBy): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pInsert: ISQLInsert): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pUpdate: ISQLUpdate): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pDelete: ISQLDelete): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pWhere: ISQLWhere): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pGroupBy: ISQLGroupBy): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pHaving: ISQLHaving): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
+    function Build(pOrderBy: ISQLOrderBy): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
     function Build(const pQuery: string): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
 
     procedure Execute(const pAutoCommit: Boolean = False); overload;
-    procedure Execute(const pDataSet: TDrvDataSet; const pAutoCommit: Boolean = False); overload;
+    procedure Execute(pDataSet: TDrvDataSet; const pAutoCommit: Boolean = False); overload;
 
     function AsDataSet(const pFetchRows: Integer = 0): TDrvDataSet;
     function AsIterator(const pFetchRows: Integer = 0): IIteratorDataSet;
@@ -64,8 +64,8 @@ type
     function AsString(): string;
     function AsVariant(): Variant;
 
-    procedure InDataSet(const pDataSet: TDrvDataSet);
-    procedure InIterator(const pIterator: IIteratorDataSet);
+    procedure InDataSet(pDataSet: TDrvDataSet);
+    procedure InIterator(pIterator: IIteratorDataSet);
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -100,8 +100,8 @@ type
     procedure Commit();
     procedure Rollback();
 
-    procedure Build(const pComponent: TDrvComponent); overload;
-    procedure Build(const pComponent: TDrvComponent; const pOwnsComponent: Boolean); overload;
+    procedure Build(pComponent: TDrvComponent); overload;
+    procedure Build(pComponent: TDrvComponent; const pOwnsComponent: Boolean); overload;
 
     property Component: TDrvComponent read GetComponent;
     property Statement: TDrvStatement read GetStatement;
@@ -124,7 +124,7 @@ type
       FObj: TDrvConnection;
       FOwnsObj: Boolean;
     public
-      constructor Create(const pObj: TDrvConnection; const pOwnsObj: Boolean);
+      constructor Create(pObj: TDrvConnection; const pOwnsObj: Boolean);
       destructor Destroy(); override;
 
       property Obj: TDrvConnection read FObj;
@@ -132,40 +132,40 @@ type
     end;
   strict private
     FConnections: TObjectDictionary<TKey, TConnectionProperties>;
-    procedure InternalRegisterConnection(const pKey: TKey; pConnectionProperties: TConnectionProperties);
+    procedure InternalRegisterConnection(pKey: TKey; pConnectionProperties: TConnectionProperties);
     function GetCount: Integer;
   public
     constructor Create();
     destructor Destroy(); override;
 
-    procedure RegisterConnection(const pKey: TKey; const pConnection: TDrvConnection); overload;
-    procedure RegisterConnection(const pKey: TKey; const pConnectionClass: TDriverClass); overload;
+    procedure RegisterConnection(pKey: TKey; pConnection: TDrvConnection); overload;
+    procedure RegisterConnection(pKey: TKey; pConnectionClass: TDriverClass); overload;
 
-    procedure UnregisterConnection(const pKey: TKey);
+    procedure UnregisterConnection(pKey: TKey);
     procedure UnregisterAllConnections();
 
-    function ConnectionIsRegistered(const pKey: TKey): Boolean;
+    function ConnectionIsRegistered(pKey: TKey): Boolean;
 
-    function GetConnection(const pKey: TKey): TDrvConnection;
+    function GetConnection(pKey: TKey): TDrvConnection;
 
     property Count: Integer read GetCount;
   end;
 
   IDriverQueryBuilder<TDrvDataSet: TDataSet> = interface
     ['{EFA518A7-79BE-475D-8991-7A59A8D6685B}']
-    function Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
     function Initialize(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
 
     function Restore(): IDriverQueryBuilder<TDrvDataSet>;
 
-    function Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
-    function Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
 
     procedure Activate;
@@ -177,14 +177,15 @@ type
   strict private
     FPersistence: TDrvPersistence;
     FOwnsPersistence: Boolean;
-    procedure InternalCreate(const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
+    procedure InternalCreate(pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
     function GetPersistence(): TDrvPersistence;
   strict protected
 
   public
-    constructor Create(const pPersistence: TDrvPersistence); overload;
-    constructor Create(const pPersistence: TDriverPersistenceClass); overload;
-    constructor Create(const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean); overload;
+    constructor Create(); overload;
+    constructor Create(pPersistence: TDrvPersistence); overload;
+    constructor Create(pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean); overload;
+    constructor Create(pPersistence: TDriverPersistenceClass); overload;
 
     destructor Destroy; override;
 
@@ -200,7 +201,7 @@ uses
 
 { TDriverComponent<TConnection> }
 
-constructor TDriverComponent<TConnection>.Create(const pConnection: TConnection);
+constructor TDriverComponent<TConnection>.Create(pConnection: TConnection);
 begin
   FConnection := pConnection;
 end;
@@ -213,35 +214,35 @@ end;
 { TDriverStatement<TDrvDataSet, TDrvConnection> }
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pDelete: ISQLDelete): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pDelete: ISQLDelete): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pDelete.ToString;
   Result := Self;
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pWhere: ISQLWhere): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pWhere: ISQLWhere): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pWhere.ToString;
   Result := Self;
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pInsert: ISQLInsert): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pInsert: ISQLInsert): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pInsert.ToString;
   Result := Self;
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pUpdate: ISQLUpdate): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pUpdate: ISQLUpdate): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pUpdate.ToString;
   Result := Self;
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pOrderBy: ISQLOrderBy): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pOrderBy: ISQLOrderBy): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pOrderBy.ToString;
   Result := Self;
@@ -287,27 +288,27 @@ begin
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pSelect.ToString;
   Result := Self;
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pGroupBy: ISQLGroupBy): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pGroupBy: ISQLGroupBy): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pGroupBy.ToString;
   Result := Self;
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
-  const pHaving: ISQLHaving): TDriverStatement<TDrvDataSet, TDrvConnection>;
+  pHaving: ISQLHaving): TDriverStatement<TDrvDataSet, TDrvConnection>;
 begin
   FQuery := pHaving.ToString;
   Result := Self;
 end;
 
-constructor TDriverStatement<TDrvDataSet, TDrvConnection>.Create(const pConnection: TDrvConnection);
+constructor TDriverStatement<TDrvDataSet, TDrvConnection>.Create(pConnection: TDrvConnection);
 begin
   FConnection := pConnection;
   FQuery := EmptyStr;
@@ -318,7 +319,7 @@ begin
   DoExecute(FQuery, nil, pAutoCommit);
 end;
 
-procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(const pDataSet: TDrvDataSet;
+procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(pDataSet: TDrvDataSet;
   const pAutoCommit: Boolean);
 begin
   DoExecute(FQuery, pDataSet, pAutoCommit);
@@ -329,20 +330,20 @@ begin
   Result := FConnection;
 end;
 
-procedure TDriverStatement<TDrvDataSet, TDrvConnection>.InDataSet(const pDataSet: TDrvDataSet);
+procedure TDriverStatement<TDrvDataSet, TDrvConnection>.InDataSet(pDataSet: TDrvDataSet);
 begin
   DoInDataSet(FQuery, pDataSet);
 end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.InIterator(
-  const pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet);
 begin
   DoInIterator(FQuery, pIterator);
 end;
 
 { TDriverConnection<TDrvComponent, TDrvStatement> }
 
-procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(const pComponent: TDrvComponent;
+procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(pComponent: TDrvComponent;
   const pOwnsComponent: Boolean);
 begin
   DestroyComponent();
@@ -351,7 +352,7 @@ begin
   DoAfterBuild();
 end;
 
-procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(const pComponent: TDrvComponent);
+procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(pComponent: TDrvComponent);
 begin
   Build(pComponent, True);
 end;
@@ -426,7 +427,7 @@ end;
 { TDriverConnectionManager<TKey, TDrvConnection>.TConnectionProperties }
 
 constructor TDriverConnectionManager<TKey, TDrvConnection>.TConnectionProperties.Create(
-  const pObj: TDrvConnection; const pOwnsObj: Boolean);
+  pObj: TDrvConnection; const pOwnsObj: Boolean);
 begin
   FObj := pObj;
   FOwnsObj := pOwnsObj;
@@ -442,7 +443,7 @@ end;
 { TDriverConnectionManager<TKey, TDrvConnection> }
 
 function TDriverConnectionManager<TKey, TDrvConnection>.ConnectionIsRegistered(
-  const pKey: TKey): Boolean;
+  pKey: TKey): Boolean;
 begin
   Result := FConnections.ContainsKey(pKey);
 end;
@@ -460,15 +461,15 @@ begin
 end;
 
 function TDriverConnectionManager<TKey, TDrvConnection>.GetConnection(
-  const pKey: TKey): TDrvConnection;
+  pKey: TKey): TDrvConnection;
 begin
   if ConnectionIsRegistered(pKey) then
   begin
-    GlobalCriticalSection.Enter;
+    Critical.Section.Enter;
     try
       Result := FConnections.Items[pKey].Obj;
     finally
-      GlobalCriticalSection.Leave;
+      Critical.Section.Leave;
     end;
   end
   else
@@ -481,52 +482,52 @@ begin
 end;
 
 procedure TDriverConnectionManager<TKey, TDrvConnection>.InternalRegisterConnection(
-  const pKey: TKey; pConnectionProperties: TConnectionProperties);
+  pKey: TKey; pConnectionProperties: TConnectionProperties);
 begin
   if not ConnectionIsRegistered(pKey) then
   begin
-    GlobalCriticalSection.Enter;
+    Critical.Section.Enter;
     try
       FConnections.Add(pKey, pConnectionProperties);
     finally
-      GlobalCriticalSection.Leave;
+      Critical.Section.Leave;
     end;
   end
   else
     raise EConnectionAlreadyRegistered.Create('Database already registered!');
 end;
 
-procedure TDriverConnectionManager<TKey, TDrvConnection>.RegisterConnection(const pKey: TKey;
-  const pConnection: TDrvConnection);
+procedure TDriverConnectionManager<TKey, TDrvConnection>.RegisterConnection(pKey: TKey;
+  pConnection: TDrvConnection);
 begin
   InternalRegisterConnection(pKey, TConnectionProperties.Create(pConnection, False));
 end;
 
-procedure TDriverConnectionManager<TKey, TDrvConnection>.RegisterConnection(const pKey: TKey;
-  const pConnectionClass: TDriverClass);
+procedure TDriverConnectionManager<TKey, TDrvConnection>.RegisterConnection(pKey: TKey;
+  pConnectionClass: TDriverClass);
 begin
   InternalRegisterConnection(pKey, TConnectionProperties.Create(pConnectionClass.Create(), True));
 end;
 
 procedure TDriverConnectionManager<TKey, TDrvConnection>.UnregisterAllConnections;
 begin
-  GlobalCriticalSection.Enter;
+  Critical.Section.Enter;
   try
     FConnections.Clear;
   finally
-    GlobalCriticalSection.Leave;
+    Critical.Section.Leave;
   end;
 end;
 
-procedure TDriverConnectionManager<TKey, TDrvConnection>.UnregisterConnection(const pKey: TKey);
+procedure TDriverConnectionManager<TKey, TDrvConnection>.UnregisterConnection(pKey: TKey);
 begin
   if ConnectionIsRegistered(pKey) then
   begin
-    GlobalCriticalSection.Enter;
+    Critical.Section.Enter;
     try
       FConnections.Remove(pKey);
     finally
-      GlobalCriticalSection.Leave;
+      Critical.Section.Leave;
     end;
   end
   else
@@ -535,18 +536,18 @@ end;
 
 { TDriverBusiness<TDrvPersistence> }
 
-constructor TDriverBusiness<TDrvPersistence>.Create(const pPersistence: TDrvPersistence);
+constructor TDriverBusiness<TDrvPersistence>.Create(pPersistence: TDrvPersistence);
 begin
   InternalCreate(pPersistence, True);
 end;
 
 constructor TDriverBusiness<TDrvPersistence>.Create(
-  const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
+  pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
 begin
   InternalCreate(pPersistence, pOwnsPersistence);
 end;
 
-constructor TDriverBusiness<TDrvPersistence>.Create(const pPersistence: TDriverPersistenceClass);
+constructor TDriverBusiness<TDrvPersistence>.Create(pPersistence: TDriverPersistenceClass);
 begin
   InternalCreate(pPersistence.Create(nil), True);
 end;
@@ -566,10 +567,15 @@ begin
 end;
 
 procedure TDriverBusiness<TDrvPersistence>.InternalCreate(
-  const pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
+  pPersistence: TDrvPersistence; const pOwnsPersistence: Boolean);
 begin
   FPersistence := pPersistence;
   FOwnsPersistence := pOwnsPersistence;
+end;
+
+constructor TDriverBusiness<TDrvPersistence>.Create;
+begin
+  InternalCreate(TDriverPersistenceClass(TDrvPersistence).Create(nil), True);
 end;
 
 end.

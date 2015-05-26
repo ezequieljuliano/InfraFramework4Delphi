@@ -67,7 +67,7 @@ function TIBXPersistenceAdapter.QueryBuilder(
   const pDataSet: TIBDataSet): IDriverQueryBuilder<TIBDataSet>;
 begin
   if not FQueryDictionary.ContainsKey(pDataSet.Name) then
-    FQueryDictionary.AddOrSetValue(pDataSet.Name, CreateIBXQueryBuilder(pDataSet));
+    FQueryDictionary.AddOrSetValue(pDataSet.Name, IBXAdapter.NewQueryBuilder(pDataSet));
   Result := FQueryDictionary.Items[pDataSet.Name];
 end;
 

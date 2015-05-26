@@ -22,41 +22,62 @@ type
   EDetailUnregistered = class(EInfraException);
   EDetailAlreadyRegistered = class(EInfraException);
 
-function GlobalCriticalSection(): TCriticalSection;
+  Critical = class sealed
+  strict private
+  const
+    CanNotBeInstantiatedException = 'This class can not be instantiated!';
+  strict private
+
+    {$HINTS OFF}
+
+    constructor Create;
+
+    {$HINTS ON}
+
+  public
+    class function Section(): TCriticalSection; static;
+  end;
 
 implementation
 
 type
 
-  TGlobalCriticalSection = class sealed
+  TSingletonCriticalSection = class sealed
   strict private
-    class var SingletonCS: TCriticalSection;
+    class var Instance: TCriticalSection;
     class constructor Create;
     class destructor Destroy;
   public
-    class function GetInstance(): TCriticalSection; static;
+    class function GetInstance: TCriticalSection; static;
   end;
 
-function GlobalCriticalSection(): TCriticalSection;
+  { Critical }
+
+constructor Critical.Create;
 begin
-  Result := TGlobalCriticalSection.GetInstance();
+  raise EInfraException.Create(CanNotBeInstantiatedException);
 end;
 
-{ TGlobalCriticalSection }
-
-class constructor TGlobalCriticalSection.Create;
+class function Critical.Section: TCriticalSection;
 begin
-  SingletonCS := TCriticalSection.Create();
+  Result := TSingletonCriticalSection.GetInstance;
 end;
 
-class destructor TGlobalCriticalSection.Destroy;
+{ TSingletonCriticalSection }
+
+class constructor TSingletonCriticalSection.Create;
 begin
-  FreeAndNil(SingletonCS);
+  Instance := TCriticalSection.Create();
 end;
 
-class function TGlobalCriticalSection.GetInstance: TCriticalSection;
+class destructor TSingletonCriticalSection.Destroy;
 begin
-  Result := SingletonCS;
+  FreeAndNil(Instance);
+end;
+
+class function TSingletonCriticalSection.GetInstance: TCriticalSection;
+begin
+  Result := Instance;
 end;
 
 end.

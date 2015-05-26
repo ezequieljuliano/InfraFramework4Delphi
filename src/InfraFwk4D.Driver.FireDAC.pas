@@ -24,7 +24,7 @@ type
 
   TFireDACStatementAdapter = class(TDriverStatement<TFDQuery, TFireDACConnectionAdapter>)
   strict protected
-    procedure DoExecute(const pQuery: string; const pDataSet: TFDQuery; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TFDQuery; const pAutoCommit: Boolean); override;
 
     function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TFDQuery; override;
     function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
@@ -33,8 +33,8 @@ type
     function DoAsString(const pQuery: string): string; override;
     function DoAsVariant(const pQuery: string): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; const pDataSet: TFDQuery); override;
-    procedure DoInIterator(const pQuery: string; const pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TFDQuery); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
   end;
 
   TFireDACConnectionAdapter = class(TDriverConnection<TFireDACComponentAdapter, TFireDACStatementAdapter>)
@@ -58,8 +58,22 @@ type
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;
 
-function FireDACSingletonConnectionAdapter(): IFireDACSingletonConnectionAdapter;
-function CreateFireDACQueryBuilder(const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
+  FireDACAdapter = class sealed
+  strict private
+  const
+    CanNotBeInstantiatedException = 'This class can not be instantiated!';
+  strict private
+
+    {$HINTS OFF}
+
+    constructor Create;
+
+    {$HINTS ON}
+
+  public
+    class function SingletonConnection(): IFireDACSingletonConnectionAdapter; static;
+    class function NewQueryBuilder(pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>; static;
+  end;
 
 implementation
 
@@ -75,7 +89,6 @@ type
     class destructor Destroy;
   private
     FConnectionAdapter: TFireDACConnectionAdapter;
-
     function GetInstance(): TFireDACConnectionAdapter;
   public
     constructor Create;
@@ -90,38 +103,28 @@ type
     FQueryBegin: string;
     FQueryParserSelect: ISQLParserSelect;
   public
-    constructor Create(const pDataSet: TFDQuery);
+    constructor Create(pDataSet: TFDQuery);
     destructor Destroy; override;
 
-    function Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TFDQuery>; overload;
-    function Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
-    function Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
-    function Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
-    function Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
     function Initialize(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
 
     function Restore(): IDriverQueryBuilder<TFDQuery>;
 
-    function Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
-    function Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
-    function Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
-    function Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
 
     procedure Activate;
   end;
 
-function FireDACSingletonConnectionAdapter(): IFireDACSingletonConnectionAdapter;
-begin
-  Result := TFireDACSingletonConnectionAdapter.SingletonConnection;
-end;
-
-function CreateFireDACQueryBuilder(const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
-begin
-  Result := TFireDACQueryBuilder.Create(pDataSet);
-end;
-
-{ TFireDACStatementAdapter }
+  { TFireDACStatementAdapter }
 
 function TFireDACStatementAdapter.DoAsDataSet(const pQuery: string;
   const pFetchRows: Integer): TFDQuery;
@@ -189,7 +192,7 @@ begin
     Result := vIterator.Fields[0].AsVariant;
 end;
 
-procedure TFireDACStatementAdapter.DoExecute(const pQuery: string; const pDataSet: TFDQuery;
+procedure TFireDACStatementAdapter.DoExecute(const pQuery: string; pDataSet: TFDQuery;
   const pAutoCommit: Boolean);
 var
   vDataSet: TFDQuery;
@@ -236,7 +239,7 @@ begin
   end;
 end;
 
-procedure TFireDACStatementAdapter.DoInDataSet(const pQuery: string; const pDataSet: TFDQuery);
+procedure TFireDACStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TFDQuery);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -249,7 +252,7 @@ begin
 end;
 
 procedure TFireDACStatementAdapter.DoInIterator(const pQuery: string;
-  const pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet);
 begin
   inherited;
   DoInDataSet(pQuery, TFDQuery(pIterator.GetDataSet));
@@ -323,11 +326,11 @@ end;
 
 class constructor TFireDACSingletonConnectionAdapter.Create;
 begin
-  GlobalCriticalSection.Enter;
+  Critical.Section.Enter;
   try
     SingletonConnection := TFireDACSingletonConnectionAdapter.Create;
   finally
-    GlobalCriticalSection.Leave;
+    Critical.Section.Leave;
   end;
 end;
 
@@ -343,7 +346,7 @@ begin
   FDataSet.Open();
 end;
 
-function TFireDACQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
   FQueryParserSelect.AddOrderBy(pOrderBy.ToString);
@@ -351,7 +354,7 @@ begin
   Result := Self;
 end;
 
-function TFireDACQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Build(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
   FQueryParserSelect.AddHaving(pHaving.ToString);
@@ -364,7 +367,7 @@ begin
   Result := Initialize(pQuery);
 end;
 
-constructor TFireDACQueryBuilder.Create(const pDataSet: TFDQuery);
+constructor TFireDACQueryBuilder.Create(pDataSet: TFDQuery);
 begin
   if (pDataSet = nil) then
     raise EDataSetDoesNotExist.Create('DataSet does not exist in Class ' + Self.ClassName);
@@ -379,7 +382,7 @@ begin
   inherited;
 end;
 
-function TFireDACQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
   FQueryParserSelect.AddGroupBy(pGroupBy.ToString);
@@ -387,7 +390,7 @@ begin
   Result := Self;
 end;
 
-function TFireDACQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Build(pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
 begin
   Restore();
   FQueryParserSelect.AddWhere(pWhere.ToString);
@@ -396,12 +399,12 @@ begin
 end;
 
 function TFireDACQueryBuilder.Initialize(
-  const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
+  pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := Initialize(pOrderBy.ToString);
 end;
 
-function TFireDACQueryBuilder.Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := Initialize(pHaving.ToString);
 end;
@@ -415,17 +418,17 @@ begin
   Result := Self;
 end;
 
-function TFireDACQueryBuilder.Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := Initialize(pSelect.ToString);
 end;
 
-function TFireDACQueryBuilder.Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := Initialize(pWhere.ToString);
 end;
 
-function TFireDACQueryBuilder.Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
+function TFireDACQueryBuilder.Initialize(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := Initialize(pGroupBy.ToString);
 end;
@@ -436,6 +439,23 @@ begin
   FQueryParserSelect.Parse(FQueryBegin);
   FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
+end;
+
+{ FireDACAdapter }
+
+constructor FireDACAdapter.Create;
+begin
+  raise EInfraException.Create(CanNotBeInstantiatedException);
+end;
+
+class function FireDACAdapter.NewQueryBuilder(pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := TFireDACQueryBuilder.Create(pDataSet);
+end;
+
+class function FireDACAdapter.SingletonConnection: IFireDACSingletonConnectionAdapter;
+begin
+  Result := TFireDACSingletonConnectionAdapter.SingletonConnection;
 end;
 
 end.

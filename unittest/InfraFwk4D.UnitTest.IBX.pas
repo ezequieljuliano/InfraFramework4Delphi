@@ -91,6 +91,21 @@ begin
   finally
     FreeAndNil(vBC);
   end;
+
+  vBC := TIBXBC.Create();
+  try
+    CheckTrue(vBC.Persistence <> nil);
+    CheckTrue(vBC.Persistence.Connection <> nil);
+    CheckTrue(vBC.Persistence.Master <> nil);
+    CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.ClassNameIs('TIBXDAO'));
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Detail') <> nil);
+  finally
+    FreeAndNil(vBC);
+  end;
 end;
 
 procedure TTestInfraFwkIBX.TestConnection;
@@ -141,7 +156,7 @@ procedure TTestInfraFwkIBX.TestConnectionSingleton;
 var
   vConnection: TIBXConnectionAdapter;
 begin
-  vConnection := IBXSingletonConnectionAdapter.Instance;
+  vConnection := IBXAdapter.SingletonConnection.Instance;
 
   CheckTrue(vConnection <> nil);
 

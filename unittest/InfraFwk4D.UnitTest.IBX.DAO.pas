@@ -37,7 +37,7 @@ end;
 
 function TIBXDAO.GetConnection: TIBXConnectionAdapter;
 begin
-  Result := IBXSingletonConnectionAdapter.Instance;
+  Result := IBXAdapter.SingletonConnection.Instance;
 end;
 
 end.

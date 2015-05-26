@@ -37,7 +37,7 @@ end;
 
 function TUniDACDAO.GetConnection: TUniDACConnectionAdapter;
 begin
-  Result := UniDACSingletonConnectionAdapter.Instance;
+  Result := UniDACAdapter.SingletonConnection.Instance;
 end;
 
 end.

@@ -65,11 +65,11 @@ class function TDatabaseFireDAC.GetAdapter: TFireDACConnectionAdapter;
 begin
   if (SingletonDatabaseFireDAC = nil) then
   begin
-    GlobalCriticalSection.Enter;
+    Critical.Section.Enter;
     try
       SingletonDatabaseFireDAC := TDatabaseFireDAC.Create(nil);
     finally
-      GlobalCriticalSection.Leave;
+      Critical.Section.Leave;
     end;
   end;
   Result := SingletonDatabaseFireDAC.GetConnectionAdapter();

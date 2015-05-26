@@ -67,7 +67,7 @@ function TUniDACPersistenceAdapter.QueryBuilder(
   const pDataSet: TUniQuery): IDriverQueryBuilder<TUniQuery>;
 begin
   if not FQueryDictionary.ContainsKey(pDataSet.Name) then
-    FQueryDictionary.AddOrSetValue(pDataSet.Name, CreateUniDACQueryBuilder(pDataSet));
+    FQueryDictionary.AddOrSetValue(pDataSet.Name, UniDACAdapter.NewQueryBuilder(pDataSet));
   Result := FQueryDictionary.Items[pDataSet.Name];
 end;
 

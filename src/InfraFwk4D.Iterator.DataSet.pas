@@ -9,29 +9,42 @@ uses
 
 type
 
+  EIteratorDataSetException = class(Exception);
+
   IIteratorDataSet = interface
     ['{A9FC32EB-0436-435B-82A2-61497C77845A}']
+    function GetDataSet(): TDataSet;
+
     function HasNext(): Boolean;
     function RecIndex: Integer;
     function IsEmpty(): Boolean;
     function Fields: TFields;
     function FieldByName(const pFieldName: string): TField;
 
-    procedure FillSameFields(const pTarget: TDataSet); overload;
-    procedure FillSameFields(const pTarget: IIteratorDataSet); overload;
-    procedure SetSameFieldsValues(const pProvider: TDataSet); overload;
-    procedure SetSameFieldsValues(const pProvider: IIteratorDataSet); overload;
+    procedure FillSameFields(pTarget: TDataSet); overload;
+    procedure FillSameFields(pTarget: IIteratorDataSet); overload;
+    procedure SetSameFieldsValues(pProvider: TDataSet); overload;
+    procedure SetSameFieldsValues(pProvider: IIteratorDataSet); overload;
 
-    function GetDataSet(): TDataSet;
+    property DataSet: TDataSet read GetDataSet;
   end;
 
-  IIteratorDataSetFactory = interface
-    ['{F2B3487F-80CF-40D4-A6D1-91E5985E0EC9}']
-    function Build(const pDataSet: TDataSet): IIteratorDataSet; overload;
-    function Build(const pDataSet: TDataSet; const pOwnsDataSet: Boolean): IIteratorDataSet; overload;
-  end;
+  IteratorDataSetFactory = class sealed
+  strict private
+  const
+    CanNotBeInstantiatedException = 'This class can not be instantiated!';
+  strict private
 
-function IteratorDataSetFactory(): IIteratorDataSetFactory;
+    {$HINTS OFF}
+
+    constructor Create;
+
+    {$HINTS ON}
+
+  public
+    class function Build(pDataSet: TDataSet): IIteratorDataSet; overload; static;
+    class function Build(pDataSet: TDataSet; const pOwnsDataSet: Boolean): IIteratorDataSet; overload; static;
+  end;
 
 implementation
 
@@ -42,8 +55,9 @@ type
     FDataSet: TDataSet;
     FCurrentCount: Integer;
     FOwnsDataSet: Boolean;
+    function GetDataSet(): TDataSet;
   public
-    constructor Create(const pDataSet: TDataSet; const pOwnsDataSet: Boolean);
+    constructor Create(pDataSet: TDataSet; const pOwnsDataSet: Boolean);
     destructor Destroy(); override;
 
     function HasNext(): Boolean;
@@ -52,28 +66,17 @@ type
     function Fields: TFields;
     function FieldByName(const pFieldName: string): TField;
 
-    procedure FillSameFields(const pTarget: TDataSet); overload;
-    procedure FillSameFields(const pTarget: IIteratorDataSet); overload;
-    procedure SetSameFieldsValues(const pProvider: TDataSet); overload;
-    procedure SetSameFieldsValues(const pProvider: IIteratorDataSet); overload;
+    procedure FillSameFields(pTarget: TDataSet); overload;
+    procedure FillSameFields(pTarget: IIteratorDataSet); overload;
+    procedure SetSameFieldsValues(pProvider: TDataSet); overload;
+    procedure SetSameFieldsValues(pProvider: IIteratorDataSet); overload;
 
-    function GetDataSet(): TDataSet;
+    property DataSet: TDataSet read GetDataSet;
   end;
 
-  TIteratorDataSetFactory = class(TInterfacedObject, IIteratorDataSetFactory)
-  public
-    function Build(const pDataSet: TDataSet): IIteratorDataSet; overload;
-    function Build(const pDataSet: TDataSet; const pOwnsDataSet: Boolean): IIteratorDataSet; overload;
-  end;
+  { TIteratorDataSet }
 
-function IteratorDataSetFactory(): IIteratorDataSetFactory;
-begin
-  Result := TIteratorDataSetFactory.Create();
-end;
-
-{ TIteratorDataSet }
-
-constructor TIteratorDataSet.Create(const pDataSet: TDataSet; const pOwnsDataSet: Boolean);
+constructor TIteratorDataSet.Create(pDataSet: TDataSet; const pOwnsDataSet: Boolean);
 begin
   FDataSet := pDataSet;
   FCurrentCount := 0;
@@ -105,7 +108,7 @@ begin
   Result := FDataSet.Fields;
 end;
 
-procedure TIteratorDataSet.FillSameFields(const pTarget: TDataSet);
+procedure TIteratorDataSet.FillSameFields(pTarget: TDataSet);
 var
   I, J: Integer;
 begin
@@ -119,7 +122,7 @@ begin
       end;
 end;
 
-procedure TIteratorDataSet.FillSameFields(const pTarget: IIteratorDataSet);
+procedure TIteratorDataSet.FillSameFields(pTarget: IIteratorDataSet);
 begin
   FillSameFields(pTarget.GetDataSet);
 end;
@@ -152,12 +155,12 @@ begin
   Result := FCurrentCount;
 end;
 
-procedure TIteratorDataSet.SetSameFieldsValues(const pProvider: IIteratorDataSet);
+procedure TIteratorDataSet.SetSameFieldsValues(pProvider: IIteratorDataSet);
 begin
   SetSameFieldsValues(pProvider.GetDataSet);
 end;
 
-procedure TIteratorDataSet.SetSameFieldsValues(const pProvider: TDataSet);
+procedure TIteratorDataSet.SetSameFieldsValues(pProvider: TDataSet);
 var
   I, J: Integer;
 begin
@@ -171,17 +174,22 @@ begin
       end;
 end;
 
-{ TIteratorDataSetFactory }
+{ IteratorDataSetFactory }
 
-function TIteratorDataSetFactory.Build(const pDataSet: TDataSet): IIteratorDataSet;
+class function IteratorDataSetFactory.Build(pDataSet: TDataSet): IIteratorDataSet;
 begin
   Result := TIteratorDataSet.Create(pDataSet, False);
 end;
 
-function TIteratorDataSetFactory.Build(const pDataSet: TDataSet;
+class function IteratorDataSetFactory.Build(pDataSet: TDataSet;
   const pOwnsDataSet: Boolean): IIteratorDataSet;
 begin
   Result := TIteratorDataSet.Create(pDataSet, pOwnsDataSet);
+end;
+
+constructor IteratorDataSetFactory.Create;
+begin
+  raise EIteratorDataSetException.Create(CanNotBeInstantiatedException);
 end;
 
 end.

@@ -93,7 +93,7 @@ procedure TTestInfraFwkFireDAC.TestConnectionSingleton;
 var
   vConnection: TFireDACConnectionAdapter;
 begin
-  vConnection := FireDACSingletonConnectionAdapter.Instance;
+  vConnection := FireDACAdapter.SingletonConnection.Instance;
 
   CheckTrue(vConnection <> nil);
 
@@ -146,6 +146,21 @@ begin
     CheckTrue(vBC.Persistence.Connection <> nil);
     CheckTrue(vBC.Persistence.Master <> nil);
     CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Detail') <> nil);
+  finally
+    FreeAndNil(vBC);
+  end;
+
+  vBC := TFireDACBC.Create();
+  try
+    CheckTrue(vBC.Persistence <> nil);
+    CheckTrue(vBC.Persistence.Connection <> nil);
+    CheckTrue(vBC.Persistence.Master <> nil);
+    CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.ClassNameIs('TFireDACDAO'));
     CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
     CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
     CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);

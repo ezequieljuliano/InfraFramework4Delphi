@@ -1,4 +1,5 @@
 inherited IBXDAO: TIBXDAO
+  OldCreateOrder = True
   object Master: TIBDataSet
     Database = IBXDmConnection.IBDatabase
     Transaction = IBXDmConnection.IBTransaction

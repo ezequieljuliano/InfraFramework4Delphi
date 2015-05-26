@@ -92,6 +92,21 @@ begin
   finally
     FreeAndNil(vBC);
   end;
+
+  vBC := TUniDACBC.Create();
+  try
+    CheckTrue(vBC.Persistence <> nil);
+    CheckTrue(vBC.Persistence.Connection <> nil);
+    CheckTrue(vBC.Persistence.Master <> nil);
+    CheckTrue(vBC.Persistence.Detail <> nil);
+    CheckTrue(vBC.Persistence.ClassNameIs('TUniDACDAO'));
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Master) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Master') <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder(vBC.Persistence.Detail) <> nil);
+    CheckTrue(vBC.Persistence.QueryBuilder('Detail') <> nil);
+  finally
+    FreeAndNil(vBC);
+  end;
 end;
 
 procedure TTestInfraFwkUniDAC.TestConnection;
@@ -142,7 +157,7 @@ procedure TTestInfraFwkUniDAC.TestConnectionSingleton;
 var
   vConnection: TUniDACConnectionAdapter;
 begin
-  vConnection := UniDACSingletonConnectionAdapter.Instance;
+  vConnection := UniDACAdapter.SingletonConnection.Instance;
 
   CheckTrue(vConnection <> nil);
 

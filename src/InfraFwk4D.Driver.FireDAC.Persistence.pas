@@ -67,7 +67,7 @@ function TFireDACPersistenceAdapter.QueryBuilder(
   const pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
 begin
   if not FQueryDictionary.ContainsKey(pDataSet.Name) then
-    FQueryDictionary.AddOrSetValue(pDataSet.Name, CreateFireDACQueryBuilder(pDataSet));
+    FQueryDictionary.AddOrSetValue(pDataSet.Name, FireDACAdapter.NewQueryBuilder(pDataSet));
   Result := FQueryDictionary.Items[pDataSet.Name];
 end;
 

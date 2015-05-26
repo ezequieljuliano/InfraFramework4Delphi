@@ -23,7 +23,7 @@ type
 
   TUniDACStatementAdapter = class(TDriverStatement<TUniQuery, TUniDACConnectionAdapter>)
   strict protected
-    procedure DoExecute(const pQuery: string; const pDataSet: TUniQuery; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TUniQuery; const pAutoCommit: Boolean); override;
 
     function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TUniQuery; override;
     function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
@@ -32,8 +32,8 @@ type
     function DoAsString(const pQuery: string): string; override;
     function DoAsVariant(const pQuery: string): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; const pDataSet: TUniQuery); override;
-    procedure DoInIterator(const pQuery: string; const pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TUniQuery); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
   end;
 
   TUniDACConnectionAdapter = class(TDriverConnection<TUniDACComponentAdapter, TUniDACStatementAdapter>)
@@ -62,8 +62,22 @@ type
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;
 
-function UniDACSingletonConnectionAdapter(): IUniDACSingletonConnectionAdapter;
-function CreateUniDACQueryBuilder(const pDataSet: TUniQuery): IDriverQueryBuilder<TUniQuery>;
+  UniDACAdapter = class sealed
+  strict private
+  const
+    CanNotBeInstantiatedException = 'This class can not be instantiated!';
+  strict private
+
+    {$HINTS OFF}
+
+    constructor Create;
+
+    {$HINTS ON}
+
+  public
+    class function SingletonConnection(): IUniDACSingletonConnectionAdapter; static;
+    class function NewQueryBuilder(pDataSet: TUniQuery): IDriverQueryBuilder<TUniQuery>; static;
+  end;
 
 implementation
 
@@ -97,35 +111,25 @@ type
     constructor Create(const pDataSet: TUniQuery);
     destructor Destroy; override;
 
-    function Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TUniQuery>; overload;
-    function Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>; overload;
-    function Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>; overload;
-    function Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>; overload;
-    function Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
+    function Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TUniQuery>; overload;
+    function Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>; overload;
+    function Initialize(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>; overload;
+    function Initialize(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>; overload;
+    function Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
     function Initialize(const pQuery: string): IDriverQueryBuilder<TUniQuery>; overload;
 
     function Restore(): IDriverQueryBuilder<TUniQuery>;
 
-    function Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>; overload;
-    function Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>; overload;
-    function Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>; overload;
-    function Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
+    function Build(pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>; overload;
+    function Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>; overload;
+    function Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>; overload;
+    function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TUniQuery>; overload;
 
     procedure Activate;
   end;
 
-function UniDACSingletonConnectionAdapter(): IUniDACSingletonConnectionAdapter;
-begin
-  Result := TUniDACSingletonConnectionAdapter.SingletonConnection;
-end;
-
-function CreateUniDACQueryBuilder(const pDataSet: TUniQuery): IDriverQueryBuilder<TUniQuery>;
-begin
-  Result := TUniDACQueryBuilder.Create(pDataSet);
-end;
-
-{ TUniDACStatementAdapter }
+  { TUniDACStatementAdapter }
 
 function TUniDACStatementAdapter.DoAsDataSet(const pQuery: string;
   const pFetchRows: Integer): TUniQuery;
@@ -188,7 +192,7 @@ begin
     Result := vIterator.Fields[0].AsVariant;
 end;
 
-procedure TUniDACStatementAdapter.DoExecute(const pQuery: string; const pDataSet: TUniQuery;
+procedure TUniDACStatementAdapter.DoExecute(const pQuery: string; pDataSet: TUniQuery;
   const pAutoCommit: Boolean);
 var
   vDataSet: TUniQuery;
@@ -235,7 +239,7 @@ begin
   end;
 end;
 
-procedure TUniDACStatementAdapter.DoInDataSet(const pQuery: string; const pDataSet: TUniQuery);
+procedure TUniDACStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TUniQuery);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -248,7 +252,7 @@ begin
 end;
 
 procedure TUniDACStatementAdapter.DoInIterator(const pQuery: string;
-  const pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet);
 begin
   inherited;
   DoInDataSet(pQuery, TUniQuery(pIterator.GetDataSet));
@@ -332,11 +336,11 @@ end;
 
 class constructor TUniDACSingletonConnectionAdapter.Create;
 begin
-  GlobalCriticalSection.Enter;
+  Critical.Section.Enter;
   try
     SingletonConnection := TUniDACSingletonConnectionAdapter.Create;
   finally
-    GlobalCriticalSection.Leave;
+    Critical.Section.Leave;
   end;
 end;
 
@@ -352,7 +356,7 @@ begin
   FDataSet.Open();
 end;
 
-function TUniDACQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
   FQueryParserSelect.AddOrderBy(pOrderBy.ToString);
@@ -360,7 +364,7 @@ begin
   Result := Self;
 end;
 
-function TUniDACQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Build(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
   FQueryParserSelect.AddHaving(pHaving.ToString);
@@ -373,7 +377,7 @@ begin
   Result := Initialize(pQuery);
 end;
 
-function TUniDACQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
   FQueryParserSelect.AddGroupBy(pGroupBy.ToString);
@@ -381,7 +385,7 @@ begin
   Result := Self;
 end;
 
-function TUniDACQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Build(pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>;
 begin
   Restore();
   FQueryParserSelect.AddWhere(pWhere.ToString);
@@ -404,12 +408,12 @@ begin
   inherited;
 end;
 
-function TUniDACQueryBuilder.Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TUniQuery>;
 begin
   Result := Initialize(pSelect.ToString);
 end;
 
-function TUniDACQueryBuilder.Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;
 begin
   Result := Initialize(pHaving.ToString);
 end;
@@ -424,18 +428,18 @@ begin
 end;
 
 function TUniDACQueryBuilder.Initialize(
-  const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>;
+  pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>;
 begin
   Result := Initialize(pOrderBy.ToString);
 end;
 
-function TUniDACQueryBuilder.Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>;
+function TUniDACQueryBuilder.Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>;
 begin
   Result := Initialize(pWhere.ToString);
 end;
 
 function TUniDACQueryBuilder.Initialize(
-  const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>;
+  pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>;
 begin
   Result := Initialize(pGroupBy.ToString);
 end;
@@ -446,6 +450,23 @@ begin
   FQueryParserSelect.Parse(FQueryBegin);
   FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
+end;
+
+{ UniDACAdapter }
+
+constructor UniDACAdapter.Create;
+begin
+  raise EInfraException.Create(CanNotBeInstantiatedException);
+end;
+
+class function UniDACAdapter.NewQueryBuilder(pDataSet: TUniQuery): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := TUniDACQueryBuilder.Create(pDataSet);
+end;
+
+class function UniDACAdapter.SingletonConnection: IUniDACSingletonConnectionAdapter;
+begin
+  Result := TUniDACSingletonConnectionAdapter.SingletonConnection;
 end;
 
 end.

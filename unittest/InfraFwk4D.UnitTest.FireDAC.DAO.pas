@@ -40,7 +40,7 @@ end;
 
 function TFireDACDAO.GetConnection: TFireDACConnectionAdapter;
 begin
-  Result := FireDACSingletonConnectionAdapter.Instance;
+  Result := FireDACAdapter.SingletonConnection.Instance;
 end;
 
 end.

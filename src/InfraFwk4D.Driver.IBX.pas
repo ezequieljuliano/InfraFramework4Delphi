@@ -24,7 +24,7 @@ type
 
   TIBXStatementAdapter = class(TDriverStatement<TIBDataSet, TIBXConnectionAdapter>)
   strict protected
-    procedure DoExecute(const pQuery: string; const pDataSet: TIBDataSet; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TIBDataSet; const pAutoCommit: Boolean); override;
 
     function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TIBDataSet; override;
     function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
@@ -33,8 +33,8 @@ type
     function DoAsString(const pQuery: string): string; override;
     function DoAsVariant(const pQuery: string): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; const pDataSet: TIBDataSet); override;
-    procedure DoInIterator(const pQuery: string; const pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TIBDataSet); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
   end;
 
   TIBXConnectionAdapter = class(TDriverConnection<TIBXComponentAdapter, TIBXStatementAdapter>)
@@ -58,8 +58,22 @@ type
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;
 
-function IBXSingletonConnectionAdapter(): IIBXSingletonConnectionAdapter;
-function CreateIBXQueryBuilder(const pDataSet: TIBDataSet): IDriverQueryBuilder<TIBDataSet>;
+  IBXAdapter = class sealed
+  strict private
+  const
+    CanNotBeInstantiatedException = 'This class can not be instantiated!';
+  strict private
+
+    {$HINTS OFF}
+
+    constructor Create;
+
+    {$HINTS ON}
+
+  public
+    class function SingletonConnection(): IIBXSingletonConnectionAdapter; static;
+    class function NewQueryBuilder(pDataSet: TIBDataSet): IDriverQueryBuilder<TIBDataSet>; static;
+  end;
 
 implementation
 
@@ -93,35 +107,25 @@ type
     constructor Create(const pDataSet: TIBDataSet);
     destructor Destroy; override;
 
-    function Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Initialize(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Initialize(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
     function Initialize(const pQuery: string): IDriverQueryBuilder<TIBDataSet>; overload;
 
     function Restore(): IDriverQueryBuilder<TIBDataSet>;
 
-    function Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>; overload;
-    function Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Build(pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TIBDataSet>; overload;
 
     procedure Activate;
   end;
 
-function IBXSingletonConnectionAdapter(): IIBXSingletonConnectionAdapter;
-begin
-  Result := TIBXSingletonConnectionAdapter.SingletonConnection;
-end;
-
-function CreateIBXQueryBuilder(const pDataSet: TIBDataSet): IDriverQueryBuilder<TIBDataSet>;
-begin
-  Result := TIBXQueryBuilder.Create(pDataSet);
-end;
-
-{ TIBXStatementAdapter }
+  { TIBXStatementAdapter }
 
 function TIBXStatementAdapter.DoAsDataSet(const pQuery: string;
   const pFetchRows: Integer): TIBDataSet;
@@ -179,7 +183,7 @@ begin
     Result := vIterator.Fields[0].AsVariant;
 end;
 
-procedure TIBXStatementAdapter.DoExecute(const pQuery: string; const pDataSet: TIBDataSet;
+procedure TIBXStatementAdapter.DoExecute(const pQuery: string; pDataSet: TIBDataSet;
   const pAutoCommit: Boolean);
 var
   vDataSet: TIBDataSet;
@@ -226,7 +230,7 @@ begin
   end;
 end;
 
-procedure TIBXStatementAdapter.DoInDataSet(const pQuery: string; const pDataSet: TIBDataSet);
+procedure TIBXStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TIBDataSet);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -239,7 +243,7 @@ begin
 end;
 
 procedure TIBXStatementAdapter.DoInIterator(const pQuery: string;
-  const pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet);
 begin
   inherited;
   DoInDataSet(pQuery, TIBDataSet(pIterator.GetDataSet));
@@ -297,11 +301,11 @@ end;
 
 class constructor TIBXSingletonConnectionAdapter.Create;
 begin
-  GlobalCriticalSection.Enter;
+  Critical.Section.Enter;
   try
     SingletonConnection := TIBXSingletonConnectionAdapter.Create;
   finally
-    GlobalCriticalSection.Leave;
+    Critical.Section.Leave;
   end;
 end;
 
@@ -333,7 +337,7 @@ begin
   FDataSet.Open();
 end;
 
-function TIBXQueryBuilder.Build(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Build(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
   FQueryParserSelect.AddOrderBy(pOrderBy.ToString);
@@ -341,7 +345,7 @@ begin
   Result := Self;
 end;
 
-function TIBXQueryBuilder.Build(const pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Build(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
   FQueryParserSelect.AddHaving(pHaving.ToString);
@@ -354,7 +358,7 @@ begin
   Result := Initialize(pQuery);
 end;
 
-function TIBXQueryBuilder.Build(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Build(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
   FQueryParserSelect.AddGroupBy(pGroupBy.ToString);
@@ -362,7 +366,7 @@ begin
   Result := Self;
 end;
 
-function TIBXQueryBuilder.Build(const pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Build(pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>;
 begin
   Restore();
   FQueryParserSelect.AddWhere(pWhere.ToString);
@@ -385,12 +389,12 @@ begin
   inherited;
 end;
 
-function TIBXQueryBuilder.Initialize(const pSelect: ISQLSelect): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Initialize(pSelect: ISQLSelect): IDriverQueryBuilder<TIBDataSet>;
 begin
   Result := Initialize(pSelect.ToString);
 end;
 
-function TIBXQueryBuilder.Initialize(const pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Initialize(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;
 begin
   Result := Initialize(pHaving.ToString);
 end;
@@ -404,17 +408,17 @@ begin
   Result := Self;
 end;
 
-function TIBXQueryBuilder.Initialize(const pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Initialize(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>;
 begin
   Result := Initialize(pOrderBy.ToString);
 end;
 
-function TIBXQueryBuilder.Initialize(const pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Initialize(pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>;
 begin
   Result := Initialize(pWhere.ToString);
 end;
 
-function TIBXQueryBuilder.Initialize(const pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>;
+function TIBXQueryBuilder.Initialize(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>;
 begin
   Result := Initialize(pGroupBy.ToString);
 end;
@@ -425,6 +429,23 @@ begin
   FQueryParserSelect.Parse(FQueryBegin);
   FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
+end;
+
+{ IBXAdapter }
+
+constructor IBXAdapter.Create;
+begin
+  raise EInfraException.Create(CanNotBeInstantiatedException);
+end;
+
+class function IBXAdapter.NewQueryBuilder(pDataSet: TIBDataSet): IDriverQueryBuilder<TIBDataSet>;
+begin
+  Result := TIBXQueryBuilder.Create(pDataSet);
+end;
+
+class function IBXAdapter.SingletonConnection: IIBXSingletonConnectionAdapter;
+begin
+  Result := TIBXSingletonConnectionAdapter.SingletonConnection;
 end;
 
 end.
