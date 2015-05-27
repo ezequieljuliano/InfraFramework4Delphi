@@ -10,6 +10,7 @@ uses
   Data.DB,
   FireDAC.Comp.Client,
   FireDAC.Stan.Option,
+  FireDAC.Phys.Intf,
   SQLBuilder4D,
   SQLBuilder4D.Parser,
   SQLBuilder4D.Parser.GaSQLParser,
@@ -58,6 +59,10 @@ type
     ['{1D4996C4-ADAD-489A-84FC-1D1279F5ED95}']
   end;
 
+  IFireDACMetaDataInfoAdapter = interface(IDriverMetaDataInfoAdapter)
+    ['{F855072F-C575-459E-A6B6-7B9F183B1D7F}']
+  end;
+
   FireDACAdapter = class sealed
   strict private
   const
@@ -73,6 +78,7 @@ type
   public
     class function SingletonConnection(): IFireDACSingletonConnectionAdapter; static;
     class function NewQueryBuilder(pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>; static;
+    class function NewMetaDataInfo(pConnectionAdapter: TFireDACConnectionAdapter): IFireDACMetaDataInfoAdapter; static;
   end;
 
 implementation
@@ -122,6 +128,28 @@ type
     function Build(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
 
     procedure Activate;
+  end;
+
+  TFireDACMetaDataInfoAdapter = class sealed(TInterfacedObject, IFireDACMetaDataInfoAdapter)
+  strict private
+    FConnectionAdapter: TFireDACConnectionAdapter;
+    function GetMetaInfo(const pKind: TFDPhysMetaInfoKind; const pObjectName: string = ''): IIteratorDataSet;
+  public
+    constructor Create(pConnectionAdapter: TFireDACConnectionAdapter);
+
+    function GetTables(): IIteratorDataSet;
+    function GetFields(const pTableName: string): IIteratorDataSet;
+    function GetPrimaryKey(const pTableName: string): IIteratorDataSet;
+    function GetIndexes(const pTableName: string): IIteratorDataSet;
+    function GetForeignKeys(const pTableName: string): IIteratorDataSet;
+    function GetGenerators(): IIteratorDataSet;
+
+    function TableExists(const pTableName: string): Boolean;
+    function FieldExists(const pTableName, pFieldName: string): Boolean;
+    function PrimaryKeyExists(const pTableName, pPrimaryKeyName: string): Boolean;
+    function IndexExists(const pTableName, pIndexName: string): Boolean;
+    function ForeignKeyExists(const pTableName, pForeignKeyName: string): Boolean;
+    function GeneratorExists(const pGeneratorName: string): Boolean;
   end;
 
   { TFireDACStatementAdapter }
@@ -448,6 +476,12 @@ begin
   raise EInfraException.Create(CanNotBeInstantiatedException);
 end;
 
+class function FireDACAdapter.NewMetaDataInfo(
+  pConnectionAdapter: TFireDACConnectionAdapter): IFireDACMetaDataInfoAdapter;
+begin
+  Result := TFireDACMetaDataInfoAdapter.Create(pConnectionAdapter);
+end;
+
 class function FireDACAdapter.NewQueryBuilder(pDataSet: TFDQuery): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := TFireDACQueryBuilder.Create(pDataSet);
@@ -456,6 +490,121 @@ end;
 class function FireDACAdapter.SingletonConnection: IFireDACSingletonConnectionAdapter;
 begin
   Result := TFireDACSingletonConnectionAdapter.SingletonConnection;
+end;
+
+{ TFireDACMetaDataInfoAdapter }
+
+constructor TFireDACMetaDataInfoAdapter.Create(pConnectionAdapter: TFireDACConnectionAdapter);
+begin
+  FConnectionAdapter := pConnectionAdapter;
+end;
+
+function TFireDACMetaDataInfoAdapter.GetForeignKeys(const pTableName: string): IIteratorDataSet;
+begin
+  Result := GetMetaInfo(mkForeignKeys, pTableName);
+end;
+
+function TFireDACMetaDataInfoAdapter.GetGenerators: IIteratorDataSet;
+begin
+  Result := GetMetaInfo(mkGenerators);
+end;
+
+function TFireDACMetaDataInfoAdapter.GetIndexes(const pTableName: string): IIteratorDataSet;
+begin
+  Result := GetMetaInfo(mkIndexes, pTableName);
+end;
+
+function TFireDACMetaDataInfoAdapter.GetMetaInfo(const pKind: TFDPhysMetaInfoKind; const pObjectName: string): IIteratorDataSet;
+var
+  vDataSet: TFDMetaInfoQuery;
+begin
+  vDataSet := TFDMetaInfoQuery.Create(nil);
+  vDataSet.Connection := FConnectionAdapter.Component.Connection;
+  vDataSet.MetaInfoKind := pKind;
+  vDataSet.ObjectName := pObjectName;
+  vDataSet.Open();
+  Result := IteratorDataSetFactory.Build(vDataSet, True);
+end;
+
+function TFireDACMetaDataInfoAdapter.GetPrimaryKey(const pTableName: string): IIteratorDataSet;
+begin
+  Result := GetMetaInfo(mkPrimaryKey, pTableName);
+end;
+
+function TFireDACMetaDataInfoAdapter.FieldExists(const pTableName, pFieldName: string): Boolean;
+var
+  vIterator: IIteratorDataSet;
+begin
+  Result := False;
+  vIterator := GetFields(pTableName);
+  while vIterator.HasNext do
+    if vIterator.FieldByName('COLUMN_NAME').AsString.Equals(pFieldName) then
+      Exit(True);
+end;
+
+function TFireDACMetaDataInfoAdapter.ForeignKeyExists(const pTableName, pForeignKeyName: string): Boolean;
+var
+  vIterator: IIteratorDataSet;
+begin
+  Result := False;
+  vIterator := GetForeignKeys(pTableName);
+  while vIterator.HasNext do
+    if vIterator.FieldByName('FKEY_NAME').AsString.Equals(pForeignKeyName) then
+      Exit(True);
+end;
+
+function TFireDACMetaDataInfoAdapter.GeneratorExists(const pGeneratorName: string): Boolean;
+var
+  vIterator: IIteratorDataSet;
+begin
+  Result := False;
+  vIterator := GetGenerators();
+  while vIterator.HasNext do
+    if vIterator.FieldByName('GENERATOR_NAME').AsString.Equals(pGeneratorName) then
+      Exit(True);
+end;
+
+function TFireDACMetaDataInfoAdapter.GetFields(const pTableName: string): IIteratorDataSet;
+begin
+  Result := GetMetaInfo(mkTableFields, pTableName);
+end;
+
+function TFireDACMetaDataInfoAdapter.GetTables: IIteratorDataSet;
+begin
+  Result := GetMetaInfo(mkTables);
+end;
+
+function TFireDACMetaDataInfoAdapter.IndexExists(const pTableName, pIndexName: string): Boolean;
+var
+  vIterator: IIteratorDataSet;
+begin
+  Result := False;
+  vIterator := GetIndexes(pTableName);
+  while vIterator.HasNext do
+    if vIterator.FieldByName('INDEX_NAME').AsString.Equals(pIndexName) then
+      Exit(True);
+end;
+
+function TFireDACMetaDataInfoAdapter.PrimaryKeyExists(const pTableName, pPrimaryKeyName: string): Boolean;
+var
+  vIterator: IIteratorDataSet;
+begin
+  Result := False;
+  vIterator := GetPrimaryKey(pTableName);
+  while vIterator.HasNext do
+    if vIterator.FieldByName('PKEY_NAME').AsString.Equals(pPrimaryKeyName) then
+      Exit(True);
+end;
+
+function TFireDACMetaDataInfoAdapter.TableExists(const pTableName: string): Boolean;
+var
+  vIterator: IIteratorDataSet;
+begin
+  Result := False;
+  vIterator := GetTables;
+  while vIterator.HasNext do
+    if vIterator.FieldByName('TABLE_NAME').AsString.Equals(pTableName) then
+      Exit(True);
 end;
 
 end.

@@ -194,6 +194,98 @@ type
 
   TBusinessAdapter<TDrvPersistence: TDataModule> = class(TDriverBusiness<TDrvPersistence>);
 
+  IDriverMetaDataInfoAdapter = interface
+    ['{100DD476-009C-4D8A-B9DB-8400819CDC41}']
+    /// <summary>DataSet Structure</summary>
+    /// <remarks>
+    /// Column Name	    Data Type	      Description
+    /// RECNO	          dtInt32
+    /// CATALOG_NAME	  dtWideString	  Catalog name.
+    /// SCHEMA_NAME	    dtWideString	  Schema name.
+    /// TABLE_NAME	    dtWideString	  Table name.
+    /// TABLE_TYPE	    dtInt32	        Table type. Cast value to FireDAC.Phys.Intf.TFDPhysTableKind.
+    /// </remarks>
+    function GetTables(): IIteratorDataSet;
+
+    /// <summary>DataSet Structure</summary>
+    /// <remarks>
+    /// Column Name	      Data Type	    Description
+    /// RECNO	            dtInt32
+    /// CATALOG_NAME	    dtWideString	Catalog name.
+    /// SCHEMA_NAME	      dtWideString	Schema name.
+    /// TABLE_NAME	      dtWideString	Table name.
+    /// COLUMN_NAME	      dtWideString	Column name.
+    /// COLUMN_POSITION	  dtInt32	      Column position.
+    /// COLUMN_DATATYPE	  dtInt32	      Column data type. Cast value to FireDAC.Stan.Intf.TFDDataType.
+    /// COLUMN_TYPENAME	  dtWideString	DBMS native column type name.
+    /// COLUMN_ATTRIBUTES	dtUInt32	    Column attributes. Cast value to FireDAC.Stan.Intf.TFDDataAttributes.
+    /// COLUMN_PRECISION	dtInt32	      Numeric and date/time column precision.
+    /// COLUMN_SCALE	    dtInt32	      Numeric and date/time column scale.
+    /// COLUMN_LENGTH	    dtInt32	      Character and byte string column length.
+    /// </remarks>
+    function GetFields(const pTableName: string): IIteratorDataSet;
+
+    /// <summary>DataSet Structure</summary>
+    /// <remarks>
+    /// Column Name	        Data Type	      Description
+    /// RECNO	              dtInt32
+    /// CATALOG_NAME	      dtWideString	  Catalog name.
+    /// SCHEMA_NAME	        dtWideString	  Schema name.
+    /// TABLE_NAME	        dtWideString	  Table name.
+    /// INDEX_NAME	        dtWideString	  Index name.
+    /// PKEY_NAME	          dtWideString	  Primary key constraint name.
+    /// INDEX_TYPE	        dtInt32	        Index type. Cast value to FireDAC.Phys.Intf.TFDPhysIndexKind.
+    /// </remarks>
+    function GetPrimaryKey(const pTableName: string): IIteratorDataSet;
+
+    /// <summary>DataSet Structure</summary>
+    /// <remarks>
+    /// Column Name	        Data Type	      Description
+    /// RECNO	              dtInt32
+    /// CATALOG_NAME	      dtWideString	  Catalog name.
+    /// SCHEMA_NAME	        dtWideString	  Schema name.
+    /// TABLE_NAME	        dtWideString	  Table name.
+    /// INDEX_NAME	        dtWideString	  Index name.
+    /// PKEY_NAME	          dtWideString	  Primary key constraint name.
+    /// INDEX_TYPE	        dtInt32	        Index type. Cast value to FireDAC.Phys.Intf.TFDPhysIndexKind.
+    /// </remarks>
+    function GetIndexes(const pTableName: string): IIteratorDataSet;
+
+    /// <summary>DataSet Structure</summary>
+    /// <remarks>
+    /// Column Name	      Data Type	      Description
+    /// RECNO	            dtInt32
+    /// CATALOG_NAME	    dtWideString	  Catalog name.
+    /// SCHEMA_NAME	      dtWideString	  Schema name.
+    /// TABLE_NAME	      dtWideString	  Table name.
+    /// FKEY_NAME	        dtWideString	  Foreign key constraint name.
+    /// PKEY_CATALOG_NAME	dtWideString	  Referenced table catalog name.
+    /// PKEY_SCHEMA_NAME	dtWideString	  Referenced table schema name.
+    /// PKEY_TABLE_NAME	  dtWideString	  Referenced table name.
+    /// DELETE_RULE	      dtInt32	        Foreign key delete rule. Cast value to FireDAC.Phys.Intf.TFDPhysCascadeRuleKind.
+    /// UPDATE_RULE	      dtInt32	        Foreign key update rule. Cast value to FireDAC.Phys.Intf.TFDPhysCascadeRuleKind.
+    /// </remarks>
+    function GetForeignKeys(const pTableName: string): IIteratorDataSet;
+
+    /// <summary>DataSet Structure</summary>
+    /// <remarks>
+    /// Column Name	      Data Type	    Description
+    /// RECNO	            dtInt32
+    /// CATALOG_NAME	    dtWideString	Catalog name.
+    /// SCHEMA_NAME	      dtWideString	Schema name.
+    /// GENERATOR_NAME	  dtWideString	Generator / sequence name.
+    /// GENERATOR_SCOPE	  dtInt32	      Generator / sequence scope. Cast value to FireDAC.Phys.Intf.TFDPhysObjectScope.
+    /// </remarks>
+    function GetGenerators(): IIteratorDataSet;
+
+    function TableExists(const pTableName: string): Boolean;
+    function FieldExists(const pTableName, pFieldName: string): Boolean;
+    function PrimaryKeyExists(const pTableName, pPrimaryKeyName: string): Boolean;
+    function IndexExists(const pTableName, pIndexName: string): Boolean;
+    function ForeignKeyExists(const pTableName, pForeignKeyName: string): Boolean;
+    function GeneratorExists(const pGeneratorName: string): Boolean;
+  end;
+
 implementation
 
 uses
