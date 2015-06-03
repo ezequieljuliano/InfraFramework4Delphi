@@ -122,6 +122,12 @@ type
     function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TIBDataSet>; overload;
 
+    function Add(pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
+    function Add(const pQuery: string): IDriverQueryBuilder<TIBDataSet>; overload;
+
     procedure Activate;
   end;
 
@@ -351,6 +357,31 @@ begin
   FQueryParserSelect.AddHaving(pHaving.ToString);
   FDataSet.SelectSQL.Text := FQueryParserSelect.ToString();
   Result := Self;
+end;
+
+function TIBXQueryBuilder.Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TIBDataSet>;
+begin
+  Result := Build(pGroupBy);
+end;
+
+function TIBXQueryBuilder.Add(pWhere: ISQLWhere): IDriverQueryBuilder<TIBDataSet>;
+begin
+  Result := Build(pWhere);
+end;
+
+function TIBXQueryBuilder.Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TIBDataSet>;
+begin
+  Result := Build(pOrderBy);
+end;
+
+function TIBXQueryBuilder.Add(const pQuery: string): IDriverQueryBuilder<TIBDataSet>;
+begin
+  Result := Build(pQuery);
+end;
+
+function TIBXQueryBuilder.Add(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;
+begin
+  Result := Build(pHaving);
 end;
 
 function TIBXQueryBuilder.Build(const pQuery: string): IDriverQueryBuilder<TIBDataSet>;

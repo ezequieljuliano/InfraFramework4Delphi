@@ -126,6 +126,12 @@ type
     function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TUniQuery>; overload;
 
+    function Add(pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>; overload;
+    function Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>; overload;
+    function Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>; overload;
+    function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
+    function Add(const pQuery: string): IDriverQueryBuilder<TUniQuery>; overload;
+
     procedure Activate;
   end;
 
@@ -370,6 +376,31 @@ begin
   FQueryParserSelect.AddHaving(pHaving.ToString);
   FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
+end;
+
+function TUniDACQueryBuilder.Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := Build(pGroupBy);
+end;
+
+function TUniDACQueryBuilder.Add(pWhere: ISQLWhere): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := Build(pWhere);
+end;
+
+function TUniDACQueryBuilder.Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := Build(pOrderBy);
+end;
+
+function TUniDACQueryBuilder.Add(const pQuery: string): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := Build(pQuery);
+end;
+
+function TUniDACQueryBuilder.Add(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := Build(pHaving);
 end;
 
 function TUniDACQueryBuilder.Build(const pQuery: string): IDriverQueryBuilder<TUniQuery>;

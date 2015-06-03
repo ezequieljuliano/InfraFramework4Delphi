@@ -168,6 +168,12 @@ type
     function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
 
+    function Add(pWhere: ISQLWhere): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
+    function Add(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
+
     procedure Activate;
   end;
 

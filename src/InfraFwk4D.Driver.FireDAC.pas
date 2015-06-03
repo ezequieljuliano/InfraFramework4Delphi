@@ -127,6 +127,12 @@ type
     function Build(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
     function Build(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
 
+    function Add(pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>; overload;
+    function Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>; overload;
+    function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
+    function Add(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
+
     procedure Activate;
   end;
 
@@ -388,6 +394,31 @@ begin
   FQueryParserSelect.AddHaving(pHaving.ToString);
   FDataSet.SQL.Text := FQueryParserSelect.ToString();
   Result := Self;
+end;
+
+function TFireDACQueryBuilder.Add(pGroupBy: ISQLGroupBy): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Build(pGroupBy);
+end;
+
+function TFireDACQueryBuilder.Add(pWhere: ISQLWhere): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Build(pWhere);
+end;
+
+function TFireDACQueryBuilder.Add(pOrderBy: ISQLOrderBy): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Build(pOrderBy);
+end;
+
+function TFireDACQueryBuilder.Add(const pQuery: string): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Build(pQuery);
+end;
+
+function TFireDACQueryBuilder.Add(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
+begin
+  Result := Build(pHaving);
 end;
 
 function TFireDACQueryBuilder.Build(const pQuery: string): IDriverQueryBuilder<TFDQuery>;

@@ -15,6 +15,9 @@
         <Projects Include="InfraFwkTestsIBX.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="InfraFwkTestsMessageContext.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -59,14 +62,23 @@
     <Target Name="InfraFwkTestsIBX:Make">
         <MSBuild Projects="InfraFwkTestsIBX.dproj" Targets="Make"/>
     </Target>
+    <Target Name="InfraFwkTestsMessageContext">
+        <MSBuild Projects="InfraFwkTestsMessageContext.dproj"/>
+    </Target>
+    <Target Name="InfraFwkTestsMessageContext:Clean">
+        <MSBuild Projects="InfraFwkTestsMessageContext.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraFwkTestsMessageContext:Make">
+        <MSBuild Projects="InfraFwkTestsMessageContext.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="InfraFwkTestsFireDAC;InfraFwkTestsIteratorDataSet;InfraFwkTestsUniDAC;InfraFwkTestsIBX"/>
+        <CallTarget Targets="InfraFwkTestsFireDAC;InfraFwkTestsIteratorDataSet;InfraFwkTestsUniDAC;InfraFwkTestsIBX;InfraFwkTestsMessageContext"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="InfraFwkTestsFireDAC:Clean;InfraFwkTestsIteratorDataSet:Clean;InfraFwkTestsUniDAC:Clean;InfraFwkTestsIBX:Clean"/>
+        <CallTarget Targets="InfraFwkTestsFireDAC:Clean;InfraFwkTestsIteratorDataSet:Clean;InfraFwkTestsUniDAC:Clean;InfraFwkTestsIBX:Clean;InfraFwkTestsMessageContext:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="InfraFwkTestsFireDAC:Make;InfraFwkTestsIteratorDataSet:Make;InfraFwkTestsUniDAC:Make;InfraFwkTestsIBX:Make"/>
+        <CallTarget Targets="InfraFwkTestsFireDAC:Make;InfraFwkTestsIteratorDataSet:Make;InfraFwkTestsUniDAC:Make;InfraFwkTestsIBX:Make;InfraFwkTestsMessageContext:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

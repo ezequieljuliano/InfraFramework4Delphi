@@ -16,11 +16,6 @@ type
   EConnectionUnregistered = class(EInfraException);
   EPersistenceDoesNotExist = class(EInfraException);
   EDataSetDoesNotExist = class(EInfraException);
-  EConnectionDoesNotExist = class(EInfraException);
-  EOwnerBusinessDoesNotCompatible = class(EInfraException);
-  EOwnerBusinessDoesNotExist = class(EInfraException);
-  EDetailUnregistered = class(EInfraException);
-  EDetailAlreadyRegistered = class(EInfraException);
 
   Critical = class sealed
   strict private
