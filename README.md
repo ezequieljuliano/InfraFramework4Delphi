@@ -164,3 +164,73 @@ Finally, create a new Form to be the View Layer. The View Layer will interact wi
       if FCountryBC.Persistence.Country.IsEmpty then
         ShowMessage('Not found!');
     end;
+
+# Message Context #
+
+A well structured application, either on the Web or Desktop platform, should display informational message, warning, or error to the user after performing certain tasks. In summary, it must be programmed to exchange messages between different layers of an object oriented implementation. The implementation of the message context has been designed in a simple and flexible way, regardless of layer, leaving you free to implement their own solution or use the existing extensions.
+
+**Creating Its Implementation**
+
+The key to the message module is the IMessageAppender interface. To create a new mechanism for show messages, you only need to implement the interface in your application. Below is a sample implementation:
+
+	  uses
+        InfraFwk4D.Message.Context;
+
+	  TMessageAppender = class(TInterfacedObject, IMessageAppender)
+	  strict private
+	  const
+	    APP_NAME = 'APP TEST';
+	  public
+	    procedure Append(pMessage: IMessage); overload;
+	    procedure Append(pQuestion: IQuestion); overload;
+	  end;
+
+	procedure TMessageAppender.Append(pMessage: IMessage);
+	begin
+	  case pMessage.Severity of
+	    svInfo:
+	      Application.MessageBox(PChar(pMessage.Text), 
+            PChar(APP_NAME), MB_ICONINFORMATION + MB_OK);
+	    svWarn:
+	      Application.MessageBox(PChar(pMessage.Text), 
+            PChar(APP_NAME), MB_ICONWARNING + MB_OK);
+	    svError, svFatal:
+	      Application.MessageBox(PChar(pMessage.Text), 
+            PChar(APP_NAME), MB_ICONERROR + MB_OK);
+	  end;
+	end;
+	
+	procedure TMessageAppender.Append(pQuestion: IQuestion);
+	var
+	  vFocus: Integer;
+	begin
+	  vFocus := MB_DEFBUTTON1;
+	  if (pQuestion.DefaultFocus = reNo) then
+	    vFocus := MB_DEFBUTTON2;
+	  case Application.MessageBox(PChar(pQuestion.Text), 
+       PChar(APP_NAME), MB_ICONQUESTION + MB_YESNO + vFocus) of
+	    IDYES: pQuestion.Response := reYes;
+	    IDNO: pQuestion.Response := reNo;
+	  end;
+	end;
+
+Now add in the message context of your appender:
+
+	Message.Context.RegisterAppender(
+	    function: IMessageAppender
+	    begin
+	      Result := TMessageAppender.Create;
+	    end
+	    );
+
+After all configured to use the security context you simply add the Uses of InfraFwk4D.Message.Context.pas and use in their codes:
+
+	 Message.Context.Show('Info Message', svInfo);
+	 Message.Context.Show('Warn Message', svWarn);
+	 Message.Context.Show('Error Message', svError);
+	 Message.Context.Show('Fatal Message', svFatal);
+
+	var
+	  vResponse: TResponse;
+	begin
+	  vResponse := Message.Context.Question('Question?', reYes);
