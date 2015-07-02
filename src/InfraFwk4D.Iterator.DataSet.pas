@@ -135,12 +135,12 @@ end;
 function TIteratorDataSet.HasNext: Boolean;
 begin
   if (FCurrentCount = 0) then
-    FCurrentCount := 1
-  else
-    Inc(FCurrentCount);
+    FCurrentCount := 1;
 
   if (FCurrentCount > 1) then
     FDataSet.Next();
+
+  Inc(FCurrentCount);
 
   Result := not FDataSet.Eof;
 end;
