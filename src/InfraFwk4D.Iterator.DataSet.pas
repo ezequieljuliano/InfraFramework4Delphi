@@ -3,9 +3,9 @@ unit InfraFwk4D.Iterator.DataSet;
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Collections,
-  Data.DB;
+  SysUtils,
+  Generics.Collections,
+  DB;
 
 type
 
