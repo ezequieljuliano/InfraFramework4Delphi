@@ -20,6 +20,7 @@ The InfraFramework4Delphi is available for the following data access drivers:
 - FireDAC
 - IBX
 - UniDAC
+- ADO
 
 
 External Dependencies
@@ -50,6 +51,7 @@ Then you must add to your project the Persistence Module Data according to Drive
 - InfraFwk4D.Driver.FireDAC.Persistence.pas
 - InfraFwk4D.Driver.IBX.Persistence.pas
 - InfraFwk4D.Driver.UniDAC.Persistence.pas
+- InfraFwk4D.Driver.ADO.Persistence.pas
 
 
 InfraFramework4Delphi in 5 Minutes
