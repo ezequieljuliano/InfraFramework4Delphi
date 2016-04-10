@@ -28,7 +28,8 @@ uses
   gaSQLTableRefParsers in '..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLTableRefParsers.pas',
   gaUpdateStm in '..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaUpdateStm.pas',
   Database.ADO in 'Database.ADO.pas' {DatabaseADO: TDataModule},
-  User.DAO in 'User.DAO.pas' {DmUserDAO: TDataModule};
+  User.DAO in 'User.DAO.pas' {UserDAO: TDataModule},
+  User.BC in 'User.BC.pas';
 
 {$R *.res}
 

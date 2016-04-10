@@ -8,8 +8,8 @@ uses
   InfraFwk4D.Driver.ADO.Persistence, ADODB, DB;
 
 type
-  TDmUserDAO = class(TADOPersistenceAdapter)
-    ADOQuery1: TADOQuery;
+  TUserDAO = class(TADOPersistenceAdapter)
+    DtsUser: TADOQuery;
   strict protected
     function GetConnection(): TADOConnectionAdapter; override;
     procedure ConfigureDataSetsConnection(); override;
@@ -20,7 +20,7 @@ type
   end;
 
 var
-  DmUserDAO: TDmUserDAO;
+  UserDAO: TUserDAO;
 
 implementation
 
@@ -32,24 +32,24 @@ uses
 {$R *.dfm}
 { TDataModule1 }
 
-procedure TDmUserDAO.ConfigureDataSetsConnection;
+procedure TUserDAO.ConfigureDataSetsConnection;
 begin
   inherited;
 
 end;
 
-procedure TDmUserDAO.FindByLogin(const pLogin: string);
+procedure TUserDAO.FindByLogin(const pLogin: string);
 begin
 //  Result := Connection.Statement.Build(SQL.Select.AllColumns.From('usuario')
 //    .Where('login').Like(SQL.Value(pLogin).Like(loContaining).Insensetive))
 //    .AsIterator;
 
-  QueryBuilder(ADOQuery1).Build(
+  QueryBuilder(DtsUser).Build(
     SQL.Where('login').Like(pLogin, loContaining)
     ).Activate;
 end;
 
-function TDmUserDAO.GetConnection: TADOConnectionAdapter;
+function TUserDAO.GetConnection: TADOConnectionAdapter;
 begin
   Result := TDatabaseADO.GetAdapter;
 end;

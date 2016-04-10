@@ -20,7 +20,7 @@ object Form3: TForm3
     Width = 497
     Height = 219
     Align = alClient
-    DataSource = DataSource1
+    DataSource = dsUser
     TabOrder = 0
     TitleFont.Charset = DEFAULT_CHARSET
     TitleFont.Color = clWindowText
@@ -33,7 +33,7 @@ object Form3: TForm3
     Top = 207
     Width = 480
     Height = 51
-    DataSource = DataSource1
+    DataSource = dsUser
     TabOrder = 1
   end
   object Panel1: TPanel
@@ -71,8 +71,8 @@ object Form3: TForm3
       OnClick = Button1Click
     end
   end
-  object DataSource1: TDataSource
-    DataSet = DmUserDAO.ADOQuery1
+  object dsUser: TDataSource
+    DataSet = UserDAO.DtsUser
     Left = 368
     Top = 104
   end

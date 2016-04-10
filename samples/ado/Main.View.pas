@@ -5,11 +5,11 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics,
   Controls, Forms, Dialogs, ADODB, DB, User.DAO, Database.ADO, Grids, DBGrids,
-  ExtCtrls, DBCtrls, StdCtrls;
+  ExtCtrls, DBCtrls, StdCtrls, User.BC;
 
 type
   TForm3 = class(TForm)
-    DataSource1: TDataSource;
+    dsUser: TDataSource;
     DBGrid1: TDBGrid;
     DBNavigator1: TDBNavigator;
     Panel1: TPanel;
@@ -23,7 +23,7 @@ type
   public
     { Public declarations }
     FDatabaseADO: TDatabaseADO;
-    FUSERDAO: TDmUserDAO;
+    FUserBC: TUserBC;
   end;
 
 var
@@ -35,13 +35,19 @@ implementation
 
 procedure TForm3.Button1Click(Sender: TObject);
 begin
-  FUSERDAO.FindByLogin(Edit1.Text);
+  FUserBC.FindByLogin(Edit1.Text);
 end;
 
 procedure TForm3.FormCreate(Sender: TObject);
 begin
   FDatabaseADO := TDatabaseADO.Create(nil);
-  FUSERDAO := TDmUserDAO.Create(nil);
+
+  FUserBC := TUserBC.Create(TUserDAO);
+  dsUser.DataSet := FUserBC.Persistence.DtsUser;
+  FUserBC.Persistence.DtsUser.Open();
 end;
 
 end.
+
+
+uses User.BC;
