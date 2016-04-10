@@ -415,7 +415,7 @@ end;
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(const pAutoCommit: Boolean);
 begin
 {$IFDEF VER210}
-  DoExecute(FQuery, nil, pAutoCommit);
+  DoExecute(FQuery, TDataSet, pAutoCommit);
 {$ELSE}
   DoExecute(FQuery, nil, pAutoCommit);
 {$ENDIF}

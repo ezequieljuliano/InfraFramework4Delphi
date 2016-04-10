@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2016/04/08 21:51:53.000.645,=C:\Users\OLSD10\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2016/04/08 21:52:31.000.840,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Main.View.pas=C:\Users\OLSD10\Documents\Embarcadero\Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2016/04/08 21:52:31.000.840,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Main.View.dfm=C:\Users\OLSD10\Documents\Embarcadero\Studio\Projects\Unit3.dfm</Transaction>
+    <Transaction>2016/04/08 21:52:55.000.444,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\BasicSample.dproj=C:\Users\OLSD10\Documents\Embarcadero\Studio\Projects\Project3.dproj</Transaction>
+    <Transaction>2016/04/08 21:54:48.000.945,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\src\InfraFwk4D.Driver.ADO.pas</Transaction>
+    <Transaction>2016/04/08 21:54:49.000.001,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\src\InfraFwk4D.Driver.ADO.Persistence.pas</Transaction>
+    <Transaction>2016/04/08 21:54:49.000.022,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\src\InfraFwk4D.Driver.pas</Transaction>
+    <Transaction>2016/04/08 21:54:49.000.079,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\src\InfraFwk4D.Iterator.DataSet.pas</Transaction>
+    <Transaction>2016/04/08 21:54:49.000.109,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\src\InfraFwk4D.Message.Context.pas</Transaction>
+    <Transaction>2016/04/08 21:54:49.000.142,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\src\InfraFwk4D.pas</Transaction>
+    <Transaction>2016/04/08 22:02:42.000.281,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\src\SQLBuilder4D.Parser.pas</Transaction>
+    <Transaction>2016/04/08 22:02:42.000.327,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\src\SQLBuilder4D.pas</Transaction>
+    <Transaction>2016/04/08 22:02:42.000.234,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\src\SQLBuilder4D.Parser.GaSQLParser.pas</Transaction>
+    <Transaction>2016/04/08 22:03:18.000.891,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaBasicSQLParser.pas</Transaction>
+    <Transaction>2016/04/08 22:03:18.000.937,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaDeleteStm.pas</Transaction>
+    <Transaction>2016/04/08 22:03:18.000.987,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaLnkList.pas</Transaction>
+    <Transaction>2016/04/08 22:03:18.000.862,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaAdvancedSQLParser.pas</Transaction>
+    <Transaction>2016/04/08 22:03:18.000.962,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaInsertStm.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.023,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaQueryParsersReg.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.082,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLFieldRefParsers.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.122,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLParserHelperClasses.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.064,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLExpressionParsers.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.144,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLSelectFieldParsers.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.102,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLParserConsts.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.166,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLTableRefParsers.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.006,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaParserVisitor.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.042,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSelectStm.pas</Transaction>
+    <Transaction>2016/04/08 22:03:19.000.185,=C:\Users\OLSD10\Desktop\Projetos\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaUpdateStm.pas</Transaction>
+    <Transaction>2016/04/08 23:09:22.000.196,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Unit1.pas</Transaction>
+    <Transaction>2016/04/08 23:10:39.000.005,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\User.DAO.dfm=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Unit1.dfm</Transaction>
+    <Transaction>2016/04/08 23:10:39.000.005,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\User.DAO.pas=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Unit1.pas</Transaction>
+    <Transaction>2016/04/08 23:12:43.000.287,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Unit2.pas</Transaction>
+    <Transaction>2016/04/08 23:12:59.000.535,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\ADO.Connection.pas=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Unit2.pas</Transaction>
+    <Transaction>2016/04/08 23:12:59.000.535,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\ADO.Connection.dfm=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Unit2.dfm</Transaction>
+    <Transaction>2016/04/08 23:23:21.000.801,=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\Database.ADO.pas</Transaction>
+    <Transaction>2016/04/09 01:09:34.110,C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\BasicSampleADO.dproj=C:\Users\OLSD10\Desktop\Projetos\InfraFramework\InfraFramework4Delphi-master\samples\ado\BasicSample.dproj</Transaction>
+    <Transaction>2016/04/09 14:46:08.927.pas,C:\Users\ONEIDE\Desktop\Projetos\InfraFramework4Delphi\samples\ado\User.DAO.pas=</Transaction>
+    <Transaction>2016/04/09 14:46:08.927.dfm,C:\Users\ONEIDE\Desktop\Projetos\InfraFramework4Delphi\samples\ado\User.DAO.dfm=</Transaction>
+    <Transaction>2016/04/09 14:46:11.056.pas,C:\Users\ONEIDE\Desktop\Projetos\InfraFramework4Delphi\samples\ado\Database.ADO.pas=</Transaction>
+    <Transaction>2016/04/09 14:46:11.056.dfm,C:\Users\ONEIDE\Desktop\Projetos\InfraFramework4Delphi\samples\ado\Database.ADO.dfm=</Transaction>
+  </Transactions>
+</BorlandProject>
