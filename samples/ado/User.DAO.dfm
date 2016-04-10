@@ -1,7 +1,6 @@
 inherited UserDAO: TUserDAO
   OldCreateOrder = True
   object DtsUser: TADOQuery
-    Active = True
     Connection = DatabaseADO.FADOConnection
     CursorType = ctStatic
     Parameters = <>

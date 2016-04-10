@@ -5,7 +5,12 @@ interface
 uses
   SysUtils, Classes,
   InfraFwk4D.Driver.ADO, InfraFwk4D.Iterator.DataSet,
-  InfraFwk4D.Driver.ADO.Persistence, ADODB, DB;
+  InfraFwk4D.Driver.ADO.Persistence, DB,
+{$IFDEF VER210}
+  ADODB;
+{$ELSE}
+  Data.Win.ADODB, ADODB;
+{$ENDIF}
 
 type
   TUserDAO = class(TADOPersistenceAdapter)

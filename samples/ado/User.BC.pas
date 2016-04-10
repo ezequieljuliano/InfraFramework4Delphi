@@ -3,7 +3,9 @@ unit User.BC;
 interface
 
 uses
-  InfraFwk4D.Driver, User.DAO, InfraFwk4D.Iterator.DataSet;
+  InfraFwk4D.Driver,
+  User.DAO,
+  InfraFwk4D.Iterator.DataSet;
 
 type
 

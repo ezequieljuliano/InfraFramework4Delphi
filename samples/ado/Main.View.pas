@@ -3,9 +3,15 @@ unit Main.View;
 interface
 
 uses
+  User.BC, User.DAO, Database.ADO,
+{$IFDEF VER210}
   Windows, Messages, SysUtils, Variants, Classes, Graphics,
-  Controls, Forms, Dialogs, ADODB, DB, User.DAO, Database.ADO, Grids, DBGrids,
-  ExtCtrls, DBCtrls, StdCtrls, User.BC;
+  Controls, Forms, Dialogs, ADODB, DB, Grids, DBGrids,
+  ExtCtrls, DBCtrls, StdCtrls;
+{$ELSE}
+  Forms, Data.DB, Vcl.StdCtrls, Vcl.Controls, Vcl.ExtCtrls, Vcl.DBCtrls, System.Classes, Vcl.Grids, Vcl.DBGrids,
+  Data.Win.ADODB, DB, StdCtrls, Controls, ExtCtrls, DBCtrls, Classes, Grids, DBGrids;
+{$ENDIF}
 
 type
   TForm3 = class(TForm)
@@ -48,6 +54,3 @@ begin
 end;
 
 end.
-
-
-uses User.BC;

@@ -3,10 +3,17 @@ unit InfraFwk4D.Driver.ADO.Persistence;
 interface
 
 uses
+{$IFDEF VER210}
   SysUtils,
   Classes,
   Generics.Collections,
   ADODB,
+{$ELSE}
+  System.SysUtils,
+  System.Classes,
+  System.Generics.Collections,
+  Data.Win.ADODB,
+{$ENDIF}
   InfraFwk4D.Driver,
   InfraFwk4D.Driver.ADO,
   InfraFwk4D.Iterator.DataSet;

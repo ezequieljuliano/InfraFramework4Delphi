@@ -25,7 +25,7 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_UsePackage>vclx;vcl;vclimg;dbrtl;Rave77VCL;bdertl;rtl;vclactnband;xmlrtl;vcldb;vcldbx;vcltouch;dsnap;dsnapcon;TeeUI;TeeDB;Tee;vclib;ibxpress;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_100_140;Intraweb_100_140;VclSmp;vclie;websnap;webdsnap;inetdb;inetdbbde;inetdbxpress;soaprtl;vclribbon;dbexpress;DbxCommonDriver;DataSnapIndy10ServerTransport;DataSnapProviderClient;DbxClientDriver;DataSnapServer;DBXInterBaseDriver;DBXMySQLDriver;dbxcds;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver</DCC_UsePackage>
+			<DCC_UsePackage>vclx;vcl;vclimg;dbrtl;Rave77VCL;bdertl;rtl;vclactnband;xmlrtl;vcldb;vcldbx;vcltouch;dsnap;dsnapcon;TeeUI;TeeDB;Tee;vclib;ibxpress;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_100_140;Intraweb_100_140;VclSmp;vclie;websnap;webdsnap;inetdb;inetdbbde;inetdbxpress;soaprtl;vclribbon;dbexpress;DbxCommonDriver;DataSnapIndy10ServerTransport;DataSnapProviderClient;DbxClientDriver;DataSnapServer;DBXInterBaseDriver;DBXMySQLDriver;dbxcds;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver;$(DCC_UsePackage)</DCC_UsePackage>
 			<DCC_DcpOutput>DCP/</DCC_DcpOutput>
 			<DCC_DependencyCheckOutputName>Executavel\BasicSampleADO.exe</DCC_DependencyCheckOutputName>
 			<Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
@@ -60,33 +60,6 @@
 			<DCCReference Include="Main.View.pas">
 				<Form>Form3</Form>
 			</DCCReference>
-			<DCCReference Include="..\..\src\InfraFwk4D.Driver.ADO.pas"/>
-			<DCCReference Include="..\..\src\InfraFwk4D.Driver.ADO.Persistence.pas">
-				<Form>ADOPersistenceAdapter</Form>
-				<DesignClass>TDataModule</DesignClass>
-			</DCCReference>
-			<DCCReference Include="..\..\src\InfraFwk4D.Driver.pas"/>
-			<DCCReference Include="..\..\src\InfraFwk4D.Iterator.DataSet.pas"/>
-			<DCCReference Include="..\..\src\InfraFwk4D.Message.Context.pas"/>
-			<DCCReference Include="..\..\src\InfraFwk4D.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\src\SQLBuilder4D.Parser.GaSQLParser.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\src\SQLBuilder4D.Parser.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\src\SQLBuilder4D.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaAdvancedSQLParser.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaBasicSQLParser.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaDeleteStm.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaInsertStm.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaLnkList.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaParserVisitor.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaQueryParsersReg.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSelectStm.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLExpressionParsers.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLFieldRefParsers.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLParserConsts.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLParserHelperClasses.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLSelectFieldParsers.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaSQLTableRefParsers.pas"/>
-			<DCCReference Include="..\..\..\SQLBuilder4Delphi-master\dependencies\gaSQLParser\src\gaUpdateStm.pas"/>
 			<DCCReference Include="Database.ADO.pas">
 				<Form>DatabaseADO</Form>
 				<DesignClass>TDataModule</DesignClass>
@@ -96,6 +69,11 @@
 				<DesignClass>TDataModule</DesignClass>
 			</DCCReference>
 			<DCCReference Include="User.BC.pas"/>
+			<DCCReference Include="..\..\src\InfraFwk4D.Driver.ADO.Persistence.pas">
+				<FormType>dfm</FormType>
+				<Form>ADOPersistenceAdapter</Form>
+				<DesignClass>TDataModule</DesignClass>
+			</DCCReference>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -152,7 +130,13 @@
 					</VersionInfoKeys>
 				</Delphi.Personality>
 				<Deployment Version="2">
-					<DeployFile Class="ProjectOutput" LocalName="Win32\Debug\BasicSampleADO.exe" Configuration="Debug">
+					<DeployFile Class="DebugSymbols" LocalName="Executavel\BasicSampleADO.rsm" Configuration="Debug">
+						<Platform Name="Win32">
+							<RemoteName>BasicSampleADO.rsm</RemoteName>
+							<Overwrite>true</Overwrite>
+						</Platform>
+					</DeployFile>
+					<DeployFile Class="ProjectOutput" LocalName="Executavel\BasicSampleADO.exe" Configuration="Debug">
 						<Platform Name="Win32">
 							<RemoteName>BasicSampleADO.exe</RemoteName>
 							<Overwrite>true</Overwrite>

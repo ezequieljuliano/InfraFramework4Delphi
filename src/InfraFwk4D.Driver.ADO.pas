@@ -3,12 +3,21 @@ unit InfraFwk4D.Driver.ADO;
 interface
 
 uses
+{$IFDEF VER210}
   Classes,
   SysUtils,
   Generics.Collections,
   SyncObjs,
   DB,
   ADODB,
+{$ELSE}
+  Classes,
+  SysUtils,
+  Generics.Collections,
+  SyncObjs,
+  DB,
+  Data.Win.ADODB,
+{$ENDIF}
   SQLBuilder4D,
   SQLBuilder4D.Parser,
   SQLBuilder4D.Parser.GaSQLParser,

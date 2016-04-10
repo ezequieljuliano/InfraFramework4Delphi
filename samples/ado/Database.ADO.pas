@@ -3,8 +3,13 @@ unit Database.ADO;
 interface
 
 uses
-  SysUtils, Classes, ADODB,
-  InfraFwk4D.Driver.ADO, InfraFwk4D, SyncObjs, DB;
+  SysUtils, Classes,
+  InfraFwk4D.Driver.ADO, InfraFwk4D, SyncObjs, DB,
+{$IFDEF VER210}
+  ADODB;
+{$ELSE}
+  Data.Win.ADODB, ADODB;
+{$ENDIF}
 
 type
 
