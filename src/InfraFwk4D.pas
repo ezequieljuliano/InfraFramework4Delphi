@@ -3,9 +3,9 @@ unit InfraFwk4D;
 interface
 
 uses
-  System.SysUtils,
-  System.Classes,
-  System.SyncObjs;
+  SysUtils,
+  Classes,
+  SyncObjs;
 
 type
 

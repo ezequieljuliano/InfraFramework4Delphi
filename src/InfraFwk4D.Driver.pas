@@ -3,11 +3,11 @@ unit InfraFwk4D.Driver;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
-  System.Generics.Collections,
-  System.SyncObjs,
-  Data.DB,
+  Classes,
+  SysUtils,
+  Generics.Collections,
+  SyncObjs,
+  DB,
   SQLBuilder4D,
   InfraFwk4D.Iterator.DataSet;
 
@@ -414,7 +414,11 @@ end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(const pAutoCommit: Boolean);
 begin
+{$IFDEF VER210}
+  DoExecute(FQuery, TDataSet, pAutoCommit);
+{$ELSE}
   DoExecute(FQuery, nil, pAutoCommit);
+{$ENDIF}
 end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(pDataSet: TDrvDataSet;
@@ -441,8 +445,7 @@ end;
 
 { TDriverConnection<TDrvComponent, TDrvStatement> }
 
-procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(pComponent: TDrvComponent;
-  const pOwnsComponent: Boolean);
+procedure TDriverConnection<TDrvComponent, TDrvStatement>.Build(pComponent: TDrvComponent; const pOwnsComponent: Boolean);
 begin
   DestroyComponent();
   FComponent := pComponent;
