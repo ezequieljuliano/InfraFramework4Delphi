@@ -4,14 +4,20 @@ interface
 
 uses
   User.BC, User.DAO, Database.ADO,
-{$IFDEF VER210}
+
+  {$IFDEF VER210}
+
   Windows, Messages, SysUtils, Variants, Classes, Graphics,
   Controls, Forms, Dialogs, ADODB, DB, Grids, DBGrids,
   ExtCtrls, DBCtrls, StdCtrls;
-{$ELSE}
-  Forms, Data.DB, Vcl.StdCtrls, Vcl.Controls, Vcl.ExtCtrls, Vcl.DBCtrls, System.Classes, Vcl.Grids, Vcl.DBGrids,
-  Data.Win.ADODB, DB, StdCtrls, Controls, ExtCtrls, DBCtrls, Classes, Grids, DBGrids;
-{$ENDIF}
+
+  {$ELSE}
+
+  Forms, Data.DB, Vcl.StdCtrls, Vcl.Controls, Vcl.ExtCtrls, Vcl.DBCtrls,
+  System.Classes, Vcl.Grids, Vcl.DBGrids,
+  Data.Win.ADODB;
+
+  {$ENDIF}
 
 type
   TForm3 = class(TForm)
@@ -25,11 +31,9 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
-    { Private declarations }
+    FUserBC: TUserBC;
   public
     { Public declarations }
-    FDatabaseADO: TDatabaseADO;
-    FUserBC: TUserBC;
   end;
 
 var
@@ -46,9 +50,7 @@ end;
 
 procedure TForm3.FormCreate(Sender: TObject);
 begin
-  FDatabaseADO := TDatabaseADO.Create(nil);
-
-  FUserBC := TUserBC.Create(TUserDAO);
+  FUserBC := TUserBC.Create;
   dsUser.DataSet := FUserBC.Persistence.DtsUser;
   FUserBC.Persistence.DtsUser.Open();
 end;

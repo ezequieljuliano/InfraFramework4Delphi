@@ -3,21 +3,22 @@ unit InfraFwk4D.Driver.ADO;
 interface
 
 uses
-{$IFDEF VER210}
   Classes,
   SysUtils,
   Generics.Collections,
   SyncObjs,
   DB,
+
+  {$IFDEF VER210}
+
   ADODB,
-{$ELSE}
-  Classes,
-  SysUtils,
-  Generics.Collections,
-  SyncObjs,
-  DB,
+
+  {$ELSE}
+
   Data.Win.ADODB,
-{$ENDIF}
+
+  {$ENDIF}
+
   SQLBuilder4D,
   SQLBuilder4D.Parser,
   SQLBuilder4D.Parser.GaSQLParser,
@@ -41,8 +42,7 @@ type
     function DoAsString(const pQuery: string): string; override;
     function DoAsVariant(const pQuery: string): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; pDataSet: TADOQuery);
-      override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TADOQuery); override;
     procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
   end;
 
@@ -64,7 +64,7 @@ type
   TADOConnectionManagerAdapter = class(TDriverConnectionManager<string, TADOConnectionAdapter>);
 
   IADOSingletonConnectionAdapter = interface(IDriverSingletonConnection<TADOConnectionAdapter>)
-  ['{BD8FED5F-99C9-4DF1-9FF0-8EF576F48317}']
+    ['{BD8FED5F-99C9-4DF1-9FF0-8EF576F48317}']
   end;
 
   ADOAdapter = class sealed
@@ -73,10 +73,12 @@ type
     CanNotBeInstantiatedException = 'This class can not be instantiated!';
   strict private
 
-{$HINTS OFF}
+    {$HINTS OFF}
+
     constructor Create;
 
-{$HINTS ON}
+    {$HINTS ON}
+
   public
     class function SingletonConnection(): IADOSingletonConnectionAdapter; static;
     class function NewQueryBuilder(pDataSet: TADOQuery): IDriverQueryBuilder<TADOQuery>; static;

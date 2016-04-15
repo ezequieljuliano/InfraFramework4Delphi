@@ -8,7 +8,7 @@ uses
 {$IFDEF VER210}
   ADODB;
 {$ELSE}
-  Data.Win.ADODB, ADODB;
+  Data.Win.ADODB;
 {$ENDIF}
 
 type
