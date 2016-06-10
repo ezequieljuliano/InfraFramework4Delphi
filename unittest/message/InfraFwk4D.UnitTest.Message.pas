@@ -86,12 +86,7 @@ var
   msgCtx: IMessageContext;
 begin
   msgCtx := TMessageContext.Create;
-  msgCtx.RegisterAppender(
-    function: IMessageAppender
-    begin
-      Result := TMessageAppender.Create;
-    end
-    );
+  msgCtx.RegisterAppender(TMessageAppender.Create);
 
   msgCtx.Display('test info message %d', svInfo, [1]);
   msgCtx.Display('test info message 2', svInfo);

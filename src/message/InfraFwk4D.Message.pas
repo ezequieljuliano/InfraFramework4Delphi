@@ -33,11 +33,9 @@ type
     procedure Append(question: IQuestion); overload;
   end;
 
-  TMessageAppenderDelegate<I: IMessageAppender> = reference to function: I;
-
   IMessageContext = interface
     ['{78EC5B84-CF72-4BBB-9DB5-EC319CD20235}']
-    procedure RegisterAppender(delegate: TMessageAppenderDelegate<IMessageAppender>);
+    procedure RegisterAppender(appender: IMessageAppender);
 
     procedure Display(const text: string; const severity: TSeverity; const args: array of const); overload;
     procedure Display(const text: string; const severity: TSeverity); overload;

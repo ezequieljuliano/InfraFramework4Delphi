@@ -48,23 +48,11 @@ type
 
   TMessageContext = class(TInterfacedObject, IMessageContext)
   private
-
-    type
-    TRegistration<I: IMessageAppender> = class
-    strict private
-      fDelegate: TMessageAppenderDelegate<I>;
-      fInstance: I;
-    public
-      property Delegate: TMessageAppenderDelegate<I> read fDelegate write fDelegate;
-      property Instance: I read fInstance write fInstance;
-    end;
-
-  private
-    fRegistration: TRegistration<IMessageAppender>;
+    fAppender: IMessageAppender;
   protected
     function GetAppender: IMessageAppender;
 
-    procedure RegisterAppender(delegate: TMessageAppenderDelegate<IMessageAppender>);
+    procedure RegisterAppender(appender: IMessageAppender);
 
     procedure Display(const text: string; const severity: TSeverity; const args: array of const); overload;
     procedure Display(const text: string; const severity: TSeverity); overload;
@@ -162,7 +150,7 @@ end;
 constructor TMessageContext.Create;
 begin
   inherited Create;
-  fRegistration := TRegistration<IMessageAppender>.Create;
+  fAppender := nil;
 end;
 
 function TMessageContext.Ask(const text: string; const focus: TResponse): TResponse;
@@ -181,7 +169,6 @@ end;
 
 destructor TMessageContext.Destroy;
 begin
-  fRegistration.Free;
   inherited Destroy;
 end;
 
@@ -192,14 +179,9 @@ end;
 
 function TMessageContext.GetAppender: IMessageAppender;
 begin
-  if (fRegistration.Instance = nil) then
-  begin
-    if Assigned(fRegistration.Delegate) then
-      fRegistration.Instance := fRegistration.Delegate();
-    if not Assigned(fRegistration.Instance) then
-      fRegistration.Instance := TDefaultMessageAppender.Create;
-  end;
-  Result := fRegistration.Instance;
+  if not Assigned(fAppender) then
+    fAppender := TDefaultMessageAppender.Create;
+  Result := fAppender;
 end;
 
 procedure TMessageContext.Display(const text: string; const severity: TSeverity);
@@ -212,9 +194,9 @@ begin
   GetAppender.Append(TDefaultMessage.Create(text, severity, args));
 end;
 
-procedure TMessageContext.RegisterAppender(delegate: TMessageAppenderDelegate<IMessageAppender>);
+procedure TMessageContext.RegisterAppender(appender: IMessageAppender);
 begin
-  fRegistration.Delegate := delegate;
+  fAppender := appender;
 end;
 
 end.
