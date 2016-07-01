@@ -28,7 +28,7 @@ type
 
   IConstraintValidator = interface(IValidation)
     ['{765B05D8-7481-4E96-B5F0-1740A218FD4B}']
-    procedure Initialize(const attribute: ConstraintAttribute);
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject);
     function IsValid(const value: TValue): Boolean;
     function ProcessingMessage(const msg: string): string;
   end;

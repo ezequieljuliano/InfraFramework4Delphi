@@ -45,5 +45,9 @@ object Model: TModel
     object EntityDecimalMinValue: TFloatField
       FieldName = 'DecimalMinValue'
     end
+    object EntityNotNullWhenValue: TStringField
+      FieldName = 'NotNullWhenValue'
+      Size = 15
+    end
   end
 end

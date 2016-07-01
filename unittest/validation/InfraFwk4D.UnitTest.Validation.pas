@@ -169,6 +169,18 @@ begin
   fModel.Entity.Cancel;
 
   fModel.Entity.Edit;
+  fModel.EntityNotNullWhenValue.AsString := '';
+  violations := validadorCtx.Validate(fModel.Entity);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('Value can not be null.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TClientDataSet'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TClientDataSet'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '');
+  CheckEqualsString('EntityNotNullWhenValue', violations.Items[0].GetValueOwnersName);
+  fModel.Entity.Cancel;
+
+  fModel.Entity.Edit;
   fModel.EntityNullValue.AsString := 'NotNull';
   violations := validadorCtx.Validate(fModel.Entity);
   CheckTrue(violations.Count = 1);
@@ -249,7 +261,7 @@ begin
   validator := TDecimalMaxValidator.Create;
   attr := DecimalMaxAttribute.Create(20.5);
   try
-    validator.Initialize(attr);
+    validator.Initialize(attr, nil);
 
     CheckTrue(validator.IsValid(19.2));
     CheckTrue(validator.IsValid(20.5));
@@ -269,7 +281,7 @@ begin
   validator := TDecimalMinValidator.Create;
   attr := DecimalMinAttribute.Create(5.5);
   try
-    validator.Initialize(attr);
+    validator.Initialize(attr, nil);
 
     CheckTrue(validator.IsValid(6.3));
     CheckTrue(validator.IsValid(5.5));
@@ -303,7 +315,7 @@ begin
   validator := TMaxValidator.Create;
   attr := MaxAttribute.Create(20);
   try
-    validator.Initialize(attr);
+    validator.Initialize(attr, nil);
 
     CheckTrue(validator.IsValid(19));
     CheckTrue(validator.IsValid(20));
@@ -323,7 +335,7 @@ begin
   validator := TMinValidator.Create;
   attr := MinAttribute.Create(5);
   try
-    validator.Initialize(attr);
+    validator.Initialize(attr, nil);
 
     CheckTrue(validator.IsValid(6));
     CheckTrue(validator.IsValid(5));
@@ -415,6 +427,18 @@ begin
   CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
   CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '');
   CheckEqualsString('EntityNotNullValue', violations.Items[0].GetValueOwnersName);
+  fModel.Entity.Cancel;
+
+  fModel.Entity.Edit;
+  fModel.EntityNotNullWhenValue.AsString := '';
+  violations := validadorCtx.Validate(fModel);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('Value can not be null.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TModel'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TModel'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '');
+  CheckEqualsString('EntityNotNullWhenValue', violations.Items[0].GetValueOwnersName);
   fModel.Entity.Cancel;
 
   fModel.Entity.Edit;
@@ -554,7 +578,7 @@ begin
   validator := TSizeValidator.Create;
   attr := SizeAttribute.Create(5, 10);
   try
-    validator.Initialize(attr);
+    validator.Initialize(attr, nil);
 
     CheckTrue(validator.IsValid('Ezequiel'));
     CheckTrue(validator.IsValid('Ezequ'));
@@ -641,6 +665,17 @@ begin
   CheckTrue(violations.Items[0].GetInvalidValue.AsType<string> = '');
   CheckEqualsString('fNotNullValue', violations.Items[0].GetValueOwnersName);
   fEntity.NotNullValue := 'NotNull';
+
+  fEntity.NotNullWhenValue := '';
+  violations := validadorCtx.Validate(fEntity);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('Value can not be null.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TEntity'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TEntity'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<string>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<string> = '');
+  CheckEqualsString('fNotNullWhenValue', violations.Items[0].GetValueOwnersName);
+  fEntity.NotNullWhenValue := 'NotNullWhen';
 
   fEntity.NullValue := 'NotNull';
   violations := validadorCtx.Validate(fEntity);

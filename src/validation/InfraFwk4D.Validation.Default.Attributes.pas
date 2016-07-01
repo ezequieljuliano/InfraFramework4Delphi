@@ -92,6 +92,19 @@ type
     { public declarations }
   end;
 
+  NotNullWhenAttribute = class(ConstraintAttribute)
+  private
+    fName: string;
+    fValue: string;
+  protected
+    { protected declarations }
+  public
+    constructor Create(const name: string; const value: string);
+
+    property Name: string read fName;
+    property Value: string read fValue;
+  end;
+
   NullAttribute = class(ConstraintAttribute)
   private
     { private declarations }
@@ -173,6 +186,15 @@ end;
 constructor DecimalMinAttribute.Create(const value: Double);
 begin
   inherited Create;
+  fValue := value;
+end;
+
+{ NotNullWhenAttribute }
+
+constructor NotNullWhenAttribute.Create(const name: string; const value: string);
+begin
+  inherited Create;
+  fName := name;
   fValue := value;
 end;
 

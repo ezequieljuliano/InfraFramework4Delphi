@@ -111,6 +111,7 @@ begin
   RegisterConstraintValidator(MinAttribute, TMinValidator.Create);
   RegisterConstraintValidator(SizeAttribute, TSizeValidator.Create);
   RegisterConstraintValidator(NotNullAttribute, TNotNullValidator.Create);
+  RegisterConstraintValidator(NotNullWhenAttribute, TNotNullWhenValidator.Create);
   RegisterConstraintValidator(NullAttribute, TNullValidator.Create);
   RegisterConstraintValidator(PastAttribute, TPastValidator.Create);
   RegisterConstraintValidator(PresentAttribute, TPresentValidator.Create);
@@ -125,6 +126,7 @@ begin
   RegisterConstraintMessage(MinAttribute, 'The value must be greater than or equal to {value}.');
   RegisterConstraintMessage(SizeAttribute, 'The size should be between {min} and {max}.');
   RegisterConstraintMessage(NotNullAttribute, 'Value can not be null.');
+  RegisterConstraintMessage(NotNullWhenAttribute, 'Value can not be null.');
   RegisterConstraintMessage(NullAttribute, 'The value should be null.');
   RegisterConstraintMessage(PastAttribute, 'It must be a date in the past.');
   RegisterConstraintMessage(PresentAttribute, 'It must be a date in the present.');
@@ -157,7 +159,7 @@ var
 begin
   if fValidators.ContainsKey(attribute.ClassName) then
   begin
-    fValidators.Items[attribute.ClassName].Initialize(attribute);
+    fValidators.Items[attribute.ClassName].Initialize(attribute, obj);
     if not fValidators.Items[attribute.ClassName].IsValid(value) then
     begin
       msg := EmptyStr;

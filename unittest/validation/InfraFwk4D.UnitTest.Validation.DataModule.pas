@@ -47,6 +47,9 @@ type
     [DecimalMin(10.5)]
     EntityDecimalMinValue: TFloatField;
 
+    [NotNullWhen('EntityMaxValue', '20')]
+    EntityNotNullWhenValue: TStringField;
+
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -76,6 +79,7 @@ begin
   EntityFutureValue.AsDateTime := Date + 1;
   EntityDecimalMaxValue.AsFloat := 20.5;
   EntityDecimalMinValue.AsFloat := 10.5;
+  EntityNotNullWhenValue.AsString := 'NotNullWhen';
   Entity.Post;
 end;
 

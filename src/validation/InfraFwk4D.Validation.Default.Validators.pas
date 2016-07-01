@@ -17,7 +17,7 @@ type
   private
     { private declarations }
   protected
-    procedure Initialize(const attribute: ConstraintAttribute); virtual;
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); virtual;
     function ProcessingMessage(const msg: string): string; virtual;
   public
     { public declarations }
@@ -45,7 +45,7 @@ type
   private
     fMaxValue: Integer;
   protected
-    procedure Initialize(const attribute: ConstraintAttribute); override;
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
     function IsValid(const value: TValue): Boolean;
     function ProcessingMessage(const msg: string): string; override;
   public
@@ -56,7 +56,7 @@ type
   private
     fMinValue: Integer;
   protected
-    procedure Initialize(const attribute: ConstraintAttribute); override;
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
     function IsValid(const value: TValue): Boolean;
     function ProcessingMessage(const msg: string): string; override;
   public
@@ -68,7 +68,7 @@ type
     fMinValue: Integer;
     fMaxValue: Integer;
   protected
-    procedure Initialize(const attribute: ConstraintAttribute); override;
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
     function IsValid(const value: TValue): Boolean;
     function ProcessingMessage(const msg: string): string; override;
   public
@@ -79,7 +79,7 @@ type
   private
     fMaxValue: Double;
   protected
-    procedure Initialize(const attribute: ConstraintAttribute); override;
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
     function IsValid(const value: TValue): Boolean;
     function ProcessingMessage(const msg: string): string; override;
   public
@@ -90,7 +90,7 @@ type
   private
     fMinValue: Double;
   protected
-    procedure Initialize(const attribute: ConstraintAttribute); override;
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
     function IsValid(const value: TValue): Boolean;
     function ProcessingMessage(const msg: string): string; override;
   public
@@ -101,7 +101,19 @@ type
   private
     { private declarations }
   protected
-    function IsValid(const value: TValue): Boolean;
+    function IsValid(const value: TValue): Boolean; virtual;
+  public
+    { public declarations }
+  end;
+
+  TNotNullWhenValidator = class(TNotNullValidator, IConstraintValidator)
+  private
+    fObj: TObject;
+    fName: string;
+    fValue: string;
+  protected
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
+    function IsValid(const value: TValue): Boolean; override;
   public
     { public declarations }
   end;
@@ -146,7 +158,7 @@ implementation
 
 { TAbstractValidator }
 
-procedure TAbstractValidator.Initialize(const attribute: ConstraintAttribute);
+procedure TAbstractValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
 begin
   { not used }
 end;
@@ -190,7 +202,7 @@ end;
 
 { TMaxValidator }
 
-procedure TMaxValidator.Initialize(const attribute: ConstraintAttribute);
+procedure TMaxValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
 begin
   inherited;
   fMaxValue := MaxAttribute(attribute).Value;
@@ -222,7 +234,7 @@ begin
   Result := msg.Replace('{value}', fMinValue.ToString);
 end;
 
-procedure TMinValidator.Initialize(const attribute: ConstraintAttribute);
+procedure TMinValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
 begin
   inherited;
   fMinValue := MinAttribute(attribute).Value;
@@ -244,7 +256,7 @@ end;
 
 { TSizeValidator }
 
-procedure TSizeValidator.Initialize(const attribute: ConstraintAttribute);
+procedure TSizeValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
 begin
   inherited;
   fMinValue := SizeAttribute(attribute).Min;
@@ -360,7 +372,7 @@ end;
 
 { TDecimalMaxValidator }
 
-procedure TDecimalMaxValidator.Initialize(const attribute: ConstraintAttribute);
+procedure TDecimalMaxValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
 begin
   inherited;
   fMaxValue := DecimalMaxAttribute(attribute).Value;
@@ -387,7 +399,7 @@ end;
 
 { TDecimalMinValidator }
 
-procedure TDecimalMinValidator.Initialize(const attribute: ConstraintAttribute);
+procedure TDecimalMinValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
 begin
   inherited;
   fMinValue := DecimalMaxAttribute(attribute).Value;
@@ -410,6 +422,50 @@ end;
 function TDecimalMinValidator.ProcessingMessage(const msg: string): string;
 begin
   Result := msg.Replace('{value}', fMinValue.ToString);
+end;
+
+{ TNotNullWhenValidator }
+
+procedure TNotNullWhenValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
+begin
+  inherited;
+  fObj := obj;
+  fName := NotNullWhenAttribute(attribute).Name;
+  fValue := NotNullWhenAttribute(attribute).Value;
+end;
+
+function TNotNullWhenValidator.IsValid(const value: TValue): Boolean;
+var
+  rttiContext: TRttiContext;
+  rttiField: TRttiField;
+  rttiProperty: TRttiProperty;
+begin
+  Result := True;
+  if Assigned(fObj) and (not fName.IsEmpty) and (not fValue.IsEmpty) then
+  begin
+    rttiContext := TRttiContext.Create;
+    try
+      if (fObj is TDataSet) then
+        fObj := TDataSet(fObj).Owner;
+
+      rttiField := rttiContext.GetType(fObj.ClassType).GetField(fName);
+      if Assigned(rttiField) and (not rttiField.GetValue(fObj).IsEmpty) then
+        if (rttiField.GetValue(fObj).IsType<TField>) then
+        begin
+          if rttiField.GetValue(fObj).AsType<TField>.AsString.Equals(fValue) then
+            Exit(inherited IsValid(value));
+        end
+        else if rttiField.GetValue(fObj).ToString.Equals(fValue) then
+          Exit(inherited IsValid(value));
+
+      rttiProperty := rttiContext.GetType(fObj.ClassType).GetProperty(fName);
+      if Assigned(rttiProperty) and (not rttiProperty.GetValue(fObj).IsEmpty) then
+        if rttiProperty.GetValue(fObj).ToString.Equals(fValue) then
+          Exit(inherited IsValid(value));
+    finally
+      rttiContext.Free;
+    end;
+  end;
 end;
 
 end.

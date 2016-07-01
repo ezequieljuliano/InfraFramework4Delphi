@@ -32,6 +32,8 @@ type
     fDecimalMaxValue: Double;
     [DecimalMin(10.5)]
     fDecimalMinValue: Double;
+    [NotNullWhen('fMaxValue', '20')]
+    fNotNullWhenValue: string;
   public
     constructor Create;
 
@@ -49,6 +51,7 @@ type
     property FutureValue: TDateTime read fFutureValue write fFutureValue;
     property DecimalMaxValue: Double read fDecimalMaxValue write fDecimalMaxValue;
     property DecimalMinValue: Double read fDecimalMinValue write fDecimalMinValue;
+    property NotNullWhenValue: string read fNotNullWhenValue write fNotNullWhenValue;
   end;
 
 implementation
@@ -69,6 +72,7 @@ begin
   fFutureValue := Date + 1;
   fDecimalMaxValue := 20.5;
   fDecimalMinValue := 10.5;
+  fNotNullWhenValue := 'NotNullWhen';
 end;
 
 end.
