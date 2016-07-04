@@ -32,7 +32,7 @@ type
     fDecimalMaxValue: Double;
     [DecimalMin(10.5)]
     fDecimalMinValue: Double;
-    [NotNullWhen('fMaxValue', '20')]
+    [NotNullWhen('fMaxValue', 20)]
     fNotNullWhenValue: string;
   public
     constructor Create;

@@ -3,6 +3,7 @@ unit InfraFwk4D.Validation.Default.Attributes;
 interface
 
 uses
+  System.SysUtils,
   InfraFwk4D.Validation;
 
 type
@@ -99,7 +100,9 @@ type
   protected
     { protected declarations }
   public
-    constructor Create(const name: string; const value: string);
+    constructor Create(const name: string; const value: string); overload;
+    constructor Create(const name: string; const value: Integer); overload;
+    constructor Create(const name: string; const value: Double); overload;
 
     property Name: string read fName;
     property Value: string read fValue;
@@ -196,6 +199,16 @@ begin
   inherited Create;
   fName := name;
   fValue := value;
+end;
+
+constructor NotNullWhenAttribute.Create(const name: string; const value: Integer);
+begin
+  Create(name, value.ToString);
+end;
+
+constructor NotNullWhenAttribute.Create(const name: string; const value: Double);
+begin
+  Create(name, value.ToString);
 end;
 
 end.
