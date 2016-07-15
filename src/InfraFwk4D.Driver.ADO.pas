@@ -95,7 +95,9 @@ type
   private
     class var SingletonConnection: IADOSingletonConnectionAdapter;
     class constructor Create;
+    {$HINTS OFF}
     class destructor Destroy;
+    {$HINTS ON}
   private
     FConnectionAdapter: TADOConnectionAdapter;
 
@@ -137,6 +139,8 @@ type
     function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TADOQuery>; overload;
     function Add(const pQuery: string): IDriverQueryBuilder<TADOQuery>; overload;
 
+    function AddParamByName(const pParam: string; const pValue: Variant):IDriverQueryBuilder<TADOQuery>;
+
     procedure Activate;
   end;
 
@@ -148,6 +152,7 @@ begin
   Result := TADOQuery.Create(nil);
   Result.Connection := GetConnection.Component.Connection;
   Result.SQL.Add(pQuery);
+  Result.CommandTimeout := 0;
   Result.Prepared := True;
   Result.Open;
 end;
@@ -394,6 +399,12 @@ function TADOQueryBuilder.Add(const pQuery: string)
   : IDriverQueryBuilder<TADOQuery>;
 begin
   Result := Build(pQuery);
+end;
+
+function TADOQueryBuilder.AddParamByName(const pParam: string; const pValue: Variant): IDriverQueryBuilder<TADOQuery>;
+begin
+  FDataSet.Parameters.ParamByName(pParam).Value := pValue;
+  Result := Self;
 end;
 
 function TADOQueryBuilder.Add(pHaving: ISQLHaving)
