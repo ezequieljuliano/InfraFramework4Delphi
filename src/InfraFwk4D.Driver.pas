@@ -3,6 +3,7 @@ unit InfraFwk4D.Driver;
 interface
 
 uses
+  Rtti,
   Classes,
   SysUtils,
   Generics.Collections,
@@ -56,6 +57,10 @@ type
 
     procedure Execute(const pAutoCommit: Boolean = False); overload;
     procedure Execute(pDataSet: TDrvDataSet; const pAutoCommit: Boolean = False); overload;
+
+    function PreparedBuild(const pQuery: string): TDriverStatement<TDrvDataSet, TDrvConnection>; virtual; abstract;
+    function AddParamByName(const pParam: string; const pValue: Variant): TDriverStatement<TDrvDataSet, TDrvConnection>; virtual; abstract;
+    procedure PreparedExecute(const pAutoCommit: Boolean = False); virtual; abstract;
 
     function AsDataSet(const pFetchRows: Integer = 0): TDrvDataSet;
     function AsIterator(const pFetchRows: Integer = 0): IIteratorDataSet;

@@ -3,6 +3,7 @@ unit InfraFwk4D.Driver.ADO;
 interface
 
 uses
+  Variants,
   Classes,
   SysUtils,
   Generics.Collections,
@@ -32,6 +33,8 @@ type
   TADOConnectionAdapter = class;
 
   TADOStatementAdapter = class(TDriverStatement<TADOQuery, TADOConnectionAdapter>)
+  strict private
+    FDataSet: TADOQuery;
   strict protected
     procedure DoExecute(const pQuery: string; pDataSet: TADOQuery; const pAutoCommit: Boolean); override;
 
@@ -44,6 +47,10 @@ type
 
     procedure DoInDataSet(const pQuery: string; pDataSet: TADOQuery); override;
     procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
+
+    function PreparedBuild(const pQuery: string): TDriverStatement<TADOQuery, TADOConnectionAdapter>; override;
+    function AddParamByName(const pParam: string; const pValue: Variant): TDriverStatement<TADOQuery, TADOConnectionAdapter>; override;
+    procedure PreparedExecute(const pAutoCommit: Boolean = False); override;
   end;
 
   TADOConnectionAdapter = class(TDriverConnection<TADOComponentAdapter, TADOStatementAdapter>)
@@ -145,6 +152,44 @@ type
   end;
 
   { TADOStatementAdapter }
+
+function TADOStatementAdapter.AddParamByName(const pParam: string; const pValue: Variant): TDriverStatement<TADOQuery, TADOConnectionAdapter>;
+begin
+  FDataSet.Parameters.ParamByName(pParam).Value := pValue;
+  Result := Self;
+end;
+
+function TADOStatementAdapter.PreparedBuild(const pQuery: string): TDriverStatement<TADOQuery, TADOConnectionAdapter>;
+begin
+  if not(Assigned(FDataSet)) then
+    FDataSet := TADOQuery.Create(nil);
+  FDataSet.Connection := GetConnection.Component.Connection;
+  FDataSet.Close;
+  FDataSet.SQL.Clear;
+  FDataSet.SQL.Add(pQuery);
+  FDataSet.Prepared := True;
+  FDataSet.CommandTimeout := 0;
+  Result := Self;
+end;
+
+procedure TADOStatementAdapter.PreparedExecute(const pAutoCommit: Boolean);
+begin
+  if pAutoCommit then
+  begin
+    try
+      GetConnection.StartTransaction;
+      FDataSet.ExecSQL;
+      GetConnection.Commit;
+    except
+      GetConnection.Rollback;
+      raise;
+    end;
+  end
+  else
+  begin
+    FDataSet.ExecSQL;
+  end;
+end;
 
 function TADOStatementAdapter.DoAsDataSet(const pQuery: string;
   const pFetchRows: Integer): TADOQuery;
