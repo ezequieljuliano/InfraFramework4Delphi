@@ -128,6 +128,8 @@ type
     function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>; overload;
     function Add(const pQuery: string): IDriverQueryBuilder<TIBDataSet>; overload;
 
+    function AddParamByName(const pParam: string; const pValue: Variant): IDriverQueryBuilder<TIBDataSet>;
+
     procedure Activate;
   end;
 
@@ -377,6 +379,12 @@ end;
 function TIBXQueryBuilder.Add(const pQuery: string): IDriverQueryBuilder<TIBDataSet>;
 begin
   Result := Build(pQuery);
+end;
+
+function TIBXQueryBuilder.AddParamByName(const pParam: string; const pValue: Variant): IDriverQueryBuilder<TIBDataSet>;
+begin
+  FDataSet.Params.ByName(pParam).Value := pValue;
+  Result := Self;
 end;
 
 function TIBXQueryBuilder.Add(pHaving: ISQLHaving): IDriverQueryBuilder<TIBDataSet>;

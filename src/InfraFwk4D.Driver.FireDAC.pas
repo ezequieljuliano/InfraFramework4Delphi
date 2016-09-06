@@ -133,6 +133,8 @@ type
     function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>; overload;
     function Add(const pQuery: string): IDriverQueryBuilder<TFDQuery>; overload;
 
+    function AddParamByName(const pParam: string; const pValue: Variant): IDriverQueryBuilder<TFDQuery>;
+
     procedure Activate;
   end;
 
@@ -414,6 +416,13 @@ end;
 function TFireDACQueryBuilder.Add(const pQuery: string): IDriverQueryBuilder<TFDQuery>;
 begin
   Result := Build(pQuery);
+end;
+
+function TFireDACQueryBuilder.AddParamByName(const pParam: string;
+  const pValue: Variant): IDriverQueryBuilder<TFDQuery>;
+begin
+  FDataSet.Params.ParamByName(pParam).Value := pValue;
+  Result := Self;
 end;
 
 function TFireDACQueryBuilder.Add(pHaving: ISQLHaving): IDriverQueryBuilder<TFDQuery>;
