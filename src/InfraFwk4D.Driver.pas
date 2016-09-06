@@ -174,6 +174,8 @@ type
     function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TDrvDataSet>; overload;
     function Add(const pQuery: string): IDriverQueryBuilder<TDrvDataSet>; overload;
 
+    function AddParamByName(const pParam: string; const pValue: Variant):IDriverQueryBuilder<TDrvDataSet>;
+
     procedure Activate;
   end;
 
