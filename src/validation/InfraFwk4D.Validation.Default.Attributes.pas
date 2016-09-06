@@ -103,6 +103,7 @@ type
     constructor Create(const name: string; const value: string); overload;
     constructor Create(const name: string; const value: Integer); overload;
     constructor Create(const name: string; const value: Double); overload;
+    constructor Create(const name: string; const value: Boolean); overload;
 
     property Name: string read fName;
     property Value: string read fValue;
@@ -209,6 +210,11 @@ end;
 constructor NotNullWhenAttribute.Create(const name: string; const value: Double);
 begin
   Create(name, value.ToString);
+end;
+
+constructor NotNullWhenAttribute.Create(const name: string; const value: Boolean);
+begin
+  Create(name, BoolToStr(value, True))
 end;
 
 end.

@@ -49,5 +49,9 @@ object Model: TModel
       FieldName = 'NotNullWhenValue'
       Size = 15
     end
+    object EntityNotNullWhenBooleanValue: TStringField
+      FieldName = 'NotNullWhenBooleanValue'
+      Size = 50
+    end
   end
 end
