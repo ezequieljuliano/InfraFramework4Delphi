@@ -193,6 +193,18 @@ begin
   fModel.Entity.Cancel;
 
   fModel.Entity.Edit;
+  fModel.EntityNotNullInValues.AsString := '';
+  violations := validadorCtx.Validate(fModel.Entity);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('Value can not be null.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TClientDataSet'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TClientDataSet'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '');
+  CheckEqualsString('EntityNotNullInValues', violations.Items[0].GetValueOwnersName);
+  fModel.Entity.Cancel;
+
+  fModel.Entity.Edit;
   fModel.EntityNullValue.AsString := 'NotNull';
   violations := validadorCtx.Validate(fModel.Entity);
   CheckTrue(violations.Count = 1);
@@ -466,6 +478,18 @@ begin
   fModel.Entity.Cancel;
 
   fModel.Entity.Edit;
+  fModel.EntityNotNullInValues.AsString := '';
+  violations := validadorCtx.Validate(fModel);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('Value can not be null.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TModel'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TModel'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '');
+  CheckEqualsString('EntityNotNullInValues', violations.Items[0].GetValueOwnersName);
+  fModel.Entity.Cancel;
+
+  fModel.Entity.Edit;
   fModel.EntityNullValue.AsString := 'NotNull';
   violations := validadorCtx.Validate(fModel);
   CheckTrue(violations.Count = 1);
@@ -711,6 +735,17 @@ begin
   CheckTrue(violations.Items[0].GetInvalidValue.AsType<string> = '');
   CheckEqualsString('fNotNullWhenBooleanValue', violations.Items[0].GetValueOwnersName);
   fEntity.NotNullWhenBooleanValue := 'fNotNullWhenBooleanValue';
+
+  fEntity.NotNullInValues := '';
+  violations := validadorCtx.Validate(fEntity);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('Value can not be null.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TEntity'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TEntity'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<string>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<string> = '');
+  CheckEqualsString('fNotNullInValues', violations.Items[0].GetValueOwnersName);
+  fEntity.NotNullInValues := 'NotNullInValues';
 
   fEntity.NullValue := 'NotNull';
   violations := validadorCtx.Validate(fEntity);

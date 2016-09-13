@@ -109,6 +109,19 @@ type
     property Value: string read fValue;
   end;
 
+  NotNullInAttribute = class(ConstraintAttribute)
+  private
+    fName: string;
+    fValues: TArray<String>;
+  protected
+    { protected declarations }
+  public
+    constructor Create(const name: string; const values: string);
+
+    property Name: string read fName;
+    property Values: TArray<String> read fValues;
+  end;
+
   NullAttribute = class(ConstraintAttribute)
   private
     { private declarations }
@@ -215,6 +228,15 @@ end;
 constructor NotNullWhenAttribute.Create(const name: string; const value: Boolean);
 begin
   Create(name, BoolToStr(value, True))
+end;
+
+{ NotNullInAttribute }
+
+constructor NotNullInAttribute.Create(const name, values: string);
+begin
+  inherited Create;
+  fName := name;
+  fValues := values.Split([';']);
 end;
 
 end.

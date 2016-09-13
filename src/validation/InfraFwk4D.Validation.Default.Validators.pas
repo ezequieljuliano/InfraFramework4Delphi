@@ -4,6 +4,7 @@ interface
 
 uses
   System.SysUtils,
+  System.StrUtils,
   System.Rtti,
   System.DateUtils,
   System.Types,
@@ -111,6 +112,18 @@ type
     fObj: TObject;
     fName: string;
     fValue: string;
+  protected
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
+    function IsValid(const value: TValue): Boolean; override;
+  public
+    { public declarations }
+  end;
+
+  TNotNullInValidator = class(TNotNullValidator, IConstraintValidator)
+  private
+    fObj: TObject;
+    fName: string;
+    fValues: TArray<String>;
   protected
     procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
     function IsValid(const value: TValue): Boolean; override;
@@ -461,6 +474,50 @@ begin
       rttiProperty := rttiContext.GetType(fObj.ClassType).GetProperty(fName);
       if Assigned(rttiProperty) and (not rttiProperty.GetValue(fObj).IsEmpty) then
         if rttiProperty.GetValue(fObj).ToString.Equals(fValue) then
+          Exit(inherited IsValid(value));
+    finally
+      rttiContext.Free;
+    end;
+  end;
+end;
+
+{ TNotNullInValidator }
+
+procedure TNotNullInValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
+begin
+  inherited;
+  fObj := obj;
+  fName := NotNullInAttribute(attribute).Name;
+  fValues := NotNullInAttribute(attribute).Values;
+end;
+
+function TNotNullInValidator.IsValid(const value: TValue): Boolean;
+var
+  rttiContext: TRttiContext;
+  rttiField: TRttiField;
+  rttiProperty: TRttiProperty;
+begin
+  Result := True;
+  if Assigned(fObj) and (not fName.IsEmpty) and (Length(fValues) > 0) then
+  begin
+    rttiContext := TRttiContext.Create;
+    try
+      if (fObj is TDataSet) then
+        fObj := TDataSet(fObj).Owner;
+
+      rttiField := rttiContext.GetType(fObj.ClassType).GetField(fName);
+      if Assigned(rttiField) and (not rttiField.GetValue(fObj).IsEmpty) then
+        if (rttiField.GetValue(fObj).IsType<TField>) then
+        begin
+          if MatchStr(rttiField.GetValue(fObj).AsType<TField>.AsString, fValues) then
+            Exit(inherited IsValid(value));
+        end
+        else if MatchStr(rttiField.GetValue(fObj).ToString, fValues) then
+          Exit(inherited IsValid(value));
+
+      rttiProperty := rttiContext.GetType(fObj.ClassType).GetProperty(fName);
+      if Assigned(rttiProperty) and (not rttiProperty.GetValue(fObj).IsEmpty) then
+        if MatchStr(rttiProperty.GetValue(fObj).ToString, fValues) then
           Exit(inherited IsValid(value));
     finally
       rttiContext.Free;

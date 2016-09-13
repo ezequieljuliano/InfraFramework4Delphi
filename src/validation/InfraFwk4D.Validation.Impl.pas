@@ -112,6 +112,7 @@ begin
   RegisterConstraintValidator(SizeAttribute, TSizeValidator.Create);
   RegisterConstraintValidator(NotNullAttribute, TNotNullValidator.Create);
   RegisterConstraintValidator(NotNullWhenAttribute, TNotNullWhenValidator.Create);
+  RegisterConstraintValidator(NotNullInAttribute, TNotNullInValidator.Create);
   RegisterConstraintValidator(NullAttribute, TNullValidator.Create);
   RegisterConstraintValidator(PastAttribute, TPastValidator.Create);
   RegisterConstraintValidator(PresentAttribute, TPresentValidator.Create);
@@ -127,6 +128,7 @@ begin
   RegisterConstraintMessage(SizeAttribute, 'The size should be between {min} and {max}.');
   RegisterConstraintMessage(NotNullAttribute, 'Value can not be null.');
   RegisterConstraintMessage(NotNullWhenAttribute, 'Value can not be null.');
+  RegisterConstraintMessage(NotNullInAttribute, 'Value can not be null.');
   RegisterConstraintMessage(NullAttribute, 'The value should be null.');
   RegisterConstraintMessage(PastAttribute, 'It must be a date in the past.');
   RegisterConstraintMessage(PresentAttribute, 'It must be a date in the present.');

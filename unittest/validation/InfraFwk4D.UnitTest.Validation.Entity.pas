@@ -36,6 +36,8 @@ type
     fNotNullWhenValue: string;
     [NotNullWhen('fFalseValue', False)]
     fNotNullWhenBooleanValue: string;
+    [NotNullIn('fMaxValue', '10;20;30')]
+    fNotNullInValues: string;
   public
     constructor Create;
 
@@ -55,6 +57,7 @@ type
     property DecimalMinValue: Double read fDecimalMinValue write fDecimalMinValue;
     property NotNullWhenValue: string read fNotNullWhenValue write fNotNullWhenValue;
     property NotNullWhenBooleanValue: string read fNotNullWhenBooleanValue write fNotNullWhenBooleanValue;
+    property NotNullInValues: string read fNotNullInValues write fNotNullInValues;
   end;
 
 implementation
@@ -77,6 +80,7 @@ begin
   fDecimalMinValue := 10.5;
   fNotNullWhenValue := 'NotNullWhen';
   fNotNullWhenBooleanValue := 'NotNullWhenBooleanValue';
+  fNotNullInValues := 'fNotNullInValues';
 end;
 
 end.

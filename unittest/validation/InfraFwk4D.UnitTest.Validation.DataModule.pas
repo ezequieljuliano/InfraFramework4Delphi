@@ -53,6 +53,9 @@ type
     [NotNullWhen('EntityFalseValue', False)]
     EntityNotNullWhenBooleanValue: TStringField;
 
+    [NotNullIn('EntityMaxValue', '10;20;30;40')]
+    EntityNotNullInValues: TStringField;
+
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -84,6 +87,7 @@ begin
   EntityDecimalMinValue.AsFloat := 10.5;
   EntityNotNullWhenValue.AsString := 'NotNullWhen';
   EntityNotNullWhenBooleanValue.AsString := 'NotNullWhenBooleanValue';
+  EntityNotNullInValues.AsString := 'EntityNotNullInValues';
   Entity.Post;
 end;
 
