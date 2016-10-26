@@ -57,5 +57,9 @@ object Model: TModel
       FieldName = 'NotNullInValues'
       Size = 15
     end
+    object EntityAssertInValue: TStringField
+      FieldName = 'AssertInValue'
+      Size = 2
+    end
   end
 end

@@ -26,6 +26,17 @@ type
     { public declarations }
   end;
 
+  AssertInAttribute = class(ConstraintAttribute)
+  private
+    fValues: TArray<String>;
+  protected
+    { protected declarations }
+  public
+    constructor Create(const values: string);
+
+    property Values: TArray<String> read fValues;
+  end;
+
   MaxAttribute = class(ConstraintAttribute)
   private
     fValue: Integer;
@@ -236,6 +247,14 @@ constructor NotNullInAttribute.Create(const name, values: string);
 begin
   inherited Create;
   fName := name;
+  fValues := values.Split([';']);
+end;
+
+{ AssertInAttribute }
+
+constructor AssertInAttribute.Create(const values: string);
+begin
+  inherited Create;
   fValues := values.Split([';']);
 end;
 

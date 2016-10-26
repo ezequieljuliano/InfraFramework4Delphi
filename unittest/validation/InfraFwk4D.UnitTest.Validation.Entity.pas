@@ -12,41 +12,61 @@ type
   private
     [AssertFalse]
     fFalseValue: Boolean;
+
     fTrueValue: Boolean;
+
     [Max(20)]
     fMaxValue: Integer;
+
     fMinValue: Integer;
+
     [Size(5, 10)]
     fSizeValue: string;
+
     [NotNull]
     fNotNullValue: string;
+
     [Null]
     fNullValue: string;
+
     [Past]
     fPastValue: TDateTime;
+
     [Present]
     fPresentValue: TDateTime;
+
     [Future]
     fFutureValue: TDateTime;
+
     [DecimalMax(20.5)]
     fDecimalMaxValue: Double;
+
     [DecimalMin(10.5)]
     fDecimalMinValue: Double;
+
     [NotNullWhen('fMaxValue', 20)]
     fNotNullWhenValue: string;
+
     [NotNullWhen('fFalseValue', False)]
     fNotNullWhenBooleanValue: string;
+
     [NotNullIn('fMaxValue', '10;20;30')]
     fNotNullInValues: string;
+
+    [AssertIn('10;20;30')]
+    fAssertInValue: string;
   public
     constructor Create;
 
     property FalseValue: Boolean read fFalseValue write fFalseValue;
+
     [AssertTrue]
     property TrueValue: Boolean read fTrueValue write fTrueValue;
     property MaxValue: Integer read fMaxValue write fMaxValue;
+
     [Min(5)]
     property MinValue: Integer read fMinValue write fMinValue;
+
     property SizeValue: string read fSizeValue write fSizeValue;
     property NotNullValue: string read fNotNullValue write fNotNullValue;
     property NullValue: string read fNullValue write fNullValue;
@@ -58,6 +78,7 @@ type
     property NotNullWhenValue: string read fNotNullWhenValue write fNotNullWhenValue;
     property NotNullWhenBooleanValue: string read fNotNullWhenBooleanValue write fNotNullWhenBooleanValue;
     property NotNullInValues: string read fNotNullInValues write fNotNullInValues;
+    property AssertInValue: string read fAssertInValue write fAssertInValue;
   end;
 
 implementation
@@ -81,6 +102,7 @@ begin
   fNotNullWhenValue := 'NotNullWhen';
   fNotNullWhenBooleanValue := 'NotNullWhenBooleanValue';
   fNotNullInValues := 'fNotNullInValues';
+  fAssertInValue := '10';
 end;
 
 end.

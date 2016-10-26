@@ -56,6 +56,9 @@ type
     [NotNullIn('EntityMaxValue', '10;20;30;40')]
     EntityNotNullInValues: TStringField;
 
+    [AssertIn('10;20;30')]
+    EntityAssertInValue: TStringField;
+
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -88,6 +91,7 @@ begin
   EntityNotNullWhenValue.AsString := 'NotNullWhen';
   EntityNotNullWhenBooleanValue.AsString := 'NotNullWhenBooleanValue';
   EntityNotNullInValues.AsString := 'EntityNotNullInValues';
+  EntityAssertInValue.AsString := '10';
   Entity.Post;
 end;
 

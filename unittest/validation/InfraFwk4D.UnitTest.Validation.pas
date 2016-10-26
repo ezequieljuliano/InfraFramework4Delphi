@@ -26,6 +26,7 @@ type
   published
     procedure TestAssertFalseValidator;
     procedure TestAssertTrueValidator;
+    procedure TestAssertInValidator;
     procedure TestMaxValidator;
     procedure TestMinValidator;
     procedure TestDecimalMaxValidator;
@@ -73,6 +74,28 @@ begin
   CheckTrue(validator.IsValid(fModel.EntityFalseValue));
 end;
 
+procedure TTestInfraFwkValidation.TestAssertInValidator;
+var
+  attr: AssertInAttribute;
+  validator: IConstraintValidator;
+begin
+  validator := TAssertInValidator.Create;
+  attr := AssertInAttribute.Create('10;20;30');
+  try
+    validator.Initialize(attr, nil);
+
+    CheckTrue(validator.IsValid(10));
+    CheckTrue(validator.IsValid(20));
+    CheckTrue(validator.IsValid(30));
+    CheckFalse(validator.IsValid(50));
+    CheckTrue(validator.IsValid(''));
+
+    CheckTrue(validator.IsValid(fModel.EntityAssertInValue));
+  finally
+    attr.Free;
+  end;
+end;
+
 procedure TTestInfraFwkValidation.TestAssertTrueValidator;
 var
   validator: IConstraintValidator;
@@ -118,6 +141,18 @@ begin
   CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
   CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsBoolean = False);
   CheckEqualsString('EntityTrueValue', violations.Items[0].GetValueOwnersName);
+  fModel.Entity.Cancel;
+
+  fModel.Entity.Edit;
+  fModel.EntityAssertInValue.AsString := '50';
+  violations := validadorCtx.Validate(fModel.Entity);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('This field should contain the 10, 20, 30 values.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TClientDataSet'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TClientDataSet'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '50');
+  CheckEqualsString('EntityAssertInValue', violations.Items[0].GetValueOwnersName);
   fModel.Entity.Cancel;
 
   fModel.Entity.Edit;
@@ -406,6 +441,18 @@ begin
   fModel.Entity.Cancel;
 
   fModel.Entity.Edit;
+  fModel.EntityAssertInValue.AsString := '50';
+  violations := validadorCtx.Validate(fModel);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('This field should contain the 10, 20, 30 values.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TModel'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TModel'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<TField>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<TField>.AsString = '50');
+  CheckEqualsString('EntityAssertInValue', violations.Items[0].GetValueOwnersName);
+  fModel.Entity.Cancel;
+
+  fModel.Entity.Edit;
   fModel.EntityMaxValue.AsInteger := 21;
   violations := validadorCtx.Validate(fModel);
   CheckTrue(violations.Count = 1);
@@ -669,6 +716,17 @@ begin
   CheckTrue(violations.Items[0].GetInvalidValue.AsType<Boolean> = False);
   CheckEqualsString('TrueValue', violations.Items[0].GetValueOwnersName);
   fEntity.TrueValue := True;
+
+  fEntity.AssertInValue := '50';
+  violations := validadorCtx.Validate(fEntity);
+  CheckTrue(violations.Count = 1);
+  CheckEqualsString('This field should contain the 10, 20, 30 values.', violations.Items[0].GetMessage);
+  CheckTrue(violations.Items[0].GetClass.ClassNameIs('TEntity'));
+  CheckTrue(violations.Items[0].GetObject.ClassNameIs('TEntity'));
+  CheckTrue(violations.Items[0].GetInvalidValue.IsType<String>);
+  CheckTrue(violations.Items[0].GetInvalidValue.AsType<String> = '50');
+  CheckEqualsString('fAssertInValue', violations.Items[0].GetValueOwnersName);
+  fEntity.AssertInValue := '10';
 
   fEntity.MaxValue := 21;
   violations := validadorCtx.Validate(fEntity);

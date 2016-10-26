@@ -107,6 +107,7 @@ begin
   // Define Default Validators
   RegisterConstraintValidator(AssertFalseAttribute, TAssertFalseValidator.Create);
   RegisterConstraintValidator(AssertTrueAttribute, TAssertTrueValidator.Create);
+  RegisterConstraintValidator(AssertInAttribute, TAssertInValidator.Create);
   RegisterConstraintValidator(MaxAttribute, TMaxValidator.Create);
   RegisterConstraintValidator(MinAttribute, TMinValidator.Create);
   RegisterConstraintValidator(SizeAttribute, TSizeValidator.Create);
@@ -123,6 +124,7 @@ begin
   // Define Default Messages
   RegisterConstraintMessage(AssertFalseAttribute, 'This field should contain the false value.');
   RegisterConstraintMessage(AssertTrueAttribute, 'This field should contain the true value.');
+  RegisterConstraintMessage(AssertInAttribute, 'This field should contain the {value} values.');
   RegisterConstraintMessage(MaxAttribute, 'The value must be less than or equal to {value}.');
   RegisterConstraintMessage(MinAttribute, 'The value must be greater than or equal to {value}.');
   RegisterConstraintMessage(SizeAttribute, 'The size should be between {min} and {max}.');

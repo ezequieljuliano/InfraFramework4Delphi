@@ -42,6 +42,18 @@ type
     { public declarations }
   end;
 
+  TAssertInValidator = class(TAbstractValidator, IConstraintValidator)
+  private
+    fValues: TArray<String>;
+    function IsStringInValues(const str: string): Boolean;
+  protected
+    procedure Initialize(const attribute: ConstraintAttribute; const obj: TObject); override;
+    function IsValid(const value: TValue): Boolean;
+    function ProcessingMessage(const msg: string): string; override;
+  public
+    { public declarations }
+  end;
+
   TMaxValidator = class(TAbstractValidator, IConstraintValidator)
   private
     fMaxValue: Integer;
@@ -523,6 +535,51 @@ begin
       rttiContext.Free;
     end;
   end;
+end;
+
+{ TAssertInValidator }
+
+procedure TAssertInValidator.Initialize(const attribute: ConstraintAttribute; const obj: TObject);
+begin
+  inherited;
+  fValues := AssertInAttribute(attribute).Values;
+end;
+
+function TAssertInValidator.IsValid(const value: TValue): Boolean;
+begin
+  Result := True;
+  if not value.IsEmpty then
+  begin
+    if value.IsType<TField> then
+      if not value.AsType<TField>.IsNull then
+        Exit(IsStringInValues(value.AsType<TField>.AsString));
+    if not value.ToString.IsEmpty then
+      Exit(IsStringInValues(value.ToString));
+  end;
+end;
+
+function TAssertInValidator.ProcessingMessage(const msg: string): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  for i := Low(fValues) to High(fValues) do
+  begin
+    Result := Result + fValues[i];
+    if (i < High(fValues)) then
+      Result := Result + ', ';
+  end;
+  Result := msg.Replace('{value}', Result);
+end;
+
+function TAssertInValidator.IsStringInValues(const str: string): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := Low(fValues) to High(fValues) do
+    if (fValues[i] = str) then
+      Exit(True);
 end;
 
 end.
