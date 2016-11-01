@@ -616,7 +616,7 @@ begin
   validator := TNotNullValidator.Create;
 
   CheckTrue(validator.IsValid(0));
-  CheckTrue(validator.IsValid(' '));
+  CheckFalse(validator.IsValid(' '));
   CheckFalse(validator.IsValid(nil));
   CheckFalse(validator.IsValid(''));
 

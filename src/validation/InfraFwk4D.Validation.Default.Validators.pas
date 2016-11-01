@@ -314,14 +314,14 @@ begin
   if (not value.IsEmpty) and (value.IsType<TField>) then
     case value.AsType<TField>.DataType of
       ftString, ftMemo, ftFmtMemo, ftWideString, ftFixedWideChar, ftWideMemo:
-        Exit(not value.AsType<TField>.AsString.IsEmpty)
+        Exit(not value.AsType<TField>.AsString.Trim.IsEmpty)
     else
       Exit(not value.AsType<TField>.IsNull);
     end;
 
   case value.Kind of
     tkChar, tkString, tkWChar, tkLString, tkWString, tkUString:
-      Exit(not value.ToString.IsEmpty);
+      Exit(not value.ToString.Trim.IsEmpty);
   else
     Exit(not value.IsEmpty);
   end;
