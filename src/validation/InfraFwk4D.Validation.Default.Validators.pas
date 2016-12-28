@@ -293,13 +293,15 @@ begin
   Result := False;
 
   if (not value.IsEmpty) and (value.IsType<TField>) then
-    if (not value.AsType<TField>.IsNull) then
+    if (not value.AsType<TField>.IsNull) and (not value.AsType<TField>.AsString.IsEmpty) then
       Exit((value.AsType<TField>.AsString.Length >= fMinValue) and (value.AsType<TField>.AsString.Length <= fMaxValue))
     else
       Exit(True);
 
-  if (value.IsType<string>) then
-    Exit((value.AsType<string>.Length >= fMinValue) and (value.AsType<string>.Length <= fMaxValue));
+  if (value.IsType<string>) and (not value.AsType<string>.IsEmpty) then
+    Exit((value.AsType<string>.Length >= fMinValue) and (value.AsType<string>.Length <= fMaxValue))
+  else
+    Exit(True);
 end;
 
 function TSizeValidator.ProcessingMessage(const msg: string): string;

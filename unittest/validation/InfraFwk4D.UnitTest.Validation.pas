@@ -677,6 +677,7 @@ begin
 
     CheckTrue(validator.IsValid('Ezequiel'));
     CheckTrue(validator.IsValid('Ezequ'));
+    CheckTrue(validator.IsValid(''));
     CheckFalse(validator.IsValid('Ezeq'));
 
     CheckTrue(validator.IsValid(fModel.EntitySizeValue));
