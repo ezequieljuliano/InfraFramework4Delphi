@@ -7,6 +7,7 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   System.SyncObjs,
+  FireDAC.Stan.Param,
   Data.DB,
   FireDAC.Comp.Client,
   FireDAC.Stan.Option,
