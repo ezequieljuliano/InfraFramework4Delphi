@@ -7,6 +7,7 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   System.SyncObjs,
+  FireDAC.Stan.Param,
   Data.DB,
   FireDAC.Comp.Client,
   FireDAC.Stan.Option,
@@ -24,18 +25,22 @@ type
   TFireDACConnectionAdapter = class;
 
   TFireDACStatementAdapter = class(TDriverStatement<TFDQuery, TFireDACConnectionAdapter>)
+  strict private
+    FDataSet: TFDQuery;
   strict protected
-    procedure DoExecute(const pQuery: string; pDataSet: TFDQuery; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TFDQuery; const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>); override;
 
-    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TFDQuery; override;
-    function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
-    function DoAsInteger(const pQuery: string): Integer; override;
-    function DoAsFloat(const pQuery: string): Double; override;
-    function DoAsString(const pQuery: string): string; override;
-    function DoAsVariant(const pQuery: string): Variant; override;
+    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TFDQuery; override;
+    function DoAsIterator(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet; override;
+    function DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer; override;
+    function DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double; override;
+    function DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string; override;
+    function DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; pDataSet: TFDQuery); override;
-    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TFDQuery; const pParams: TDictionary<string, Variant>); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>); override;
+
+    procedure DoAddParamByname(const pParam: string; const pValue: Variant); override;
   end;
 
   TFireDACConnectionAdapter = class(TDriverConnection<TFireDACComponentAdapter, TFireDACStatementAdapter>)
@@ -162,8 +167,18 @@ type
 
   { TFireDACStatementAdapter }
 
+
+procedure TFireDACStatementAdapter.DoAddParamByname(const pParam: string;
+  const pValue: Variant);
+begin
+  inherited;
+  FDataSet.Params.ParamByName(pParam).Value := pValue;
+end;
+
 function TFireDACStatementAdapter.DoAsDataSet(const pQuery: string;
-  const pFetchRows: Integer): TFDQuery;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TFDQuery;
+var
+  key: string;
 begin
   Result := TFDQuery.Create(nil);
   Result.Connection := GetConnection.Component.Connection;
@@ -178,61 +193,69 @@ begin
     Result.FetchOptions.RowsetSize := -1;
   end;
   Result.SQL.Add(pQuery);
+  if (pParams.Count > 0) then
+  begin
+    for key in pParams.Keys do
+      if (key <> EmptyStr) then
+        Result.Params.ParamByName(key).Value := pParams.Items[key];
+    pParams.Clear;
+  end;  
   Result.Prepare;
   Result.Open;
 end;
 
-function TFireDACStatementAdapter.DoAsFloat(const pQuery: string): Double;
+function TFireDACStatementAdapter.DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsFloat;
 end;
 
-function TFireDACStatementAdapter.DoAsInteger(const pQuery: string): Integer;
+function TFireDACStatementAdapter.DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsInteger;
 end;
 
 function TFireDACStatementAdapter.DoAsIterator(const pQuery: string;
-  const pFetchRows: Integer): IIteratorDataSet;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet;
 begin
-  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows), True);
+  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows, pParams), True);
 end;
 
-function TFireDACStatementAdapter.DoAsString(const pQuery: string): string;
+function TFireDACStatementAdapter.DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := EmptyStr;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsString;
 end;
 
-function TFireDACStatementAdapter.DoAsVariant(const pQuery: string): Variant;
+function TFireDACStatementAdapter.DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := varNull;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsVariant;
 end;
 
 procedure TFireDACStatementAdapter.DoExecute(const pQuery: string; pDataSet: TFDQuery;
-  const pAutoCommit: Boolean);
+  const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>);
 var
   vDataSet: TFDQuery;
   vOwnsDataSet: Boolean;
+  key: string;
 begin
   inherited;
   if (pDataSet = nil) then
@@ -250,6 +273,13 @@ begin
     vDataSet.SQL.Clear;
     vDataSet.Connection := GetConnection.Component.Connection;
     vDataSet.SQL.Add(pQuery);
+    if (pParams.Count > 0) then
+    begin
+      for key in pParams.Keys do
+        if (key <> EmptyStr) then
+          vDataSet.Params.ParamByName(key).Value := pParams.Items[key];
+      pParams.Clear;
+    end;
     if pAutoCommit then
     begin
       try
@@ -275,7 +305,9 @@ begin
   end;
 end;
 
-procedure TFireDACStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TFDQuery);
+procedure TFireDACStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TFDQuery; const pParams: TDictionary<string, Variant>);
+var
+  key: string;
 begin
   inherited;
   if (pDataSet = nil) then
@@ -283,15 +315,22 @@ begin
   pDataSet.Close;
   pDataSet.Connection := GetConnection.Component.Connection;
   pDataSet.SQL.Add(pQuery);
+  if (pParams.Count > 0) then
+  begin
+    for key in pParams.Keys do
+      if key <> EmptyStr then      
+        pDataSet.Params.ParamByName(key).Value := pParams.Items[key];
+    pParams.Clear;
+  end;  
   pDataSet.Prepare;
   pDataSet.Open;
 end;
 
 procedure TFireDACStatementAdapter.DoInIterator(const pQuery: string;
-  pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>);
 begin
   inherited;
-  DoInDataSet(pQuery, TFDQuery(pIterator.GetDataSet));
+  DoInDataSet(pQuery, TFDQuery(pIterator.GetDataSet), pParams);
 end;
 
 { TFireDACConnectionAdapter }
