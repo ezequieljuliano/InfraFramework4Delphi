@@ -26,23 +26,27 @@ type
   TDriverStatement<TDrvDataSet: TDataSet; TDrvConnection: class> = class abstract
   strict private
     FConnection: TDrvConnection;
+    FParams: TDictionary<string, Variant>;
     FQuery: string;
   strict protected
     function GetConnection(): TDrvConnection;
 
-    procedure DoExecute(const pQuery: string; pDataSet: TDrvDataSet; const pAutoCommit: Boolean); virtual; abstract;
+    procedure DoExecute(const pQuery: string; pDataSet: TDrvDataSet; const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>); virtual; abstract;
 
-    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TDrvDataSet; virtual; abstract;
-    function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; virtual; abstract;
-    function DoAsInteger(const pQuery: string): Integer; virtual; abstract;
-    function DoAsFloat(const pQuery: string): Double; virtual; abstract;
-    function DoAsString(const pQuery: string): string; virtual; abstract;
-    function DoAsVariant(const pQuery: string): Variant; virtual; abstract;
+    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TDrvDataSet; virtual; abstract;
+    function DoAsIterator(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet; virtual; abstract;
+    function DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer; virtual; abstract;
+    function DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double; virtual; abstract;
+    function DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string; virtual; abstract;
+    function DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant; virtual; abstract;
 
-    procedure DoInDataSet(const pQuery: string; pDataSet: TDrvDataSet); virtual; abstract;
-    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); virtual; abstract;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TDrvDataSet; const pParams: TDictionary<string, Variant>); virtual; abstract;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>); virtual; abstract;
+
+    procedure DoAddParamByname(const pParam: string; const pValue: Variant); virtual; abstract;
   public
     constructor Create(pConnection: TDrvConnection);
+    destructor Destroy(); override;
 
     function Build(pSelect: ISQLSelect): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
     function Build(pInsert: ISQLInsert): TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
@@ -66,6 +70,8 @@ type
 
     procedure InDataSet(pDataSet: TDrvDataSet);
     procedure InIterator(pIterator: IIteratorDataSet);
+
+    function AddParamByName(const pParam: string; const pValue: Variant):TDriverStatement<TDrvDataSet, TDrvConnection>; overload;
   end;
 
   TDriverConnection<TDrvComponent, TDrvStatement: class> = class abstract
@@ -348,36 +354,44 @@ begin
   Result := Self;
 end;
 
+function TDriverStatement<TDrvDataSet, TDrvConnection>.AddParamByName(
+  const pParam: string;
+  const pValue: Variant): TDriverStatement<TDrvDataSet, TDrvConnection>;
+begin
+  FParams.Add(pParam, pValue);
+  Result := Self;
+end;
+
 function TDriverStatement<TDrvDataSet, TDrvConnection>.AsDataSet(
   const pFetchRows: Integer): TDrvDataSet;
 begin
-  Result := DoAsDataSet(FQuery, pFetchRows);
+  Result := DoAsDataSet(FQuery, pFetchRows, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.AsFloat: Double;
 begin
-  Result := DoAsFloat(FQuery);
+  Result := DoAsFloat(FQuery, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.AsInteger: Integer;
 begin
-  Result := DoAsInteger(FQuery);
+  Result := DoAsInteger(FQuery, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.AsIterator(
   const pFetchRows: Integer): IIteratorDataSet;
 begin
-  Result := DoAsIterator(FQuery, pFetchRows);
+  Result := DoAsIterator(FQuery, pFetchRows, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.AsString: string;
 begin
-  Result := DoAsString(FQuery);
+  Result := DoAsString(FQuery, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.AsVariant: Variant;
 begin
-  Result := DoAsVariant(FQuery);
+  Result := DoAsVariant(FQuery, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.Build(
@@ -412,21 +426,28 @@ constructor TDriverStatement<TDrvDataSet, TDrvConnection>.Create(pConnection: TD
 begin
   FConnection := pConnection;
   FQuery := EmptyStr;
+  FParams := TDictionary<string, Variant>.Create;
+end;
+
+destructor TDriverStatement<TDrvDataSet, TDrvConnection>.Destroy;
+begin
+  FreeAndNil(FParams);
+  inherited Destroy;
 end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(const pAutoCommit: Boolean);
 begin
 {$IFDEF VER210}
-  DoExecute(FQuery, TDataSet, pAutoCommit);
+  DoExecute(FQuery, TDataSet(nil), pAutoCommit, FParams);
 {$ELSE}
-  DoExecute(FQuery, nil, pAutoCommit);
+  DoExecute(FQuery, nil, pAutoCommit, FParams);
 {$ENDIF}
 end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.Execute(pDataSet: TDrvDataSet;
   const pAutoCommit: Boolean);
 begin
-  DoExecute(FQuery, pDataSet, pAutoCommit);
+  DoExecute(FQuery, pDataSet, pAutoCommit, FParams);
 end;
 
 function TDriverStatement<TDrvDataSet, TDrvConnection>.GetConnection: TDrvConnection;
@@ -436,13 +457,13 @@ end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.InDataSet(pDataSet: TDrvDataSet);
 begin
-  DoInDataSet(FQuery, pDataSet);
+  DoInDataSet(FQuery, pDataSet, FParams);
 end;
 
 procedure TDriverStatement<TDrvDataSet, TDrvConnection>.InIterator(
   pIterator: IIteratorDataSet);
 begin
-  DoInIterator(FQuery, pIterator);
+  DoInIterator(FQuery, pIterator, FParams);
 end;
 
 { TDriverConnection<TDrvComponent, TDrvStatement> }

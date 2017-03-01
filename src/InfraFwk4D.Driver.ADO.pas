@@ -32,18 +32,21 @@ type
   TADOConnectionAdapter = class;
 
   TADOStatementAdapter = class(TDriverStatement<TADOQuery, TADOConnectionAdapter>)
+  strict private
+    FDataSet: TADOQuery;
   strict protected
-    procedure DoExecute(const pQuery: string; pDataSet: TADOQuery; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TADOQuery; const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>); override;
 
-    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TADOQuery; override;
-    function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
-    function DoAsInteger(const pQuery: string): Integer; override;
-    function DoAsFloat(const pQuery: string): Double; override;
-    function DoAsString(const pQuery: string): string; override;
-    function DoAsVariant(const pQuery: string): Variant; override;
+    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TADOQuery; override;
+    function DoAsIterator(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet; override;
+    function DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer; override;
+    function DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double; override;
+    function DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string; override;
+    function DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; pDataSet: TADOQuery); override;
-    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TADOQuery; const pParams: TDictionary<string, Variant>); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>); override;
+    procedure DoAddParamByname(const pParam: string; const pValue: Variant); override;
   end;
 
   TADOConnectionAdapter = class(TDriverConnection<TADOComponentAdapter, TADOStatementAdapter>)
@@ -146,68 +149,85 @@ type
 
   { TADOStatementAdapter }
 
+procedure TADOStatementAdapter.DoAddParamByname(const pParam: string;
+  const pValue: Variant);
+begin
+  inherited;
+  FDataSet.Parameters.ParamByName(pParam).Value := pValue;
+end;
+
 function TADOStatementAdapter.DoAsDataSet(const pQuery: string;
-  const pFetchRows: Integer): TADOQuery;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TADOQuery;
+var
+  key: string;
 begin
   Result := TADOQuery.Create(nil);
   Result.Connection := GetConnection.Component.Connection;
   Result.SQL.Add(pQuery);
   Result.CommandTimeout := 0;
   Result.Prepared := True;
+  if (pParams.Count > 0) then
+  begin
+    for key in pParams.Keys do
+      if (key <> EmptyStr) then
+        Result.Parameters.ParamByName(key).Value := pParams.Items[key];
+    pParams.Clear;
+  end;
   Result.Open;
 end;
 
-function TADOStatementAdapter.DoAsFloat(const pQuery: string): Double;
+function TADOStatementAdapter.DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsFloat;
 end;
 
-function TADOStatementAdapter.DoAsInteger(const pQuery: string): Integer;
+function TADOStatementAdapter.DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsInteger;
 end;
 
 function TADOStatementAdapter.DoAsIterator(const pQuery: string;
-  const pFetchRows: Integer): IIteratorDataSet;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet;
 begin
-  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows), True);
+  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows, pParams), True);
 end;
 
-function TADOStatementAdapter.DoAsString(const pQuery: string): string;
+function TADOStatementAdapter.DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := EmptyStr;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsString;
 end;
 
-function TADOStatementAdapter.DoAsVariant(const pQuery: string): Variant;
+function TADOStatementAdapter.DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := varNull;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsVariant;
 end;
 
 procedure TADOStatementAdapter.DoExecute(const pQuery: string;
-  pDataSet: TADOQuery; const pAutoCommit: Boolean);
+  pDataSet: TADOQuery; const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>);
 var
   vDataSet: TADOQuery;
   vOwnsDataSet: Boolean;
+  key: string;
 begin
   inherited;
   if (pDataSet = nil) then
@@ -225,6 +245,13 @@ begin
     vDataSet.SQL.Clear;
     vDataSet.Connection := GetConnection.Component.Connection;
     vDataSet.SQL.Add(pQuery);
+    if (pParams.Count > 0) then
+    begin
+      for key in pParams.Keys do
+        if (key <> EmptyStr) then
+          vDataSet.Parameters.ParamByName(key).Value := pParams.Items[key];
+      pParams.Clear;
+    end;
     if pAutoCommit then
     begin
       try
@@ -250,8 +277,9 @@ begin
   end;
 end;
 
-procedure TADOStatementAdapter.DoInDataSet(const pQuery: string;
-  pDataSet: TADOQuery);
+procedure TADOStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TADOQuery; const pParams: TDictionary<string, Variant>);
+var
+  key: string;
 begin
   inherited;
   if (pDataSet = nil) then
@@ -260,15 +288,22 @@ begin
   pDataSet.Connection := GetConnection.Component.Connection;
   pDataSet.SQL.Clear;
   pDataSet.SQL.Add(pQuery);
+  if (pParams.Count > 0) then
+  begin
+    for key in pParams.Keys do
+      if (key <> EmptyStr) then
+        pDataSet.Parameters.ParamByName(key).Value := pParams.Items[key];
+    pParams.Clear;
+  end;
   pDataSet.Prepared := True;
   pDataSet.Open;
 end;
 
 procedure TADOStatementAdapter.DoInIterator(const pQuery: string;
-  pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>);
 begin
   inherited;
-  DoInDataSet(pQuery, TADOQuery(pIterator.GetDataSet));
+  DoInDataSet(pQuery, TADOQuery(pIterator.GetDataSet), pParams);
 end;
 
 { TADOConnectionAdapter }
