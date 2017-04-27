@@ -23,17 +23,18 @@ type
 
   TUniDACStatementAdapter = class(TDriverStatement<TUniQuery, TUniDACConnectionAdapter>)
   strict protected
-    procedure DoExecute(const pQuery: string; pDataSet: TUniQuery; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TUniQuery; const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>); override;
 
-    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TUniQuery; override;
-    function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
-    function DoAsInteger(const pQuery: string): Integer; override;
-    function DoAsFloat(const pQuery: string): Double; override;
-    function DoAsString(const pQuery: string): string; override;
-    function DoAsVariant(const pQuery: string): Variant; override;
+    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TUniQuery; override;
+    function DoAsIterator(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet; override;
+    function DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer; override;
+    function DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double; override;
+    function DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string; override;
+    function DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; pDataSet: TUniQuery); override;
-    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TUniQuery; const pParams: TDictionary<string, Variant>); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>); override;
+    procedure DoAddParamByname(const pParam: string; const pValue: Variant); override;
   end;
 
   TUniDACConnectionAdapter = class(TDriverConnection<TUniDACComponentAdapter, TUniDACStatementAdapter>)
@@ -132,13 +133,20 @@ type
     function Add(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>; overload;
     function Add(const pQuery: string): IDriverQueryBuilder<TUniQuery>; overload;
 
+    function AddParamByName(const pParam: string; const pValue: Variant): IDriverQueryBuilder<TUniQuery>;
+
     procedure Activate;
   end;
 
   { TUniDACStatementAdapter }
 
+procedure TUniDACStatementAdapter.DoAddParamByname(const pParam: string; const pValue: Variant);
+begin
+  inherited;
+end;
+
 function TUniDACStatementAdapter.DoAsDataSet(const pQuery: string;
-  const pFetchRows: Integer): TUniQuery;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TUniQuery;
 begin
   Result := TUniQuery.Create(nil);
   Result.Connection := GetConnection.Component.Connection;
@@ -152,54 +160,54 @@ begin
   Result.Open;
 end;
 
-function TUniDACStatementAdapter.DoAsFloat(const pQuery: string): Double;
+function TUniDACStatementAdapter.DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsFloat;
 end;
 
-function TUniDACStatementAdapter.DoAsInteger(const pQuery: string): Integer;
+function TUniDACStatementAdapter.DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsInteger;
 end;
 
 function TUniDACStatementAdapter.DoAsIterator(const pQuery: string;
-  const pFetchRows: Integer): IIteratorDataSet;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet;
 begin
-  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows), True);
+  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows, pParams), True);
 end;
 
-function TUniDACStatementAdapter.DoAsString(const pQuery: string): string;
+function TUniDACStatementAdapter.DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := EmptyStr;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsString;
 end;
 
-function TUniDACStatementAdapter.DoAsVariant(const pQuery: string): Variant;
+function TUniDACStatementAdapter.DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := varNull;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsVariant;
 end;
 
 procedure TUniDACStatementAdapter.DoExecute(const pQuery: string; pDataSet: TUniQuery;
-  const pAutoCommit: Boolean);
+  const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>);
 var
   vDataSet: TUniQuery;
   vOwnsDataSet: Boolean;
@@ -245,7 +253,7 @@ begin
   end;
 end;
 
-procedure TUniDACStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TUniQuery);
+procedure TUniDACStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TUniQuery; const pParams: TDictionary<string, Variant>);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -258,10 +266,10 @@ begin
 end;
 
 procedure TUniDACStatementAdapter.DoInIterator(const pQuery: string;
-  pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>);
 begin
   inherited;
-  DoInDataSet(pQuery, TUniQuery(pIterator.GetDataSet));
+  DoInDataSet(pQuery, TUniQuery(pIterator.GetDataSet), pParams);
 end;
 
 { TUniDACConnectionAdapter }
@@ -396,6 +404,11 @@ end;
 function TUniDACQueryBuilder.Add(const pQuery: string): IDriverQueryBuilder<TUniQuery>;
 begin
   Result := Build(pQuery);
+end;
+
+function TUniDACQueryBuilder.AddParamByName(const pParam: string; const pValue: Variant): IDriverQueryBuilder<TUniQuery>;
+begin
+  Result := nil;
 end;
 
 function TUniDACQueryBuilder.Add(pHaving: ISQLHaving): IDriverQueryBuilder<TUniQuery>;

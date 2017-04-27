@@ -24,17 +24,18 @@ type
 
   TIBXStatementAdapter = class(TDriverStatement<TIBDataSet, TIBXConnectionAdapter>)
   strict protected
-    procedure DoExecute(const pQuery: string; pDataSet: TIBDataSet; const pAutoCommit: Boolean); override;
+    procedure DoExecute(const pQuery: string; pDataSet: TIBDataSet; const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>); override;
 
-    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer): TIBDataSet; override;
-    function DoAsIterator(const pQuery: string; const pFetchRows: Integer): IIteratorDataSet; override;
-    function DoAsInteger(const pQuery: string): Integer; override;
-    function DoAsFloat(const pQuery: string): Double; override;
-    function DoAsString(const pQuery: string): string; override;
-    function DoAsVariant(const pQuery: string): Variant; override;
+    function DoAsDataSet(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TIBDataSet; override;
+    function DoAsIterator(const pQuery: string; const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet; override;
+    function DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer; override;
+    function DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double; override;
+    function DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string; override;
+    function DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant; override;
 
-    procedure DoInDataSet(const pQuery: string; pDataSet: TIBDataSet); override;
-    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet); override;
+    procedure DoInDataSet(const pQuery: string; pDataSet: TIBDataSet; const pParams: TDictionary<string, Variant>); override;
+    procedure DoInIterator(const pQuery: string; pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>); override;
+    procedure DoAddParamByname(const pParam: string; const pValue: Variant); override;
   end;
 
   TIBXConnectionAdapter = class(TDriverConnection<TIBXComponentAdapter, TIBXStatementAdapter>)
@@ -135,8 +136,13 @@ type
 
   { TIBXStatementAdapter }
 
+procedure TIBXStatementAdapter.DoAddParamByname(const pParam: string; const pValue: Variant);
+begin
+  inherited;
+end;
+
 function TIBXStatementAdapter.DoAsDataSet(const pQuery: string;
-  const pFetchRows: Integer): TIBDataSet;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): TIBDataSet;
 begin
   Result := TIBDataSet.Create(nil);
   Result.Database := GetConnection.Component.Connection;
@@ -145,54 +151,54 @@ begin
   Result.Open;
 end;
 
-function TIBXStatementAdapter.DoAsFloat(const pQuery: string): Double;
+function TIBXStatementAdapter.DoAsFloat(const pQuery: string; const pParams: TDictionary<string, Variant>): Double;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsFloat;
 end;
 
-function TIBXStatementAdapter.DoAsInteger(const pQuery: string): Integer;
+function TIBXStatementAdapter.DoAsInteger(const pQuery: string; const pParams: TDictionary<string, Variant>): Integer;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := 0;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsInteger;
 end;
 
 function TIBXStatementAdapter.DoAsIterator(const pQuery: string;
-  const pFetchRows: Integer): IIteratorDataSet;
+  const pFetchRows: Integer; const pParams: TDictionary<string, Variant>): IIteratorDataSet;
 begin
-  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows), True);
+  Result := IteratorDataSetFactory.Build(DoAsDataSet(pQuery, pFetchRows, pParams), True);
 end;
 
-function TIBXStatementAdapter.DoAsString(const pQuery: string): string;
+function TIBXStatementAdapter.DoAsString(const pQuery: string; const pParams: TDictionary<string, Variant>): string;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := EmptyStr;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsString;
 end;
 
-function TIBXStatementAdapter.DoAsVariant(const pQuery: string): Variant;
+function TIBXStatementAdapter.DoAsVariant(const pQuery: string; const pParams: TDictionary<string, Variant>): Variant;
 var
   vIterator: IIteratorDataSet;
 begin
   Result := varNull;
-  vIterator := DoAsIterator(pQuery, 0);
+  vIterator := DoAsIterator(pQuery, 0, pParams);
   if not vIterator.IsEmpty then
     Result := vIterator.Fields[0].AsVariant;
 end;
 
 procedure TIBXStatementAdapter.DoExecute(const pQuery: string; pDataSet: TIBDataSet;
-  const pAutoCommit: Boolean);
+  const pAutoCommit: Boolean; const pParams: TDictionary<string, Variant>);
 var
   vDataSet: TIBDataSet;
   vOwnsDataSet: Boolean;
@@ -238,7 +244,7 @@ begin
   end;
 end;
 
-procedure TIBXStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TIBDataSet);
+procedure TIBXStatementAdapter.DoInDataSet(const pQuery: string; pDataSet: TIBDataSet; const pParams: TDictionary<string, Variant>);
 begin
   inherited;
   if (pDataSet = nil) then
@@ -251,10 +257,10 @@ begin
 end;
 
 procedure TIBXStatementAdapter.DoInIterator(const pQuery: string;
-  pIterator: IIteratorDataSet);
+  pIterator: IIteratorDataSet; const pParams: TDictionary<string, Variant>);
 begin
   inherited;
-  DoInDataSet(pQuery, TIBDataSet(pIterator.GetDataSet));
+  DoInDataSet(pQuery, TIBDataSet(pIterator.GetDataSet), pParams);
 end;
 
 { TIBXConnectionAdapter }
