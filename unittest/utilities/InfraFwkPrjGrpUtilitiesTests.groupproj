@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{503EFE76-930E-470F-B8CD-E307050E89F6}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="InfraFwkTestsDataSetIterator.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="InfraFwkTestsObserver.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="InfraFwkTestsDataSetIterator">
+        <MSBuild Projects="InfraFwkTestsDataSetIterator.dproj"/>
+    </Target>
+    <Target Name="InfraFwkTestsDataSetIterator:Clean">
+        <MSBuild Projects="InfraFwkTestsDataSetIterator.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraFwkTestsDataSetIterator:Make">
+        <MSBuild Projects="InfraFwkTestsDataSetIterator.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="InfraFwkTestsObserver">
+        <MSBuild Projects="InfraFwkTestsObserver.dproj"/>
+    </Target>
+    <Target Name="InfraFwkTestsObserver:Clean">
+        <MSBuild Projects="InfraFwkTestsObserver.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraFwkTestsObserver:Make">
+        <MSBuild Projects="InfraFwkTestsObserver.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="InfraFwkTestsDataSetIterator;InfraFwkTestsObserver"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="InfraFwkTestsDataSetIterator:Clean;InfraFwkTestsObserver:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="InfraFwkTestsDataSetIterator:Make;InfraFwkTestsObserver:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

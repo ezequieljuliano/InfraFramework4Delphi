@@ -20,7 +20,7 @@ uses
   InfraFwk4D.Validation in '..\..\src\validation\InfraFwk4D.Validation.pas',
   InfraFwk4D.Validation.Default.Attributes in '..\..\src\validation\InfraFwk4D.Validation.Default.Attributes.pas',
   InfraFwk4D.Validation.Default.Validators in '..\..\src\validation\InfraFwk4D.Validation.Default.Validators.pas',
-  InfraFwk4D.Validation.Impl in '..\..\src\validation\InfraFwk4D.Validation.Impl.pas',
+  InfraFwk4D.Validation.Core in '..\..\src\validation\InfraFwk4D.Validation.Core.pas',
   InfraFwk4D.UnitTest.Validation.DataModule in 'InfraFwk4D.UnitTest.Validation.DataModule.pas' {Model: TDataModule},
   InfraFwk4D.UnitTest.Validation.Entity in 'InfraFwk4D.UnitTest.Validation.Entity.pas';
 

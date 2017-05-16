@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{493C9BB8-9F53-4156-9F26-53FE5F22591D}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="InfraFwkTestsFireDAC.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="InfraFwkTestsFireDAC">
+        <MSBuild Projects="InfraFwkTestsFireDAC.dproj"/>
+    </Target>
+    <Target Name="InfraFwkTestsFireDAC:Clean">
+        <MSBuild Projects="InfraFwkTestsFireDAC.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraFwkTestsFireDAC:Make">
+        <MSBuild Projects="InfraFwkTestsFireDAC.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="InfraFwkTestsFireDAC"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="InfraFwkTestsFireDAC:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="InfraFwkTestsFireDAC:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

@@ -1,4 +1,4 @@
-program InfraFwkTestsMessage;
+program InfraFwkTestsDataSetIterator;
 {
 
   Delphi DUnit Test Project
@@ -16,12 +16,10 @@ program InfraFwkTestsMessage;
 
 uses
   DUnitTestRunner,
-  InfraFwk4D.UnitTest.Message in 'InfraFwk4D.UnitTest.Message.pas',
-  InfraFwk4D.Message in '..\..\src\message\InfraFwk4D.Message.pas',
-  InfraFwk4D.Message.Core in '..\..\src\message\InfraFwk4D.Message.Core.pas',
-  InfraFwk4D.UnitTest.Appender in 'InfraFwk4D.UnitTest.Appender.pas';
+  InfraFwk4D.DataSet.Iterator in '..\..\src\utilities\InfraFwk4D.DataSet.Iterator.pas',
+  InfraFwk4D.UnitTest.DataSet.Iterator in 'InfraFwk4D.UnitTest.DataSet.Iterator.pas';
 
-{$R *.RES}
+{ R *.RES }
 
 begin
 

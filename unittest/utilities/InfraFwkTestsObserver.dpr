@@ -1,4 +1,4 @@
-program InfraFwkTestsMessage;
+program InfraFwkTestsObserver;
 {
 
   Delphi DUnit Test Project
@@ -16,10 +16,8 @@ program InfraFwkTestsMessage;
 
 uses
   DUnitTestRunner,
-  InfraFwk4D.UnitTest.Message in 'InfraFwk4D.UnitTest.Message.pas',
-  InfraFwk4D.Message in '..\..\src\message\InfraFwk4D.Message.pas',
-  InfraFwk4D.Message.Core in '..\..\src\message\InfraFwk4D.Message.Core.pas',
-  InfraFwk4D.UnitTest.Appender in 'InfraFwk4D.UnitTest.Appender.pas';
+  InfraFwk4D.UnitTest.Observer in 'InfraFwk4D.UnitTest.Observer.pas',
+  InfraFwk4D.Observer in '..\..\src\utilities\InfraFwk4D.Observer.pas';
 
 {$R *.RES}
 

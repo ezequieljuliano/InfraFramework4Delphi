@@ -290,8 +290,6 @@ end;
 
 function TSizeValidator.IsValid(const value: TValue): Boolean;
 begin
-  Result := False;
-
   if (not value.IsEmpty) and (value.IsType<TField>) then
     if (not value.AsType<TField>.IsNull) and (not value.AsType<TField>.AsString.IsEmpty) then
       Exit((value.AsType<TField>.AsString.Length >= fMinValue) and (value.AsType<TField>.AsString.Length <= fMaxValue))
