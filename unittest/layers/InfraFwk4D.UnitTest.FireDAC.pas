@@ -48,7 +48,7 @@ type
   private
     fDatabase: TFDConnection;
     fConnection: IDBConnection<TFDConnection>;
-    fSession: IDBSession<TFDConnection, TFDQuery>;
+    fSession: IDBSession<TFDConnection>;
   protected
     procedure SetUp; override;
     procedure TearDown; override;

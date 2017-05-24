@@ -26,7 +26,7 @@ type
     { public declarations }
   end;
 
-  TDriverConnectionAdapter<T: TComponent> = class(TDriverAdapterBase, IDBConnection<T>)
+  TDriverConnectionAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBConnection<T>)
   private
     fComponent: T;
   protected
@@ -35,53 +35,58 @@ type
     constructor Create(const component: T);
   end;
 
-  TDriverStatementAdapter<T: TDataSet; C: TComponent> = class(TDriverAdapterBase, IDBStatement<T>)
+  TDriverStatementAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBStatement)
   private
-    fConnection: IDBConnection<C>;
+    fConnection: IDBConnection<T>;
     fQuery: string;
     fParams: TDictionary<string, TValue>;
+    fPreparedDataSet: TDataSet;
   protected
     function GetQuery: string;
-    function GetConnection: IDBConnection<C>;
+    function GetConnection: IDBConnection<T>;
     function GetParams: TDictionary<string, TValue>;
+    function GetPreparedDataSet: TDataSet;
+    procedure SetPreparedDataSet(const value: TDataSet);
 
-    function Build(const query: string): IDBStatement<T>; overload;
-    function Build(const query: ISQL): IDBStatement<T>; overload;
+    procedure DataSetPreparation(const dataSet: TDataSet); virtual; abstract;
 
-    function AddOrSetParam(const name: string; const value: TValue): IDBStatement<T>; overload;
-    function AddOrSetParam(const name: string; const value: ISQLValue): IDBStatement<T>; overload;
-    function ClearParams: IDBStatement<T>;
-    function Prepare(const dataSet: T): IDBStatement<T>; virtual; abstract;
+    function Build(const query: string): IDBStatement; overload;
+    function Build(const query: ISQL): IDBStatement; overload;
 
-    procedure Open(const dataSet: T); overload; virtual; abstract;
-    procedure Open(const iterator: IDataSetIterator<T>); overload;
+    function AddOrSetParam(const name: string; const value: TValue): IDBStatement; overload;
+    function AddOrSetParam(const name: string; const value: ISQLValue): IDBStatement; overload;
+    function ClearParams: IDBStatement;
+    function Prepare(const dataSet: TDataSet): IDBStatement;
+
+    procedure Open(const dataSet: TDataSet); overload;
+    procedure Open(const iterator: IDataSetIterator); overload;
 
     procedure Execute; overload;
     procedure Execute(const commit: Boolean); overload; virtual; abstract;
 
-    function AsDataSet: T; overload;
-    function AsDataSet(const fetchRows: Integer): T; overload; virtual; abstract;
+    function AsDataSet: TDataSet; overload;
+    function AsDataSet(const fetchRows: Integer): TDataSet; overload; virtual; abstract;
 
-    function AsIterator: IDataSetIterator<T>; overload;
-    function AsIterator(const fetchRows: Integer): IDataSetIterator<T>; overload;
+    function AsIterator: IDataSetIterator; overload;
+    function AsIterator(const fetchRows: Integer): IDataSetIterator; overload;
 
     function AsField: TField;
   public
-    constructor Create(const connection: IDBConnection<C>);
+    constructor Create(const connection: IDBConnection<T>);
     destructor Destroy; override;
   end;
 
-  TDriverSessionAdapter<C: TComponent; T: TDataSet> = class(TDriverAdapterBase, IDBSession<C, T>)
+  TDriverSessionAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBSession<T>)
   private
-    fConnection: IDBConnection<C>;
+    fConnection: IDBConnection<T>;
   protected
-    function GetConnection: IDBConnection<C>;
-    function NewStatement: IDBStatement<T>; virtual; abstract;
+    function GetConnection: IDBConnection<T>;
+    function NewStatement: IDBStatement; virtual; abstract;
   public
-    constructor Create(const connection: IDBConnection<C>);
+    constructor Create(const connection: IDBConnection<T>);
   end;
 
-  TDriverQueryChangerAdapter<T: TDataSet> = class(TDriverAdapterBase, IDBQueryChanger<T>)
+  TDriverQueryChangerAdapter<T: TDataSet> = class(TDriverAdapterBase, IDBQueryChanger)
   private
     fDataSet: T;
     fParser: ISQLParserSelect;
@@ -99,31 +104,31 @@ type
     function GetDataSetQueryText: string; virtual; abstract;
     procedure SetDataSetQueryText(const value: string); virtual; abstract;
 
-    function Initialize(const query: string): IDBQueryChanger<T>; overload;
-    function Initialize(const query: ISQL): IDBQueryChanger<T>; overload;
+    function Initialize(const query: string): IDBQueryChanger; overload;
+    function Initialize(const query: ISQL): IDBQueryChanger; overload;
 
-    function Add(const condition: string): IDBQueryChanger<T>; overload;
-    function Add(const condition: ISQLClause): IDBQueryChanger<T>; overload;
+    function Add(const condition: string): IDBQueryChanger; overload;
+    function Add(const condition: ISQLClause): IDBQueryChanger; overload;
 
-    function Restore: IDBQueryChanger<T>;
+    function Restore: IDBQueryChanger;
 
     procedure Activate;
   public
     constructor Create(const dataSet: T);
   end;
 
-  TDriverMetaDataInfoAdapter<T: TDataSet; C: TComponent> = class(TDriverAdapterBase, IDBMetaDataInfo<T>)
+  TDriverMetaDataInfoAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBMetaDataInfo)
   private
-    fSession: IDBSession<C, T>;
+    fSession: IDBSession<T>;
   protected
-    function GetSession: IDBSession<C, T>;
+    function GetSession: IDBSession<T>;
 
-    function GetTables: IDataSetIterator<T>; virtual; abstract;
-    function GetFields(const tableName: string): IDataSetIterator<T>; virtual; abstract;
-    function GetPrimaryKeys(const tableName: string): IDataSetIterator<T>; virtual; abstract;
-    function GetIndexes(const tableName: string): IDataSetIterator<T>; virtual; abstract;
-    function GetForeignKeys(const tableName: string): IDataSetIterator<T>; virtual; abstract;
-    function GetGenerators: IDataSetIterator<T>; virtual; abstract;
+    function GetTables: IDataSetIterator; virtual; abstract;
+    function GetFields(const tableName: string): IDataSetIterator; virtual; abstract;
+    function GetPrimaryKeys(const tableName: string): IDataSetIterator; virtual; abstract;
+    function GetIndexes(const tableName: string): IDataSetIterator; virtual; abstract;
+    function GetForeignKeys(const tableName: string): IDataSetIterator; virtual; abstract;
+    function GetGenerators: IDataSetIterator; virtual; abstract;
 
     function TableExists(const tableName: string): Boolean;
     function FieldExists(const tableName, fieldName: string): Boolean;
@@ -132,7 +137,7 @@ type
     function ForeignKeyExists(const tableName, foreignKeyName: string): Boolean;
     function GeneratorExists(const generatorName: string): Boolean;
   public
-    constructor Create(const session: IDBSession<C, T>);
+    constructor Create(const session: IDBSession<T>);
   end;
 
 implementation
@@ -152,112 +157,135 @@ begin
   Result := fComponent;
 end;
 
-{ TDriverStatementAdapter<T, C> }
+{ TDriverStatementAdapter<T> }
 
-function TDriverStatementAdapter<T, C>.AsDataSet: T;
+function TDriverStatementAdapter<T>.AsDataSet: TDataSet;
 begin
   Result := AsDataSet(0);
 end;
 
-function TDriverStatementAdapter<T, C>.AsField: TField;
+function TDriverStatementAdapter<T>.AsField: TField;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := nil;
-  it := TDataSetIterator<T>.Create(AsDataSet);
+  it := TDataSetIterator.Create(AsDataSet);
   if not it.IsEmpty then
     Result := it.Fields[0];
 end;
 
-function TDriverStatementAdapter<T, C>.AsIterator(const fetchRows: Integer): IDataSetIterator<T>;
+function TDriverStatementAdapter<T>.AsIterator(const fetchRows: Integer): IDataSetIterator;
 begin
-  Result := TDataSetIterator<T>.Create(AsDataSet(fetchRows));
+  Result := TDataSetIterator.Create(AsDataSet(fetchRows));
 end;
 
-function TDriverStatementAdapter<T, C>.AsIterator: IDataSetIterator<T>;
+function TDriverStatementAdapter<T>.AsIterator: IDataSetIterator;
 begin
   Result := AsIterator(0);
 end;
 
-function TDriverStatementAdapter<T, C>.Build(const query: ISQL): IDBStatement<T>;
+function TDriverStatementAdapter<T>.Build(const query: ISQL): IDBStatement;
 begin
   Result := Build(query.ToString);
 end;
 
-function TDriverStatementAdapter<T, C>.Build(const query: string): IDBStatement<T>;
+function TDriverStatementAdapter<T>.Build(const query: string): IDBStatement;
 begin
   fQuery := query;
   Result := Self;
 end;
 
-function TDriverStatementAdapter<T, C>.ClearParams: IDBStatement<T>;
+function TDriverStatementAdapter<T>.ClearParams: IDBStatement;
 begin
   fParams.Clear;
   Result := Self;
 end;
 
-constructor TDriverStatementAdapter<T, C>.Create(const connection: IDBConnection<C>);
+constructor TDriverStatementAdapter<T>.Create(const connection: IDBConnection<T>);
 begin
   inherited Create;
   fConnection := connection;
   fQuery := EmptyStr;
   fParams := TDictionary<string, TValue>.Create;
+  SetPreparedDataSet(nil);
 end;
 
-destructor TDriverStatementAdapter<T, C>.Destroy;
+destructor TDriverStatementAdapter<T>.Destroy;
 begin
   fParams.Free;
   inherited Destroy;
 end;
 
-procedure TDriverStatementAdapter<T, C>.Execute;
+procedure TDriverStatementAdapter<T>.Execute;
 begin
   Execute(False);
 end;
 
-procedure TDriverStatementAdapter<T, C>.Open(const iterator: IDataSetIterator<T>);
+procedure TDriverStatementAdapter<T>.Open(const iterator: IDataSetIterator);
 begin
   Open(iterator.GetDataSet);
 end;
 
-function TDriverStatementAdapter<T, C>.GetConnection: IDBConnection<C>;
+function TDriverStatementAdapter<T>.Prepare(const dataSet: TDataSet): IDBStatement;
+begin
+  SetPreparedDataSet(dataSet);
+  Result := Self;
+end;
+
+procedure TDriverStatementAdapter<T>.SetPreparedDataSet(const value: TDataSet);
+begin
+  fPreparedDataSet := value;
+end;
+
+function TDriverStatementAdapter<T>.GetConnection: IDBConnection<T>;
 begin
   if not Assigned(fConnection) then
     raise EPersistenceException.CreateFmt('Connection not defined in %s!', [Self.ClassName]);
   Result := fConnection;
 end;
 
-function TDriverStatementAdapter<T, C>.GetParams: TDictionary<string, TValue>;
+function TDriverStatementAdapter<T>.GetParams: TDictionary<string, TValue>;
 begin
   Result := fParams;
 end;
 
-function TDriverStatementAdapter<T, C>.GetQuery: string;
+function TDriverStatementAdapter<T>.GetPreparedDataSet: TDataSet;
+begin
+  Result := fPreparedDataSet;
+end;
+
+function TDriverStatementAdapter<T>.GetQuery: string;
 begin
   Result := fQuery;
 end;
 
-function TDriverStatementAdapter<T, C>.AddOrSetParam(const name: string; const value: TValue): IDBStatement<T>;
+procedure TDriverStatementAdapter<T>.Open(const dataSet: TDataSet);
+begin
+  DataSetPreparation(dataSet);
+  dataSet.Open;
+end;
+
+function TDriverStatementAdapter<T>.AddOrSetParam(const name: string; const value: TValue): IDBStatement;
 begin
   fParams.AddOrSetValue(name, value);
   Result := Self;
 end;
 
-function TDriverStatementAdapter<T, C>.AddOrSetParam(const name: string; const value: ISQLValue): IDBStatement<T>;
+function TDriverStatementAdapter<T>.AddOrSetParam(const name: string; const value: ISQLValue): IDBStatement;
 begin
   Result := AddOrSetParam(name, value.ToString);
 end;
 
-{ TDriverSessionAdapter<C, T> }
+{ TDriverSessionAdapter<T> }
 
-function TDriverSessionAdapter<C, T>.GetConnection: IDBConnection<C>;
+function TDriverSessionAdapter<T>.GetConnection: IDBConnection<T>;
 begin
   if not Assigned(fConnection) then
     raise EPersistenceException.CreateFmt('Connection not defined in %s!', [Self.ClassName]);
   Result := fConnection;
 end;
 
-constructor TDriverSessionAdapter<C, T>.Create(const connection: IDBConnection<C>);
+constructor TDriverSessionAdapter<T>.Create(const connection: IDBConnection<T>);
 begin
   inherited Create;
   fConnection := connection;
@@ -271,12 +299,12 @@ begin
   fParser.Parse(fQuery);
 end;
 
-function TDriverQueryChangerAdapter<T>.Add(const condition: ISQLClause): IDBQueryChanger<T>;
+function TDriverQueryChangerAdapter<T>.Add(const condition: ISQLClause): IDBQueryChanger;
 begin
   Result := Add(condition.ToString);
 end;
 
-function TDriverQueryChangerAdapter<T>.Add(const condition: string): IDBQueryChanger<T>;
+function TDriverQueryChangerAdapter<T>.Add(const condition: string): IDBQueryChanger;
 begin
   if IsOrderBy(condition) then
     fParser.AddOrderBy(condition)
@@ -331,7 +359,7 @@ begin
   Result := fParser;
 end;
 
-function TDriverQueryChangerAdapter<T>.Initialize(const query: string): IDBQueryChanger<T>;
+function TDriverQueryChangerAdapter<T>.Initialize(const query: string): IDBQueryChanger;
 begin
   fDataSet.Close;
   fQuery := query;
@@ -340,7 +368,7 @@ begin
   Result := Self;
 end;
 
-function TDriverQueryChangerAdapter<T>.Initialize(const query: ISQL): IDBQueryChanger<T>;
+function TDriverQueryChangerAdapter<T>.Initialize(const query: ISQL): IDBQueryChanger;
 begin
   Result := Initialize(query.ToString);
 end;
@@ -365,7 +393,7 @@ begin
   Result := ConditionIs(condition, stWhere);
 end;
 
-function TDriverQueryChangerAdapter<T>.Restore: IDBQueryChanger<T>;
+function TDriverQueryChangerAdapter<T>.Restore: IDBQueryChanger;
 begin
   fDataSet.Close;
   fParser.Parse(fQuery);
@@ -373,17 +401,17 @@ begin
   Result := Self;
 end;
 
-{ TDriverMetaDataInfoAdapter<T, C> }
+{ TDriverMetaDataInfoAdapter<T> }
 
-constructor TDriverMetaDataInfoAdapter<T, C>.Create(const session: IDBSession<C, T>);
+constructor TDriverMetaDataInfoAdapter<T>.Create(const session: IDBSession<T>);
 begin
   inherited Create;
   fSession := session;
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.FieldExists(const tableName, fieldName: string): Boolean;
+function TDriverMetaDataInfoAdapter<T>.FieldExists(const tableName, fieldName: string): Boolean;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := False;
   it := GetFields(tableName);
@@ -392,9 +420,9 @@ begin
       Exit(True);
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.ForeignKeyExists(const tableName, foreignKeyName: string): Boolean;
+function TDriverMetaDataInfoAdapter<T>.ForeignKeyExists(const tableName, foreignKeyName: string): Boolean;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := False;
   it := GetForeignKeys(tableName);
@@ -403,9 +431,9 @@ begin
       Exit(True);
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.GeneratorExists(const generatorName: string): Boolean;
+function TDriverMetaDataInfoAdapter<T>.GeneratorExists(const generatorName: string): Boolean;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := False;
   it := GetGenerators;
@@ -414,16 +442,16 @@ begin
       Exit(True);
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.GetSession: IDBSession<C, T>;
+function TDriverMetaDataInfoAdapter<T>.GetSession: IDBSession<T>;
 begin
   if not Assigned(fSession) then
     raise EPersistenceException.CreateFmt('Session not defined in %s!', [Self.ClassName]);
   Result := fSession;
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.IndexExists(const tableName, indexName: string): Boolean;
+function TDriverMetaDataInfoAdapter<T>.IndexExists(const tableName, indexName: string): Boolean;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := False;
   it := GetIndexes(tableName);
@@ -432,9 +460,9 @@ begin
       Exit(True);
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.PrimaryKeyExists(const tableName, primaryKeyName: string): Boolean;
+function TDriverMetaDataInfoAdapter<T>.PrimaryKeyExists(const tableName, primaryKeyName: string): Boolean;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := False;
   it := GetPrimaryKeys(tableName);
@@ -443,9 +471,9 @@ begin
       Exit(True);
 end;
 
-function TDriverMetaDataInfoAdapter<T, C>.TableExists(const tableName: string): Boolean;
+function TDriverMetaDataInfoAdapter<T>.TableExists(const tableName: string): Boolean;
 var
-  it: IDataSetIterator<T>;
+  it: IDataSetIterator;
 begin
   Result := False;
   it := GetTables;

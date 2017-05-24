@@ -49,11 +49,11 @@ end;
 procedure TTestInfraFwkDataSetIterator.TestIteratorDataSet;
 var
   ds: TClientDataSet;
-  it: IDataSetIterator<TClientDataSet>;
+  it: IDataSetIterator;
 begin
   ds := CreateDataSet;
   try
-    it := TDataSetIterator<TClientDataSet>.Create(ds, False);
+    it := TDataSetIterator.Create(ds, False);
     CheckTrue(it.GetDataSet <> nil);
     CheckTrue(it.IsEmpty);
     CheckFalse(it.HasNext);
@@ -66,9 +66,9 @@ end;
 
 procedure TTestInfraFwkDataSetIterator.TestIteratorOwnsDataSet;
 var
-  it: IDataSetIterator<TClientDataSet>;
+  it: IDataSetIterator;
 begin
-  it := TDataSetIterator<TClientDataSet>.Create(CreateDataSet);
+  it := TDataSetIterator.Create(CreateDataSet);
   CheckTrue(it.GetDataSet <> nil);
   CheckTrue(it.IsEmpty);
   CheckFalse(it.HasNext);
@@ -79,7 +79,7 @@ end;
 procedure TTestInfraFwkDataSetIterator.TestIteratorDataSetLoop;
 var
   ds: TClientDataSet;
-  it: IDataSetIterator<TClientDataSet>;
+  it: IDataSetIterator;
 
   procedure AddValue(const city, state: string; const position: Integer);
   begin
@@ -104,7 +104,7 @@ begin
 
   ds.IndexFieldNames := 'City';
 
-  it := TDataSetIterator<TClientDataSet>.Create(ds, True);
+  it := TDataSetIterator.Create(ds, True);
   CheckFalse(it.IsEmpty);
 
   while it.HasNext do
@@ -168,7 +168,7 @@ begin
 
   it.First;
   it.ForEach(
-    procedure(currentIterator: IDataSetIterator<TClientDataSet>)
+    procedure(currentIterator: IDataSetIterator)
     begin
       if (currentIterator.FieldByName('Position').AsInteger = 1) then
       begin
@@ -193,37 +193,6 @@ begin
         CheckEquals('Rio de Janeiro', currentIterator.FieldByName('City').AsString);
         CheckEquals('RJ', currentIterator.FieldByName('State').AsString);
         CheckEquals(4, currentIterator.FieldByName('Position').AsInteger);
-      end;
-    end
-    );
-
-  it.First;
-  it.ForEach(
-    procedure(dataSet: TClientDataSet)
-    begin
-      if (dataSet.FieldByName('Position').AsInteger = 1) then
-      begin
-        CheckEquals('São Paulo', dataSet.FieldByName('City').AsString);
-        CheckEquals('SP', dataSet.FieldByName('State').AsString);
-        CheckEquals(1, dataSet.FieldByName('Position').AsInteger);
-      end;
-      if (dataSet.FieldByName('Position').AsInteger = 2) then
-      begin
-        CheckEquals('Maravilha', dataSet.FieldByName('City').AsString);
-        CheckEquals('SC', dataSet.FieldByName('State').AsString);
-        CheckEquals(2, dataSet.FieldByName('Position').AsInteger);
-      end;
-      if (dataSet.FieldByName('Position').AsInteger = 3) then
-      begin
-        CheckEquals('Florianópolis', dataSet.FieldByName('City').AsString);
-        CheckEquals('SC', dataSet.FieldByName('State').AsString);
-        CheckEquals(3, dataSet.FieldByName('Position').AsInteger);
-      end;
-      if (dataSet.FieldByName('Position').AsInteger = 4) then
-      begin
-        CheckEquals('Rio de Janeiro', dataSet.FieldByName('City').AsString);
-        CheckEquals('RJ', dataSet.FieldByName('State').AsString);
-        CheckEquals(4, dataSet.FieldByName('Position').AsInteger);
       end;
     end
     );

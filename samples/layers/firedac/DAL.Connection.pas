@@ -17,9 +17,9 @@ type
     procedure DataModuleDestroy(Sender: TObject);
   private
     fConnection: IDBConnection<TFDConnection>;
-    fSession: IDBSession<TFDConnection, TFDQuery>;
+    fSession: IDBSession<TFDConnection>;
   public
-    function GetSession: IDBSession<TFDConnection, TFDQuery>;
+    function GetSession: IDBSession<TFDConnection>;
   end;
 
 var
@@ -42,7 +42,7 @@ begin
   FDConnection.Connected := False;
 end;
 
-function TDALConnection.GetSession: IDBSession<TFDConnection, TFDQuery>;
+function TDALConnection.GetSession: IDBSession<TFDConnection>;
 begin
   Result := fSession;
 end;

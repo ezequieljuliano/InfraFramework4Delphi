@@ -28,7 +28,7 @@ procedure TCountryBC.ProcessCounting;
 begin
   fCount := 0;
   Persistence.FindAll.ForEach(
-    procedure(iterator: IDataSetIterator<TFDQuery>)
+    procedure(iterator: IDataSetIterator)
     begin
       fCount := fCount + 1;
     end

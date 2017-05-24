@@ -16,9 +16,9 @@ type
   private
     { Private declarations }
   public
-    function FindByName(const name: string): IDataSetIterator<TFDQuery>;
-    function FindById(const id: Integer): IDataSetIterator<TFDQuery>;
-    function FindAll: IDataSetIterator<TFDQuery>;
+    function FindByName(const name: string): IDataSetIterator;
+    function FindById(const id: Integer): IDataSetIterator;
+    function FindAll: IDataSetIterator;
 
     procedure FilterById(const id: Integer);
     procedure Desfilter;
@@ -41,21 +41,21 @@ begin
   QueryChanger('Country').Add(SQL.Where('Id').Equal(id)).Activate;
 end;
 
-function TCountryDAO.FindAll: IDataSetIterator<TFDQuery>;
+function TCountryDAO.FindAll: IDataSetIterator;
 begin
   Result := GetSession.NewStatement.Build(
     SQL.Select.AllColumns.From('Country')
     ).AsIterator;
 end;
 
-function TCountryDAO.FindById(const id: Integer): IDataSetIterator<TFDQuery>;
+function TCountryDAO.FindById(const id: Integer): IDataSetIterator;
 begin
   Result := GetSession.NewStatement.Build(
     SQL.Select.AllColumns.From('Country').Where('Id').Equal(SQL.Value(':ID').Expression)
     ).AddOrSetParam('ID', id).AsIterator;
 end;
 
-function TCountryDAO.FindByName(const name: string): IDataSetIterator<TFDQuery>;
+function TCountryDAO.FindByName(const name: string): IDataSetIterator;
 begin
   Result := GetSession.NewStatement.Build(
     SQL.Select.AllColumns.From('Country').Where('Name').Like(SQL.Value(name).Like(loContaining).Insensetive)

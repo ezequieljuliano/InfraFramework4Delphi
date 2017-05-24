@@ -23,21 +23,21 @@ type
 
   TPersistenceTemplateFireDAC = class(TDataModule)
   private
-    fSession: IDBSession<TFDConnection, TFDQuery>;
-    fQueryChangers: TDictionary<string, IDBQueryChanger<TFDQuery>>;
+    fSession: IDBSession<TFDConnection>;
+    fQueryChangers: TDictionary<string, IDBQueryChanger>;
   protected
-    function GetSession: IDBSession<TFDConnection, TFDQuery>;
-    function GetQueryChangers: TDictionary<string, IDBQueryChanger<TFDQuery>>;
+    function GetSession: IDBSession<TFDConnection>;
+    function GetQueryChangers: TDictionary<string, IDBQueryChanger>;
 
     procedure Setup; virtual;
 
-    function QueryChanger(const dataSet: TFDQuery): IDBQueryChanger<TFDQuery>; overload;
-    function QueryChanger(const dataSetName: string): IDBQueryChanger<TFDQuery>; overload;
+    function QueryChanger(const dataSet: TFDQuery): IDBQueryChanger; overload;
+    function QueryChanger(const dataSetName: string): IDBQueryChanger; overload;
 
-    function NewIterator(const dataSet: TFDQuery): IDataSetIterator<TFDQuery>; overload;
-    function NewIterator(const dataSetName: string): IDataSetIterator<TFDQuery>; overload;
+    function NewIterator(const dataSet: TFDQuery): IDataSetIterator; overload;
+    function NewIterator(const dataSetName: string): IDataSetIterator; overload;
   public
-    constructor Create(const session: IDBSession<TFDConnection, TFDQuery>); reintroduce;
+    constructor Create(const session: IDBSession<TFDConnection>); reintroduce;
     destructor Destroy; override;
   end;
 
@@ -55,7 +55,7 @@ begin
   inherited Destroy;
 end;
 
-constructor TPersistenceTemplateFireDAC.Create(const session: IDBSession<TFDConnection, TFDQuery>);
+constructor TPersistenceTemplateFireDAC.Create(const session: IDBSession<TFDConnection>);
 begin
   inherited Create(nil);
   fSession := session;
@@ -63,27 +63,27 @@ begin
   Setup;
 end;
 
-function TPersistenceTemplateFireDAC.GetSession: IDBSession<TFDConnection, TFDQuery>;
+function TPersistenceTemplateFireDAC.GetSession: IDBSession<TFDConnection>;
 begin
   if not Assigned(fSession) then
     raise EPersistenceException.CreateFmt('Database Session not defined in %s!', [Self.ClassName]);
   Result := fSession;
 end;
 
-function TPersistenceTemplateFireDAC.NewIterator(const dataSet: TFDQuery): IDataSetIterator<TFDQuery>;
+function TPersistenceTemplateFireDAC.NewIterator(const dataSet: TFDQuery): IDataSetIterator;
 begin
-  Result := TDataSetIterator<TFDQuery>.Create(dataSet, False);
+  Result := TDataSetIterator.Create(dataSet, False);
 end;
 
-function TPersistenceTemplateFireDAC.NewIterator(const dataSetName: string): IDataSetIterator<TFDQuery>;
+function TPersistenceTemplateFireDAC.NewIterator(const dataSetName: string): IDataSetIterator;
 begin
   Result := NewIterator(FindComponent(dataSetName) as TFDQuery);
 end;
 
-function TPersistenceTemplateFireDAC.GetQueryChangers: TDictionary<string, IDBQueryChanger<TFDQuery>>;
+function TPersistenceTemplateFireDAC.GetQueryChangers: TDictionary<string, IDBQueryChanger>;
 begin
   if not Assigned(fQueryChangers) then
-    fQueryChangers := TDictionary < string, IDBQueryChanger < TFDQuery >>.Create;
+    fQueryChangers := TDictionary<string, IDBQueryChanger>.Create;
   Result := fQueryChangers;
 end;
 
@@ -113,12 +113,12 @@ begin
   end;
 end;
 
-function TPersistenceTemplateFireDAC.QueryChanger(const dataSet: TFDQuery): IDBQueryChanger<TFDQuery>;
+function TPersistenceTemplateFireDAC.QueryChanger(const dataSet: TFDQuery): IDBQueryChanger;
 begin
   Result := QueryChanger(dataSet.Name);
 end;
 
-function TPersistenceTemplateFireDAC.QueryChanger(const dataSetName: string): IDBQueryChanger<TFDQuery>;
+function TPersistenceTemplateFireDAC.QueryChanger(const dataSetName: string): IDBQueryChanger;
 begin
   Result := GetQueryChangers.Items[dataSetName];
 end;

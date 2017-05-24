@@ -6,6 +6,7 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   System.Rtti,
+  Data.DB,
   FireDAC.DApt,
   FireDAC.Comp.Client,
   FireDAC.Stan.Async,
@@ -29,26 +30,23 @@ type
     { public declarations }
   end;
 
-  TFireDACStatementAdapter = class(TDriverStatementAdapter<TFDQuery, TFDConnection>)
-  private
-    fPreparedDataSet: TFDQuery;
-    procedure PrepareDataSet(const dataSet: TFDQuery);
-  protected
-    function Prepare(const dataSet: TFDQuery): IDBStatement<TFDQuery>; override;
-
-    procedure Open(const dataSet: TFDQuery); override;
-    procedure Execute(const commit: Boolean); override;
-
-    function AsDataSet(const fetchRows: Integer): TFDQuery; override;
-  public
-    procedure AfterConstruction; override;
-  end;
-
-  TFireDACSessionAdapter = class(TDriverSessionAdapter<TFDConnection, TFDQuery>)
+  TFireDACStatementAdapter = class(TDriverStatementAdapter<TFDConnection>)
   private
     { private declarations }
   protected
-    function NewStatement: IDBStatement<TFDQuery>; override;
+    procedure DataSetPreparation(const dataSet: TDataSet); override;
+    procedure Execute(const commit: Boolean); override;
+
+    function AsDataSet(const fetchRows: Integer): TDataSet; override;
+  public
+    { public declarations }
+  end;
+
+  TFireDACSessionAdapter = class(TDriverSessionAdapter<TFDConnection>)
+  private
+    { private declarations }
+  protected
+    function NewStatement: IDBStatement; override;
   public
     { public declarations }
   end;
@@ -63,17 +61,17 @@ type
     { public declarations }
   end;
 
-  TFireDACMetaDataInfoAdapter = class(TDriverMetaDataInfoAdapter<TFDMetaInfoQuery, TFDConnection>)
+  TFireDACMetaDataInfoAdapter = class(TDriverMetaDataInfoAdapter<TFDConnection>)
   private
-    function GetMetaInfo(const kind: TFDPhysMetaInfoKind): IDataSetIterator<TFDMetaInfoQuery>; overload;
-    function GetMetaInfo(const kind: TFDPhysMetaInfoKind; const objectName: string): IDataSetIterator<TFDMetaInfoQuery>; overload;
+    function GetMetaInfo(const kind: TFDPhysMetaInfoKind): IDataSetIterator; overload;
+    function GetMetaInfo(const kind: TFDPhysMetaInfoKind; const objectName: string): IDataSetIterator; overload;
   protected
-    function GetTables: IDataSetIterator<TFDMetaInfoQuery>; override;
-    function GetFields(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>; override;
-    function GetPrimaryKeys(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>; override;
-    function GetIndexes(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>; override;
-    function GetForeignKeys(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>; override;
-    function GetGenerators: IDataSetIterator<TFDMetaInfoQuery>; override;
+    function GetTables: IDataSetIterator; override;
+    function GetFields(const tableName: string): IDataSetIterator; override;
+    function GetPrimaryKeys(const tableName: string): IDataSetIterator; override;
+    function GetIndexes(const tableName: string): IDataSetIterator; override;
+    function GetForeignKeys(const tableName: string): IDataSetIterator; override;
+    function GetGenerators: IDataSetIterator; override;
   public
     { public declarations }
   end;
@@ -82,39 +80,36 @@ implementation
 
 { TFireDACStatementAdapter }
 
-procedure TFireDACStatementAdapter.AfterConstruction;
+function TFireDACStatementAdapter.AsDataSet(const fetchRows: Integer): TDataSet;
+var
+  dataSet: TFDQuery;
 begin
-  inherited AfterConstruction;
-  fPreparedDataSet := nil;
-end;
-
-function TFireDACStatementAdapter.AsDataSet(const fetchRows: Integer): TFDQuery;
-begin
-  Result := TFDQuery.Create(nil);
-  PrepareDataSet(Result);
+  dataSet := TFDQuery.Create(nil);
+  DataSetPreparation(dataSet);
   if (fetchRows > 0) then
   begin
-    Result.FetchOptions.Mode := fmOnDemand;
-    Result.FetchOptions.RowsetSize := fetchRows;
+    dataSet.FetchOptions.Mode := fmOnDemand;
+    dataSet.FetchOptions.RowsetSize := fetchRows;
   end
   else
   begin
-    Result.FetchOptions.Mode := fmAll;
-    Result.FetchOptions.RowsetSize := -1;
+    dataSet.FetchOptions.Mode := fmAll;
+    dataSet.FetchOptions.RowsetSize := -1;
   end;
-  Result.Open;
+  dataSet.Open;
+  Result := dataSet;
 end;
 
 procedure TFireDACStatementAdapter.Execute(const commit: Boolean);
 var
   dataSet: TFDQuery;
 begin
-  if Assigned(fPreparedDataSet) then
-    dataSet := fPreparedDataSet
+  if (GetPreparedDataSet <> nil) then
+    dataSet := GetPreparedDataSet as TFDQuery
   else
     dataSet := TFDQuery.Create(nil);
   try
-    PrepareDataSet(dataSet);
+    DataSetPreparation(dataSet);
     if commit then
     begin
       GetConnection.GetComponent.StartTransaction;
@@ -129,44 +124,35 @@ begin
     else
       dataSet.ExecSQL;
   finally
-    if Assigned(fPreparedDataSet) then
-      fPreparedDataSet := nil
+    if (GetPreparedDataSet <> nil) then
+      SetPreparedDataSet(nil)
     else
       dataSet.Free;
   end;
 end;
 
-procedure TFireDACStatementAdapter.Open(const dataSet: TFDQuery);
-begin
-  PrepareDataSet(dataSet);
-  dataSet.Open;
-end;
-
-function TFireDACStatementAdapter.Prepare(const dataSet: TFDQuery): IDBStatement<TFDQuery>;
-begin
-  fPreparedDataSet := dataSet;
-  Result := Self;
-end;
-
-procedure TFireDACStatementAdapter.PrepareDataSet(const dataSet: TFDQuery);
+procedure TFireDACStatementAdapter.DataSetPreparation(const dataSet: TDataSet);
 var
-  p: TPair<string, TValue>;
+  param: TPair<string, TValue>;
+  typedDataSet: TFDQuery;
 begin
-  if dataSet.Active then
-    dataSet.Close;
+  typedDataSet := dataSet as TFDQuery;
 
-  dataSet.Connection := GetConnection.GetComponent;
-  dataSet.SQL.Text := GetQuery;
+  if typedDataSet.Active then
+    typedDataSet.Close;
 
-  for p in GetParams do
-    dataSet.ParamByName(p.Key).Value := p.Value.AsVariant;
+  typedDataSet.Connection := GetConnection.GetComponent;
+  typedDataSet.SQL.Text := GetQuery;
 
-  dataSet.Prepare;
+  for param in GetParams do
+    typedDataSet.ParamByName(param.Key).Value := param.Value.AsVariant;
+
+  typedDataSet.Prepare;
 end;
 
 { TFireDACSessionAdapter }
 
-function TFireDACSessionAdapter.NewStatement: IDBStatement<TFDQuery>;
+function TFireDACSessionAdapter.NewStatement: IDBStatement;
 begin
   Result := TFireDACStatementAdapter.Create(GetConnection);
 end;
@@ -186,32 +172,32 @@ end;
 
 { TFireDACMetaDataInfoAdapter }
 
-function TFireDACMetaDataInfoAdapter.GetFields(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetFields(const tableName: string): IDataSetIterator;
 begin
   Result := GetMetaInfo(mkTableFields, tableName);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetForeignKeys(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetForeignKeys(const tableName: string): IDataSetIterator;
 begin
   Result := GetMetaInfo(mkForeignKeys, tableName);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetGenerators: IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetGenerators: IDataSetIterator;
 begin
   Result := GetMetaInfo(mkGenerators);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetIndexes(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetIndexes(const tableName: string): IDataSetIterator;
 begin
   Result := GetMetaInfo(mkIndexes, tableName);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetMetaInfo(const kind: TFDPhysMetaInfoKind): IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetMetaInfo(const kind: TFDPhysMetaInfoKind): IDataSetIterator;
 begin
   Result := GetMetaInfo(kind, EmptyStr);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetMetaInfo(const kind: TFDPhysMetaInfoKind; const objectName: string): IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetMetaInfo(const kind: TFDPhysMetaInfoKind; const objectName: string): IDataSetIterator;
 var
   ds: TFDMetaInfoQuery;
 begin
@@ -220,15 +206,15 @@ begin
   ds.MetaInfoKind := kind;
   ds.ObjectName := objectName;
   ds.Open;
-  Result := TDataSetIterator<TFDMetaInfoQuery>.Create(ds, True);
+  Result := TDataSetIterator.Create(ds, True);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetPrimaryKeys(const tableName: string): IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetPrimaryKeys(const tableName: string): IDataSetIterator;
 begin
   Result := GetMetaInfo(mkPrimaryKey, tableName);
 end;
 
-function TFireDACMetaDataInfoAdapter.GetTables: IDataSetIterator<TFDMetaInfoQuery>;
+function TFireDACMetaDataInfoAdapter.GetTables: IDataSetIterator;
 begin
   Result := GetMetaInfo(mkTables);
 end;
