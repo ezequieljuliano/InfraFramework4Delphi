@@ -17,11 +17,12 @@ uses
 
 type
 
-  TDriverAdapterBase = class(TInterfacedObject)
+  TDriverAdapterBase = class(TInterfacedObject, IDB)
   private
-    { private declarations }
+    fOwner: IDB;
   protected
-    { protected declarations }
+    function GetOwner: IDB;
+    procedure SetOwner(const value: IDB);
   public
     { public declarations }
   end;
@@ -35,19 +36,19 @@ type
     constructor Create(const component: T);
   end;
 
-  TDriverStatementAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBStatement)
+  TDriverStatementAdapter = class(TDriverAdapterBase, IDBStatement)
   private
-    fConnection: IDBConnection<T>;
+    fSession: IDBSession;
     fQuery: string;
     fParams: TDictionary<string, TValue>;
     fPreparedDataSet: TDataSet;
   protected
     function GetQuery: string;
-    function GetConnection: IDBConnection<T>;
+    function GetSession: IDBSession;
     function GetParams: TDictionary<string, TValue>;
     function GetPreparedDataSet: TDataSet;
-    procedure SetPreparedDataSet(const value: TDataSet);
 
+    procedure SetPreparedDataSet(const value: TDataSet);
     procedure DataSetPreparation(const dataSet: TDataSet); virtual; abstract;
 
     function Build(const query: string): IDBStatement; overload;
@@ -72,15 +73,33 @@ type
 
     function AsField: TField;
   public
-    constructor Create(const connection: IDBConnection<T>);
+    constructor Create(const session: IDBSession);
     destructor Destroy; override;
   end;
 
-  TDriverSessionAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBSession<T>)
+  TDriverTransactionAdapter<T: TComponent> = class(TDriverAdapterBase, IDBTransaction)
+  private
+    fTransaction: T;
+  protected
+    procedure Commit; virtual; abstract;
+    procedure Rollback; virtual; abstract;
+    function InTransaction: Boolean; virtual; abstract;
+  public
+    constructor Create(const transaction: T); virtual;
+    destructor Destroy; override;
+
+    property Transaction: T read fTransaction;
+  end;
+
+  TDriverSessionAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBSession)
   private
     fConnection: IDBConnection<T>;
   protected
     function GetConnection: IDBConnection<T>;
+
+    function BeginTransaction: IDBTransaction; virtual; abstract;
+    procedure Transactional(const action: TProc);
+
     function NewStatement: IDBStatement; virtual; abstract;
   public
     constructor Create(const connection: IDBConnection<T>);
@@ -119,9 +138,9 @@ type
 
   TDriverMetaDataInfoAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBMetaDataInfo)
   private
-    fSession: IDBSession<T>;
+    fSession: IDBSession;
   protected
-    function GetSession: IDBSession<T>;
+    function GetSession: IDBSession;
 
     function GetTables: IDataSetIterator; virtual; abstract;
     function GetFields(const tableName: string): IDataSetIterator; virtual; abstract;
@@ -137,10 +156,25 @@ type
     function ForeignKeyExists(const tableName, foreignKeyName: string): Boolean;
     function GeneratorExists(const generatorName: string): Boolean;
   public
-    constructor Create(const session: IDBSession<T>);
+    constructor Create(const session: IDBSession);
   end;
 
 implementation
+
+
+{ TDriverAdapterBase }
+
+function TDriverAdapterBase.GetOwner: IDB;
+begin
+  if not Assigned(fOwner) then
+    raise EPersistenceException.CreateFmt('Owner object not defined in %s!', [Self.ClassName]);
+  Result := fOwner;
+end;
+
+procedure TDriverAdapterBase.SetOwner(const value: IDB);
+begin
+  fOwner := value;
+end;
 
 { TDriverConnectionAdapter<T> }
 
@@ -157,14 +191,14 @@ begin
   Result := fComponent;
 end;
 
-{ TDriverStatementAdapter<T> }
+{ TDriverStatementAdapter }
 
-function TDriverStatementAdapter<T>.AsDataSet: TDataSet;
+function TDriverStatementAdapter.AsDataSet: TDataSet;
 begin
   Result := AsDataSet(0);
 end;
 
-function TDriverStatementAdapter<T>.AsField: TField;
+function TDriverStatementAdapter.AsField: TField;
 var
   it: IDataSetIterator;
 begin
@@ -174,121 +208,156 @@ begin
     Result := it.Fields[0];
 end;
 
-function TDriverStatementAdapter<T>.AsIterator(const fetchRows: Integer): IDataSetIterator;
+function TDriverStatementAdapter.AsIterator(const fetchRows: Integer): IDataSetIterator;
 begin
   Result := TDataSetIterator.Create(AsDataSet(fetchRows));
 end;
 
-function TDriverStatementAdapter<T>.AsIterator: IDataSetIterator;
+function TDriverStatementAdapter.AsIterator: IDataSetIterator;
 begin
   Result := AsIterator(0);
 end;
 
-function TDriverStatementAdapter<T>.Build(const query: ISQL): IDBStatement;
+function TDriverStatementAdapter.Build(const query: ISQL): IDBStatement;
 begin
   Result := Build(query.ToString);
 end;
 
-function TDriverStatementAdapter<T>.Build(const query: string): IDBStatement;
+function TDriverStatementAdapter.Build(const query: string): IDBStatement;
 begin
   fQuery := query;
   Result := Self;
 end;
 
-function TDriverStatementAdapter<T>.ClearParams: IDBStatement;
+function TDriverStatementAdapter.ClearParams: IDBStatement;
 begin
   fParams.Clear;
   Result := Self;
 end;
 
-constructor TDriverStatementAdapter<T>.Create(const connection: IDBConnection<T>);
+constructor TDriverStatementAdapter.Create(const session: IDBSession);
 begin
   inherited Create;
-  fConnection := connection;
+  fSession := session;
   fQuery := EmptyStr;
   fParams := TDictionary<string, TValue>.Create;
   SetPreparedDataSet(nil);
+  SetOwner(fSession);
 end;
 
-destructor TDriverStatementAdapter<T>.Destroy;
+destructor TDriverStatementAdapter.Destroy;
 begin
   fParams.Free;
   inherited Destroy;
 end;
 
-procedure TDriverStatementAdapter<T>.Execute;
+procedure TDriverStatementAdapter.Execute;
 begin
   Execute(False);
 end;
 
-procedure TDriverStatementAdapter<T>.Open(const iterator: IDataSetIterator);
+procedure TDriverStatementAdapter.Open(const iterator: IDataSetIterator);
 begin
   Open(iterator.GetDataSet);
 end;
 
-function TDriverStatementAdapter<T>.Prepare(const dataSet: TDataSet): IDBStatement;
+function TDriverStatementAdapter.Prepare(const dataSet: TDataSet): IDBStatement;
 begin
   SetPreparedDataSet(dataSet);
   Result := Self;
 end;
 
-procedure TDriverStatementAdapter<T>.SetPreparedDataSet(const value: TDataSet);
+procedure TDriverStatementAdapter.SetPreparedDataSet(const value: TDataSet);
 begin
   fPreparedDataSet := value;
 end;
 
-function TDriverStatementAdapter<T>.GetConnection: IDBConnection<T>;
+function TDriverStatementAdapter.GetSession: IDBSession;
 begin
-  if not Assigned(fConnection) then
-    raise EPersistenceException.CreateFmt('Connection not defined in %s!', [Self.ClassName]);
-  Result := fConnection;
+  if not Assigned(fSession) then
+    raise EPersistenceException.CreateFmt('Session not defined in %s!', [Self.ClassName]);
+  Result := fSession;
 end;
 
-function TDriverStatementAdapter<T>.GetParams: TDictionary<string, TValue>;
+function TDriverStatementAdapter.GetParams: TDictionary<string, TValue>;
 begin
   Result := fParams;
 end;
 
-function TDriverStatementAdapter<T>.GetPreparedDataSet: TDataSet;
+function TDriverStatementAdapter.GetPreparedDataSet: TDataSet;
 begin
   Result := fPreparedDataSet;
 end;
 
-function TDriverStatementAdapter<T>.GetQuery: string;
+function TDriverStatementAdapter.GetQuery: string;
 begin
   Result := fQuery;
 end;
 
-procedure TDriverStatementAdapter<T>.Open(const dataSet: TDataSet);
+procedure TDriverStatementAdapter.Open(const dataSet: TDataSet);
 begin
   DataSetPreparation(dataSet);
   dataSet.Open;
 end;
 
-function TDriverStatementAdapter<T>.AddOrSetParam(const name: string; const value: TValue): IDBStatement;
+function TDriverStatementAdapter.AddOrSetParam(const name: string; const value: TValue): IDBStatement;
 begin
   fParams.AddOrSetValue(name, value);
   Result := Self;
 end;
 
-function TDriverStatementAdapter<T>.AddOrSetParam(const name: string; const value: ISQLValue): IDBStatement;
+function TDriverStatementAdapter.AddOrSetParam(const name: string; const value: ISQLValue): IDBStatement;
 begin
   Result := AddOrSetParam(name, value.ToString);
 end;
 
-{ TDriverSessionAdapter<T> }
+{ TDriverTransactionAdapter<T> }
 
-function TDriverSessionAdapter<T>.GetConnection: IDBConnection<T>;
+constructor TDriverTransactionAdapter<T>.Create(const transaction: T);
 begin
-  if not Assigned(fConnection) then
-    raise EPersistenceException.CreateFmt('Connection not defined in %s!', [Self.ClassName]);
-  Result := fConnection;
+  inherited Create;
+  fTransaction := transaction;
 end;
+
+destructor TDriverTransactionAdapter<T>.Destroy;
+begin
+  if InTransaction then
+    Rollback;
+  fTransaction.Free;
+  inherited Destroy;
+end;
+
+{ TDriverSessionAdapter<T> }
 
 constructor TDriverSessionAdapter<T>.Create(const connection: IDBConnection<T>);
 begin
   inherited Create;
   fConnection := connection;
+  SetOwner(fConnection);
+end;
+
+function TDriverSessionAdapter<T>.GetConnection: IDBConnection<T>;
+begin
+  if not Assigned(fConnection) then
+    raise EPersistenceException.CreateFmt('Database connection not defined in %s!', [Self.ClassName]);
+  Result := fConnection;
+end;
+
+procedure TDriverSessionAdapter<T>.Transactional(const action: TProc);
+var
+  transaction: IDBTransaction;
+begin
+  transaction := BeginTransaction;
+  try
+    action();
+    transaction.Commit;
+  except
+    on E: Exception do
+    begin
+      transaction.Rollback;
+      raise;
+    end;
+  end;
 end;
 
 { TDriverQueryChangerAdapter<T> }
@@ -403,10 +472,11 @@ end;
 
 { TDriverMetaDataInfoAdapter<T> }
 
-constructor TDriverMetaDataInfoAdapter<T>.Create(const session: IDBSession<T>);
+constructor TDriverMetaDataInfoAdapter<T>.Create(const session: IDBSession);
 begin
   inherited Create;
   fSession := session;
+  SetOwner(session);
 end;
 
 function TDriverMetaDataInfoAdapter<T>.FieldExists(const tableName, fieldName: string): Boolean;
@@ -442,7 +512,7 @@ begin
       Exit(True);
 end;
 
-function TDriverMetaDataInfoAdapter<T>.GetSession: IDBSession<T>;
+function TDriverMetaDataInfoAdapter<T>.GetSession: IDBSession;
 begin
   if not Assigned(fSession) then
     raise EPersistenceException.CreateFmt('Session not defined in %s!', [Self.ClassName]);

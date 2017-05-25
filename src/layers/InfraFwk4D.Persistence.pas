@@ -23,6 +23,7 @@ type
 
   IDB = interface(IInvokable)
     ['{4B8DE4DA-DE5F-4524-96D3-50D08F26B12A}']
+    function GetOwner: IDB;
   end;
 
   IDBConnection<T: TCustomConnection> = interface(IDB)
@@ -55,9 +56,17 @@ type
     function AsField: TField;
   end;
 
-  IDBSession<T: TCustomConnection> = interface(IDB)
+  IDBTransaction = interface(IDB)
+    ['{AAFAF475-B600-4E1B-BE52-8490373EDDEB}']
+    procedure Commit;
+    procedure Rollback;
+  end;
+
+  IDBSession = interface(IDB)
     ['{CE7682D8-B2D6-4A05-A080-3E0634321152}']
-    function GetConnection: IDBConnection<T>;
+    function BeginTransaction: IDBTransaction;
+    procedure Transactional(const action: TProc);
+
     function NewStatement: IDBStatement;
   end;
 
@@ -74,7 +83,7 @@ type
     procedure Activate;
   end;
 
-  IDBMetaDataInfo = interface
+  IDBMetaDataInfo = interface(IDB)
     ['{A20C2754-F004-49B2-A2AF-54249EC921FE}']
     /// <summary>DataSet Structure</summary>
     /// <remarks>

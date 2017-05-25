@@ -20,6 +20,7 @@ type
     Label1: TLabel;
     Button4: TButton;
     Button5: TButton;
+    Button6: TButton;
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -27,6 +28,7 @@ type
     procedure Button4Click(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button5Click(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
   private
     fCountryBC: TCountryBC;
   public
@@ -82,6 +84,14 @@ begin
       ShowMessage('Country Id: ' + FieldByName('Id').AsString + ' Name: ' + FieldByName('Name').AsString)
     else
       ShowMessage('Not found!');
+end;
+
+procedure TCountryView.Button6Click(Sender: TObject);
+var
+  id: string;
+begin
+  id := InputBox('Country', 'Id', '');
+  fCountryBC.Persistence.UpdateNameById('Argentina', id.ToInteger);
 end;
 
 procedure TCountryView.FormCreate(Sender: TObject);

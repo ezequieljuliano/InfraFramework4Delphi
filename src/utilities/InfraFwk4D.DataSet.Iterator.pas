@@ -32,7 +32,7 @@ type
   TDataSetIterator = class(TInterfacedObject, IDataSetIterator)
   private
     fDataSet: TDataSet;
-    FOwns: Boolean;
+    fOwns: Boolean;
   protected
     procedure First;
     procedure ForEach(const action: TProc); overload;
@@ -61,7 +61,7 @@ constructor TDataSetIterator.Create(const dataSet: TDataSet; const ownsDataSet: 
 begin
   inherited Create;
   fDataSet := dataSet;
-  FOwns := ownsDataSet;
+  fOwns := ownsDataSet;
 
   if not Assigned(fDataSet) then
     raise EDataSetIteratorException.CreateFmt('Source DataSet %s is nil in the Iterator!', [dataSet.Name]);
@@ -74,7 +74,7 @@ end;
 
 destructor TDataSetIterator.Destroy;
 begin
-  if (FOwns) and Assigned(fDataSet) then
+  if (fOwns) and Assigned(fDataSet) then
     fDataSet.Free;
   inherited Destroy;
 end;

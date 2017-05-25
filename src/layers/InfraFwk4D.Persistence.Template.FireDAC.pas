@@ -23,10 +23,10 @@ type
 
   TPersistenceTemplateFireDAC = class(TDataModule)
   private
-    fSession: IDBSession<TFDConnection>;
+    fSession: IDBSession;
     fQueryChangers: TDictionary<string, IDBQueryChanger>;
   protected
-    function GetSession: IDBSession<TFDConnection>;
+    function GetSession: IDBSession;
     function GetQueryChangers: TDictionary<string, IDBQueryChanger>;
 
     procedure Setup; virtual;
@@ -37,7 +37,7 @@ type
     function NewIterator(const dataSet: TFDQuery): IDataSetIterator; overload;
     function NewIterator(const dataSetName: string): IDataSetIterator; overload;
   public
-    constructor Create(const session: IDBSession<TFDConnection>); reintroduce;
+    constructor Create(const session: IDBSession); reintroduce;
     destructor Destroy; override;
   end;
 
@@ -55,7 +55,7 @@ begin
   inherited Destroy;
 end;
 
-constructor TPersistenceTemplateFireDAC.Create(const session: IDBSession<TFDConnection>);
+constructor TPersistenceTemplateFireDAC.Create(const session: IDBSession);
 begin
   inherited Create(nil);
   fSession := session;
@@ -63,7 +63,7 @@ begin
   Setup;
 end;
 
-function TPersistenceTemplateFireDAC.GetSession: IDBSession<TFDConnection>;
+function TPersistenceTemplateFireDAC.GetSession: IDBSession;
 begin
   if not Assigned(fSession) then
     raise EPersistenceException.CreateFmt('Database Session not defined in %s!', [Self.ClassName]);
@@ -103,8 +103,8 @@ begin
         p := t.GetProperty('Connection');
         if Assigned(p) and p.GetValue(Components[i]).IsType<TFDConnection> and p.IsWritable then
         begin
-          p.SetValue(Components[i], fSession.GetConnection.GetComponent);
-          if Components[i].ClassName.Equals('TFDQuery') then
+          p.SetValue(Components[i], (fSession.GetOwner as IDBConnection<TFDConnection>).GetComponent);
+          if Components[i] is TFDCustomQuery then
             GetQueryChangers.AddOrSetValue(Components[i].Name, TFireDACQueryChangerAdapter.Create(Components[i] as TFDQuery));
         end;
       end;

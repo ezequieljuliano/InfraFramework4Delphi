@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, InfraFwk4D.Persistence.Template.FireDAC, DAL.Connection, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt, Data.DB, FireDAC.Comp.DataSet,
-  FireDAC.Comp.Client, InfraFwk4D.DataSet.Iterator, SQLBuilder4D;
+  FireDAC.Comp.Client, InfraFwk4D.DataSet.Iterator, SQLBuilder4D, InfraFwk4D.Persistence;
 
 type
 
@@ -22,6 +22,8 @@ type
 
     procedure FilterById(const id: Integer);
     procedure Desfilter;
+
+    procedure UpdateNameById(const name: string; const id: Integer);
   end;
 
 implementation
@@ -60,6 +62,23 @@ begin
   Result := GetSession.NewStatement.Build(
     SQL.Select.AllColumns.From('Country').Where('Name').Like(SQL.Value(name).Like(loContaining).Insensetive)
     ).AsIterator;
+end;
+
+procedure TCountryDAO.UpdateNameById(const name: string; const id: Integer);
+var
+  transaction: IDBTransaction;
+begin
+  transaction := GetSession.BeginTransaction;
+  try
+    GetSession.NewStatement.Build(SQL.Update.Table('Country').ColumnSetValue('Name', name).Where('Id').Equal(id)).Execute;
+    transaction.Commit;
+  except
+    on E: Exception do
+    begin
+      transaction.Rollback;
+      raise;
+    end;
+  end;
 end;
 
 end.

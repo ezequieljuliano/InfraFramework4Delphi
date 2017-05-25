@@ -106,7 +106,6 @@ object CountryView: TCountryView
       Caption = 'Count'
       TabOrder = 3
       OnClick = Button4Click
-      ExplicitLeft = 233
     end
     object Button5: TButton
       Left = 448
@@ -117,6 +116,16 @@ object CountryView: TCountryView
       Caption = 'FindById'
       TabOrder = 4
       OnClick = Button5Click
+    end
+    object Button6: TButton
+      Left = 392
+      Top = 1
+      Width = 56
+      Height = 39
+      Align = alRight
+      Caption = 'Update'
+      TabOrder = 5
+      OnClick = Button6Click
     end
   end
   object DsoCountry: TDataSource

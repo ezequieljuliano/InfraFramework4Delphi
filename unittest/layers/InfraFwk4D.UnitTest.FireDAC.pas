@@ -48,7 +48,7 @@ type
   private
     fDatabase: TFDConnection;
     fConnection: IDBConnection<TFDConnection>;
-    fSession: IDBSession<TFDConnection>;
+    fSession: IDBSession;
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -121,8 +121,8 @@ end;
 procedure TTestInfraFwkFireDAC.TestSession;
 begin
   CheckTrue(fSession <> nil);
-  CheckTrue(fSession.GetConnection <> nil);
-  CheckTrue(fSession.GetConnection.GetComponent <> nil);
+  CheckTrue(fSession.GetOwner <> nil);
+  CheckTrue((fSession.GetOwner as IDBConnection<TFDConnection>).GetComponent <> nil);
   CheckTrue(fSession.NewStatement <> nil);
 end;
 

@@ -30,9 +30,9 @@ type
     { public declarations }
   end;
 
-  TFireDACStatementAdapter = class(TDriverStatementAdapter<TFDConnection>)
+  TFireDACStatementAdapter = class(TDriverStatementAdapter)
   private
-    { private declarations }
+    procedure ValidateDataSetType(const dataSet: TDataSet);
   protected
     procedure DataSetPreparation(const dataSet: TDataSet); override;
     procedure Execute(const commit: Boolean); override;
@@ -42,10 +42,22 @@ type
     { public declarations }
   end;
 
+  TFireDACTransactionAdapter = class(TDriverTransactionAdapter<TFDTransaction>)
+  private
+    { private declarations }
+  protected
+    procedure Commit; override;
+    procedure Rollback; override;
+    function InTransaction: Boolean; override;
+  public
+    { public declarations }
+  end;
+
   TFireDACSessionAdapter = class(TDriverSessionAdapter<TFDConnection>)
   private
     { private declarations }
   protected
+    function BeginTransaction: IDBTransaction; override;
     function NewStatement: IDBStatement; override;
   public
     { public declarations }
@@ -102,22 +114,26 @@ end;
 
 procedure TFireDACStatementAdapter.Execute(const commit: Boolean);
 var
-  dataSet: TFDQuery;
+  dataSet: TFDCustomQuery;
+  transaction: IDBTransaction;
 begin
   if (GetPreparedDataSet <> nil) then
-    dataSet := GetPreparedDataSet as TFDQuery
+  begin
+    ValidateDataSetType(GetPreparedDataSet);
+    dataSet := GetPreparedDataSet as TFDCustomQuery;
+  end
   else
     dataSet := TFDQuery.Create(nil);
   try
     DataSetPreparation(dataSet);
     if commit then
     begin
-      GetConnection.GetComponent.StartTransaction;
+      transaction := GetSession.BeginTransaction;
       try
         dataSet.ExecSQL;
-        GetConnection.GetComponent.Commit;
+        transaction.Commit;
       except
-        GetConnection.GetComponent.Rollback;
+        transaction.Rollback;
         raise;
       end;
     end
@@ -131,17 +147,22 @@ begin
   end;
 end;
 
+procedure TFireDACStatementAdapter.ValidateDataSetType(const dataSet: TDataSet);
+begin
+  if not(dataSet is TFDCustomQuery) then
+    raise EPersistenceException.CreateFmt('The DataSet can not be prepared because the class %s is not valid for preparation.', [dataSet.ClassName]);
+end;
+
 procedure TFireDACStatementAdapter.DataSetPreparation(const dataSet: TDataSet);
 var
   param: TPair<string, TValue>;
-  typedDataSet: TFDQuery;
+  typedDataSet: TFDCustomQuery;
 begin
-  typedDataSet := dataSet as TFDQuery;
+  ValidateDataSetType(dataSet);
 
-  if typedDataSet.Active then
-    typedDataSet.Close;
-
-  typedDataSet.Connection := GetConnection.GetComponent;
+  typedDataSet := dataSet as TFDCustomQuery;
+  typedDataSet.Close;
+  typedDataSet.Connection := (GetSession.GetOwner as IDBConnection<TFDConnection>).GetComponent;
   typedDataSet.SQL.Text := GetQuery;
 
   for param in GetParams do
@@ -150,11 +171,44 @@ begin
   typedDataSet.Prepare;
 end;
 
+{ TFireDACTransactionAdapter }
+
+procedure TFireDACTransactionAdapter.Commit;
+begin
+  if Assigned(Transaction) then
+    Transaction.Commit;
+end;
+
+function TFireDACTransactionAdapter.InTransaction: Boolean;
+begin
+  Result := Assigned(Transaction) and Transaction.Active;
+end;
+
+procedure TFireDACTransactionAdapter.Rollback;
+begin
+  if Assigned(Transaction) then
+    Transaction.Rollback;
+end;
+
 { TFireDACSessionAdapter }
+
+function TFireDACSessionAdapter.BeginTransaction: IDBTransaction;
+var
+  transaction: TFDTransaction;
+begin
+  Result := nil;
+  if not GetConnection.GetComponent.InTransaction or GetConnection.GetComponent.TxOptions.EnableNested then
+  begin
+    transaction := TFDTransaction.Create(nil);
+    transaction.Connection := GetConnection.GetComponent;
+    transaction.StartTransaction;
+    Result := TFireDACTransactionAdapter.Create(transaction);
+  end;
+end;
 
 function TFireDACSessionAdapter.NewStatement: IDBStatement;
 begin
-  Result := TFireDACStatementAdapter.Create(GetConnection);
+  Result := TFireDACStatementAdapter.Create(Self);
 end;
 
 { TFireDACQueryChangerAdapter }
@@ -202,7 +256,7 @@ var
   ds: TFDMetaInfoQuery;
 begin
   ds := TFDMetaInfoQuery.Create(nil);
-  ds.Connection := GetSession.GetConnection.GetComponent;
+  ds.Connection := (GetSession.GetOwner as IDBConnection<TFDConnection>).GetComponent;
   ds.MetaInfoKind := kind;
   ds.ObjectName := objectName;
   ds.Open;
