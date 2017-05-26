@@ -3,12 +3,14 @@ unit Province.BC;
 interface
 
 uses
-  InfraFwk4D.Driver, Province.DAO, InfraFwk4D.Iterator.DataSet,
+  InfraFwk4D.Business,
+  InfraFwk4D.DataSet.Iterator,
+  Province.DAO,
   Data.DB;
 
 type
 
-  TProvinceBC = class(TBusinessAdapter<TProvinceDAO>)
+  TProvinceBC = class(TBusinessController<TProvinceDAO>)
   private
     procedure CityNewRecord(DataSet: TDataSet);
   public

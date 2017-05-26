@@ -35,12 +35,12 @@ implementation
 
 procedure TCountryDAO.Desfilter;
 begin
-  QueryChanger('Country').Restore.Activate;
+  GetDelegate.QueryChanger('Country').Restore.Activate;
 end;
 
 procedure TCountryDAO.FilterById(const id: Integer);
 begin
-  QueryChanger('Country').Add(SQL.Where('Id').Equal(id)).Activate;
+  GetDelegate.QueryChanger('Country').Add(SQL.Where('Id').Equal(id)).Activate;
 end;
 
 function TCountryDAO.FindAll: IDataSetIterator;

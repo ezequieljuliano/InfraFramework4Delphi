@@ -83,6 +83,15 @@ type
     procedure Activate;
   end;
 
+  IDBDelegate<T: TDataSet> = interface(IDB)
+    ['{04DB309F-6132-4ED1-97C4-D7405F19D236}']
+    function QueryChanger(const dataSet: T): IDBQueryChanger; overload;
+    function QueryChanger(const dataSetName: string): IDBQueryChanger; overload;
+
+    function NewIterator(const dataSet: T): IDataSetIterator; overload;
+    function NewIterator(const dataSetName: string): IDataSetIterator; overload;
+  end;
+
   IDBMetaDataInfo = interface(IDB)
     ['{A20C2754-F004-49B2-A2AF-54249EC921FE}']
     /// <summary>DataSet Structure</summary>

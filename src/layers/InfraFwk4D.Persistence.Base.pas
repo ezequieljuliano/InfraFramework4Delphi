@@ -136,6 +136,27 @@ type
     constructor Create(const dataSet: T);
   end;
 
+  TDriverDelegateAdapter<T: TDataSet> = class(TDriverAdapterBase, IDBDelegate<T>)
+  private
+    fSession: IDBSession;
+    fDao: TDataModule;
+    fQueryChangers: TDictionary<string, IDBQueryChanger>;
+  protected
+    function GetSession: IDBSession;
+    function GetQueryChangers: TDictionary<string, IDBQueryChanger>;
+
+    procedure Setup(const dao: TDataModule); virtual; abstract;
+
+    function QueryChanger(const dataSet: T): IDBQueryChanger; overload;
+    function QueryChanger(const dataSetName: string): IDBQueryChanger; overload;
+
+    function NewIterator(const dataSet: T): IDataSetIterator; overload;
+    function NewIterator(const dataSetName: string): IDataSetIterator; overload;
+  public
+    constructor Create(const session: IDBSession; const dao: TDataModule);
+    destructor Destroy; override;
+  end;
+
   TDriverMetaDataInfoAdapter<T: TCustomConnection> = class(TDriverAdapterBase, IDBMetaDataInfo)
   private
     fSession: IDBSession;
@@ -550,6 +571,58 @@ begin
   while it.HasNext do
     if it.FieldByName('TABLE_NAME').AsString.Equals(tableName) then
       Exit(True);
+end;
+
+{ TDriverDelegateAdapter<T> }
+
+constructor TDriverDelegateAdapter<T>.Create(const session: IDBSession; const dao: TDataModule);
+begin
+  inherited Create;
+  fSession := session;
+  fDao := dao;
+  fQueryChangers := nil;
+  Setup(fDao);
+end;
+
+destructor TDriverDelegateAdapter<T>.Destroy;
+begin
+  if Assigned(fQueryChangers) then
+    fQueryChangers.Free;
+  inherited Destroy;
+end;
+
+function TDriverDelegateAdapter<T>.GetQueryChangers: TDictionary<string, IDBQueryChanger>;
+begin
+  if not Assigned(fQueryChangers) then
+    fQueryChangers := TDictionary<string, IDBQueryChanger>.Create;
+  Result := fQueryChangers;
+end;
+
+function TDriverDelegateAdapter<T>.GetSession: IDBSession;
+begin
+  if not Assigned(fSession) then
+    raise EPersistenceException.CreateFmt('Database Session not defined in %s!', [Self.ClassName]);
+  Result := fSession;
+end;
+
+function TDriverDelegateAdapter<T>.NewIterator(const dataSet: T): IDataSetIterator;
+begin
+  Result := TDataSetIterator.Create(dataSet, False);
+end;
+
+function TDriverDelegateAdapter<T>.NewIterator(const dataSetName: string): IDataSetIterator;
+begin
+  Result := NewIterator(fDao.FindComponent(dataSetName) as T);
+end;
+
+function TDriverDelegateAdapter<T>.QueryChanger(const dataSetName: string): IDBQueryChanger;
+begin
+  Result := GetQueryChangers.Items[dataSetName];
+end;
+
+function TDriverDelegateAdapter<T>.QueryChanger(const dataSet: T): IDBQueryChanger;
+begin
+  Result := QueryChanger(dataSet.Name);
 end;
 
 end.
