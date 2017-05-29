@@ -5,8 +5,10 @@ interface
 uses
   System.SysUtils,
   System.Classes,
+  Data.DB,
   System.Generics.Collections,
-  InfraFwk4D.Observer;
+  InfraFwk4D.Observer,
+  InfraFwk4D.DataSet.Events;
 
 type
 
@@ -24,9 +26,14 @@ type
     fPersistence: T;
     fOwnsPersistence: Boolean;
     fSubject: ISubject;
+    fEvents: TDictionary<string, IDataSetEvents>;
   protected
     function GetPersistence: T;
     function GetObserver(const key: string): IObserver;
+
+    function GetEvents(const dataSet: TDataSet): IDataSetEvents; overload;
+    function GetEvents(const dataSetName: string): IDataSetEvents; overload;
+
     procedure NotifyObservers;
   public
     constructor Create(const persistence: T); overload;
@@ -56,13 +63,27 @@ begin
   fPersistence := persistence;
   fOwnsPersistence := ownsPersistence;
   fSubject := TSubject.Create(Self);
+  fEvents := TDictionary<string, IDataSetEvents>.Create;
 end;
 
 destructor TBusinessController<T>.Destroy;
 begin
   if (fOwnsPersistence) and Assigned(fPersistence) then
     fPersistence.Free;
+  fEvents.Free;
   inherited Destroy;
+end;
+
+function TBusinessController<T>.GetEvents(const dataSet: TDataSet): IDataSetEvents;
+begin
+  if not fEvents.ContainsKey(dataSet.Name) then
+    fEvents.AddOrSetValue(dataSet.Name, TDataSetEvents.Create(dataSet));
+  Result := fEvents.Items[dataSet.Name];
+end;
+
+function TBusinessController<T>.GetEvents(const dataSetName: string): IDataSetEvents;
+begin
+  Result := GetEvents(GetPersistence.FindComponent(dataSetName) as TDataSet);
 end;
 
 function TBusinessController<T>.GetObserver(const key: string): IObserver;

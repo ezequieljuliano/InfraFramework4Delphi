@@ -24,7 +24,8 @@ uses
   InfraFwk4D.Business in '..\..\src\layers\InfraFwk4D.Business.pas',
   InfraFwk4D.Persistence.Template.FireDAC in '..\..\src\layers\InfraFwk4D.Persistence.Template.FireDAC.pas' {PersistenceTemplateFireDAC: TDataModule},
   InfraFwk4D.View in '..\..\src\layers\InfraFwk4D.View.pas',
-  InfraFwk4D.Observer in '..\..\src\utilities\InfraFwk4D.Observer.pas';
+  InfraFwk4D.Observer in '..\..\src\utilities\InfraFwk4D.Observer.pas',
+  InfraFwk4D.DataSet.Events in '..\..\src\utilities\InfraFwk4D.DataSet.Events.pas';
 
 {$R *.RES}
 

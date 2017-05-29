@@ -12,7 +12,7 @@ type
 
   TProvinceBC = class(TBusinessController<TProvinceDAO>)
   private
-    procedure CityNewRecord(DataSet: TDataSet);
+    { private declarations }
   public
     procedure AfterConstruction; override;
   end;
@@ -24,12 +24,12 @@ implementation
 procedure TProvinceBC.AfterConstruction;
 begin
   inherited AfterConstruction;
-  Persistence.City.OnNewRecord := CityNewRecord;
-end;
-
-procedure TProvinceBC.CityNewRecord(DataSet: TDataSet);
-begin
-  Persistence.CityPROVINCEID.AsInteger := Persistence.ProvinceID.AsInteger;
+  GetEvents(Persistence.City).OnNewRecord.Add('AutoIncCity',
+    procedure(dataSet: TDataSet)
+    begin
+      Persistence.CityPROVINCEID.AsInteger := Persistence.ProvinceID.AsInteger;
+    end
+    );
 end;
 
 end.

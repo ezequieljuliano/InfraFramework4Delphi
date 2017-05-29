@@ -9,6 +9,9 @@
         <Projects Include="InfraFwkTestsObserver.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="InfraFwkTestsDataSetEvents.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="InfraFwkTestsObserver:Make">
         <MSBuild Projects="InfraFwkTestsObserver.dproj" Targets="Make"/>
     </Target>
+    <Target Name="InfraFwkTestsDataSetEvents">
+        <MSBuild Projects="InfraFwkTestsDataSetEvents.dproj"/>
+    </Target>
+    <Target Name="InfraFwkTestsDataSetEvents:Clean">
+        <MSBuild Projects="InfraFwkTestsDataSetEvents.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="InfraFwkTestsDataSetEvents:Make">
+        <MSBuild Projects="InfraFwkTestsDataSetEvents.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="InfraFwkTestsDataSetIterator;InfraFwkTestsObserver"/>
+        <CallTarget Targets="InfraFwkTestsDataSetIterator;InfraFwkTestsObserver;InfraFwkTestsDataSetEvents"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="InfraFwkTestsDataSetIterator:Clean;InfraFwkTestsObserver:Clean"/>
+        <CallTarget Targets="InfraFwkTestsDataSetIterator:Clean;InfraFwkTestsObserver:Clean;InfraFwkTestsDataSetEvents:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="InfraFwkTestsDataSetIterator:Make;InfraFwkTestsObserver:Make"/>
+        <CallTarget Targets="InfraFwkTestsDataSetIterator:Make;InfraFwkTestsObserver:Make;InfraFwkTestsDataSetEvents:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
