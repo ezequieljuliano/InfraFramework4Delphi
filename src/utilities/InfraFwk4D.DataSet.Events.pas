@@ -9,10 +9,10 @@ uses
 
 type
 
-  TNotifyEvent = reference to procedure(dataSet: TDataSet);
-  TErrorEvent = reference to procedure(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
+  TAnonymousNotifyEvent = reference to procedure(dataSet: TDataSet);
+  TAnonymousErrorEvent  = reference to procedure(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
 
-  TNotifyEvents = class(TDictionary<string, TNotifyEvent>)
+  EDataSetEventsException = class(Exception)
   private
     { private declarations }
   protected
@@ -21,68 +21,79 @@ type
     { public declarations }
   end;
 
-  TErrorEvents = class(TDictionary<string, TErrorEvent>)
-  private
-    { private declarations }
-  protected
-    { protected declarations }
-  public
-    { public declarations }
+  IDataSetNotifyEvents = interface
+    ['{5001E840-432E-4833-B764-41E32BAA8DD2}']
+    procedure Add(const key: string; const event: TDataSetNotifyEvent); overload;
+    procedure Add(const key: string; const event: TAnonymousNotifyEvent); overload;
+    procedure Remove(const key: string);
+    procedure Clear;
+    function Count: Integer;
+    procedure Execute(dataSet: TDataSet);
+  end;
+
+  IDataSetErrorEvents = interface
+    ['{50D8CC36-5F83-4767-A70C-98BD4E301D95}']
+    procedure Add(const key: string; const event: TDataSetErrorEvent); overload;
+    procedure Add(const key: string; const event: TAnonymousErrorEvent); overload;
+    procedure Remove(const key: string);
+    procedure Clear;
+    function Count: Integer;
+    procedure Execute(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
   end;
 
   IDataSetEvents = interface
     ['{8FAB5F98-4A30-42A9-B4CA-A45E382F9EED}']
-    function BeforeOpen: TNotifyEvents;
-    function AfterOpen: TNotifyEvents;
-    function BeforeClose: TNotifyEvents;
-    function AfterClose: TNotifyEvents;
-    function BeforeInsert: TNotifyEvents;
-    function AfterInsert: TNotifyEvents;
-    function BeforeEdit: TNotifyEvents;
-    function AfterEdit: TNotifyEvents;
-    function BeforePost: TNotifyEvents;
-    function AfterPost: TNotifyEvents;
-    function BeforeCancel: TNotifyEvents;
-    function AfterCancel: TNotifyEvents;
-    function BeforeDelete: TNotifyEvents;
-    function AfterDelete: TNotifyEvents;
-    function BeforeRefresh: TNotifyEvents;
-    function AfterRefresh: TNotifyEvents;
-    function BeforeScroll: TNotifyEvents;
-    function AfterScroll: TNotifyEvents;
-    function OnNewRecord: TNotifyEvents;
-    function OnCalcFields: TNotifyEvents;
-    function OnEditError: TErrorEvents;
-    function OnPostError: TErrorEvents;
-    function OnDeleteError: TErrorEvents;
+    function BeforeOpen: IDataSetNotifyEvents;
+    function AfterOpen: IDataSetNotifyEvents;
+    function BeforeClose: IDataSetNotifyEvents;
+    function AfterClose: IDataSetNotifyEvents;
+    function BeforeInsert: IDataSetNotifyEvents;
+    function AfterInsert: IDataSetNotifyEvents;
+    function BeforeEdit: IDataSetNotifyEvents;
+    function AfterEdit: IDataSetNotifyEvents;
+    function BeforePost: IDataSetNotifyEvents;
+    function AfterPost: IDataSetNotifyEvents;
+    function BeforeCancel: IDataSetNotifyEvents;
+    function AfterCancel: IDataSetNotifyEvents;
+    function BeforeDelete: IDataSetNotifyEvents;
+    function AfterDelete: IDataSetNotifyEvents;
+    function BeforeRefresh: IDataSetNotifyEvents;
+    function AfterRefresh: IDataSetNotifyEvents;
+    function BeforeScroll: IDataSetNotifyEvents;
+    function AfterScroll: IDataSetNotifyEvents;
+    function OnNewRecord: IDataSetNotifyEvents;
+    function OnCalcFields: IDataSetNotifyEvents;
+    function OnEditError: IDataSetErrorEvents;
+    function OnPostError: IDataSetErrorEvents;
+    function OnDeleteError: IDataSetErrorEvents;
   end;
 
   TDataSetEvents = class(TInterfacedObject, IDataSetEvents)
   private
     fDataSet: TDataSet;
-    fBeforeOpen: TNotifyEvents;
-    fAfterOpen: TNotifyEvents;
-    fBeforeClose: TNotifyEvents;
-    fAfterClose: TNotifyEvents;
-    fBeforeInsert: TNotifyEvents;
-    fAfterInsert: TNotifyEvents;
-    fBeforeEdit: TNotifyEvents;
-    fAfterEdit: TNotifyEvents;
-    fBeforePost: TNotifyEvents;
-    fAfterPost: TNotifyEvents;
-    fBeforeCancel: TNotifyEvents;
-    fAfterCancel: TNotifyEvents;
-    fBeforeDelete: TNotifyEvents;
-    fAfterDelete: TNotifyEvents;
-    fBeforeRefresh: TNotifyEvents;
-    fAfterRefresh: TNotifyEvents;
-    fBeforeScroll: TNotifyEvents;
-    fAfterScroll: TNotifyEvents;
-    fOnNewRecord: TNotifyEvents;
-    fOnCalcFields: TNotifyEvents;
-    fOnEditError: TErrorEvents;
-    fOnPostError: TErrorEvents;
-    fOnDeleteError: TErrorEvents;
+    fBeforeOpen: IDataSetNotifyEvents;
+    fAfterOpen: IDataSetNotifyEvents;
+    fBeforeClose: IDataSetNotifyEvents;
+    fAfterClose: IDataSetNotifyEvents;
+    fBeforeInsert: IDataSetNotifyEvents;
+    fAfterInsert: IDataSetNotifyEvents;
+    fBeforeEdit: IDataSetNotifyEvents;
+    fAfterEdit: IDataSetNotifyEvents;
+    fBeforePost: IDataSetNotifyEvents;
+    fAfterPost: IDataSetNotifyEvents;
+    fBeforeCancel: IDataSetNotifyEvents;
+    fAfterCancel: IDataSetNotifyEvents;
+    fBeforeDelete: IDataSetNotifyEvents;
+    fAfterDelete: IDataSetNotifyEvents;
+    fBeforeRefresh: IDataSetNotifyEvents;
+    fAfterRefresh: IDataSetNotifyEvents;
+    fBeforeScroll: IDataSetNotifyEvents;
+    fAfterScroll: IDataSetNotifyEvents;
+    fOnNewRecord: IDataSetNotifyEvents;
+    fOnCalcFields: IDataSetNotifyEvents;
+    fOnEditError: IDataSetErrorEvents;
+    fOnPostError: IDataSetErrorEvents;
+    fOnDeleteError: IDataSetErrorEvents;
     procedure DoBeforeOpen(dataSet: TDataSet);
     procedure DoAfterOpen(dataSet: TDataSet);
     procedure DoBeforeClose(dataSet: TDataSet);
@@ -108,29 +119,29 @@ type
     procedure DoOnDeleteError(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
     procedure Setup;
   protected
-    function BeforeOpen: TNotifyEvents;
-    function AfterOpen: TNotifyEvents;
-    function BeforeClose: TNotifyEvents;
-    function AfterClose: TNotifyEvents;
-    function BeforeInsert: TNotifyEvents;
-    function AfterInsert: TNotifyEvents;
-    function BeforeEdit: TNotifyEvents;
-    function AfterEdit: TNotifyEvents;
-    function BeforePost: TNotifyEvents;
-    function AfterPost: TNotifyEvents;
-    function BeforeCancel: TNotifyEvents;
-    function AfterCancel: TNotifyEvents;
-    function BeforeDelete: TNotifyEvents;
-    function AfterDelete: TNotifyEvents;
-    function BeforeRefresh: TNotifyEvents;
-    function AfterRefresh: TNotifyEvents;
-    function BeforeScroll: TNotifyEvents;
-    function AfterScroll: TNotifyEvents;
-    function OnNewRecord: TNotifyEvents;
-    function OnCalcFields: TNotifyEvents;
-    function OnEditError: TErrorEvents;
-    function OnPostError: TErrorEvents;
-    function OnDeleteError: TErrorEvents;
+    function BeforeOpen: IDataSetNotifyEvents;
+    function AfterOpen: IDataSetNotifyEvents;
+    function BeforeClose: IDataSetNotifyEvents;
+    function AfterClose: IDataSetNotifyEvents;
+    function BeforeInsert: IDataSetNotifyEvents;
+    function AfterInsert: IDataSetNotifyEvents;
+    function BeforeEdit: IDataSetNotifyEvents;
+    function AfterEdit: IDataSetNotifyEvents;
+    function BeforePost: IDataSetNotifyEvents;
+    function AfterPost: IDataSetNotifyEvents;
+    function BeforeCancel: IDataSetNotifyEvents;
+    function AfterCancel: IDataSetNotifyEvents;
+    function BeforeDelete: IDataSetNotifyEvents;
+    function AfterDelete: IDataSetNotifyEvents;
+    function BeforeRefresh: IDataSetNotifyEvents;
+    function AfterRefresh: IDataSetNotifyEvents;
+    function BeforeScroll: IDataSetNotifyEvents;
+    function AfterScroll: IDataSetNotifyEvents;
+    function OnNewRecord: IDataSetNotifyEvents;
+    function OnCalcFields: IDataSetNotifyEvents;
+    function OnEditError: IDataSetErrorEvents;
+    function OnPostError: IDataSetErrorEvents;
+    function OnDeleteError: IDataSetErrorEvents;
   public
     constructor Create(const dataSet: TDataSet);
     destructor Destroy; override;
@@ -138,113 +149,271 @@ type
 
 implementation
 
+type
+
+  TDataSetNotifyEvents = class(TInterfacedObject, IDataSetNotifyEvents)
+  private
+    fDataSetNotifyEvents: TDictionary<string, TDataSetNotifyEvent>;
+    fAnonymousNotifyEvents: TDictionary<string, TAnonymousNotifyEvent>;
+  protected
+    procedure Add(const key: string; const event: TDataSetNotifyEvent); overload;
+    procedure Add(const key: string; const event: TAnonymousNotifyEvent); overload;
+    procedure Remove(const key: string);
+    procedure Clear;
+    function Count: Integer;
+    procedure Execute(dataSet: TDataSet);
+  public
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+  TDataSetErrorEvents = class(TInterfacedObject, IDataSetErrorEvents)
+  private
+    fDataSetErrorEvents: TDictionary<string, TDataSetErrorEvent>;
+    fAnonymousErrorEvents: TDictionary<string, TAnonymousErrorEvent>;
+  protected
+    procedure Add(const key: string; const event: TDataSetErrorEvent); overload;
+    procedure Add(const key: string; const event: TAnonymousErrorEvent); overload;
+    procedure Remove(const key: string);
+    procedure Clear;
+    function Count: Integer;
+    procedure Execute(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
+  public
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+  { TDataSetNotifyEvents }
+
+procedure TDataSetNotifyEvents.Add(const key: string; const event: TDataSetNotifyEvent);
+begin
+  if fDataSetNotifyEvents.ContainsKey(key) or fAnonymousNotifyEvents.ContainsKey(key) then
+    raise EDataSetEventsException.Create('This key already exists for another DataSet Event!');
+  fDataSetNotifyEvents.AddOrSetValue(key, event);
+end;
+
+procedure TDataSetNotifyEvents.Add(const key: string; const event: TAnonymousNotifyEvent);
+begin
+  if fAnonymousNotifyEvents.ContainsKey(key) or fDataSetNotifyEvents.ContainsKey(key) then
+    raise EDataSetEventsException.Create('This key already exists for another DataSet Event!');
+  fAnonymousNotifyEvents.AddOrSetValue(key, event);
+end;
+
+procedure TDataSetNotifyEvents.Clear;
+begin
+  fDataSetNotifyEvents.Clear;
+  fAnonymousNotifyEvents.Clear;
+end;
+
+function TDataSetNotifyEvents.Count: Integer;
+begin
+  Result := fDataSetNotifyEvents.Count + fAnonymousNotifyEvents.Count;
+end;
+
+constructor TDataSetNotifyEvents.Create;
+begin
+  inherited Create;
+  fDataSetNotifyEvents := TDictionary<string, TDataSetNotifyEvent>.Create;
+  fAnonymousNotifyEvents := TDictionary<string, TAnonymousNotifyEvent>.Create;
+end;
+
+destructor TDataSetNotifyEvents.Destroy;
+begin
+  fDataSetNotifyEvents.Free;
+  fAnonymousNotifyEvents.Free;
+  inherited Destroy;
+end;
+
+procedure TDataSetNotifyEvents.Execute(dataSet: TDataSet);
+var
+  p1: TPair<string, TDataSetNotifyEvent>;
+  p2: TPair<string, TAnonymousNotifyEvent>;
+begin
+  for p1 in fDataSetNotifyEvents do
+    p1.Value(dataSet);
+
+  for p2 in fAnonymousNotifyEvents do
+    p2.Value(dataSet);
+end;
+
+procedure TDataSetNotifyEvents.Remove(const key: string);
+begin
+  if fDataSetNotifyEvents.ContainsKey(key) then
+    fDataSetNotifyEvents.Remove(key);
+
+  if fAnonymousNotifyEvents.ContainsKey(key) then
+    fAnonymousNotifyEvents.Remove(key);
+end;
+
+{ TDataSetErrorEvents }
+
+procedure TDataSetErrorEvents.Add(const key: string; const event: TDataSetErrorEvent);
+begin
+  if fDataSetErrorEvents.ContainsKey(key) or fAnonymousErrorEvents.ContainsKey(key) then
+    raise EDataSetEventsException.Create('This key already exists for another DataSet Event!');
+  fDataSetErrorEvents.AddOrSetValue(key, event);
+end;
+
+procedure TDataSetErrorEvents.Add(const key: string; const event: TAnonymousErrorEvent);
+begin
+  if fAnonymousErrorEvents.ContainsKey(key) or fDataSetErrorEvents.ContainsKey(key) then
+    raise EDataSetEventsException.Create('This key already exists for another DataSet Event!');
+  fAnonymousErrorEvents.AddOrSetValue(key, event);
+end;
+
+procedure TDataSetErrorEvents.Clear;
+begin
+  fDataSetErrorEvents.Clear;
+  fAnonymousErrorEvents.Clear;
+end;
+
+function TDataSetErrorEvents.Count: Integer;
+begin
+  Result := fDataSetErrorEvents.Count + fAnonymousErrorEvents.Count;
+end;
+
+constructor TDataSetErrorEvents.Create;
+begin
+  inherited Create;
+  fDataSetErrorEvents := TDictionary<string, TDataSetErrorEvent>.Create;
+  fAnonymousErrorEvents := TDictionary<string, TAnonymousErrorEvent>.Create;
+end;
+
+destructor TDataSetErrorEvents.Destroy;
+begin
+  fDataSetErrorEvents.Free;
+  fAnonymousErrorEvents.Free;
+  inherited Destroy;
+end;
+
+procedure TDataSetErrorEvents.Execute(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
+var
+  p1: TPair<string, TDataSetErrorEvent>;
+  p2: TPair<string, TAnonymousErrorEvent>;
+begin
+  for p1 in fDataSetErrorEvents do
+    p1.Value(dataSet, e, action);
+
+  for p2 in fAnonymousErrorEvents do
+    p2.Value(dataSet, e, action);
+end;
+
+procedure TDataSetErrorEvents.Remove(const key: string);
+begin
+  if fDataSetErrorEvents.ContainsKey(key) then
+    fDataSetErrorEvents.Remove(key);
+
+  if fAnonymousErrorEvents.ContainsKey(key) then
+    fAnonymousErrorEvents.Remove(key);
+end;
+
 { TDataSetEvents }
 
-function TDataSetEvents.AfterCancel: TNotifyEvents;
+function TDataSetEvents.AfterCancel: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterCancel) then fAfterCancel := TNotifyEvents.Create;
+  if not Assigned(fAfterCancel) then fAfterCancel := TDataSetNotifyEvents.Create;
   Result := fAfterCancel;
 end;
 
-function TDataSetEvents.AfterClose: TNotifyEvents;
+function TDataSetEvents.AfterClose: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterClose) then fAfterClose := TNotifyEvents.Create;
+  if not Assigned(fAfterClose) then fAfterClose := TDataSetNotifyEvents.Create;
   Result := fAfterClose;
 end;
 
-function TDataSetEvents.AfterDelete: TNotifyEvents;
+function TDataSetEvents.AfterDelete: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterDelete) then fAfterDelete := TNotifyEvents.Create;
+  if not Assigned(fAfterDelete) then fAfterDelete := TDataSetNotifyEvents.Create;
   Result := fAfterDelete;
 end;
 
-function TDataSetEvents.AfterEdit: TNotifyEvents;
+function TDataSetEvents.AfterEdit: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterEdit) then fAfterEdit := TNotifyEvents.Create;
+  if not Assigned(fAfterEdit) then fAfterEdit := TDataSetNotifyEvents.Create;
   Result := fAfterEdit;
 end;
 
-function TDataSetEvents.AfterInsert: TNotifyEvents;
+function TDataSetEvents.AfterInsert: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterInsert) then fAfterInsert := TNotifyEvents.Create;
+  if not Assigned(fAfterInsert) then fAfterInsert := TDataSetNotifyEvents.Create;
   Result := fAfterInsert;
 end;
 
-function TDataSetEvents.AfterOpen: TNotifyEvents;
+function TDataSetEvents.AfterOpen: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterOpen) then fAfterOpen := TNotifyEvents.Create;
+  if not Assigned(fAfterOpen) then fAfterOpen := TDataSetNotifyEvents.Create;
   Result := fAfterOpen;
 end;
 
-function TDataSetEvents.AfterPost: TNotifyEvents;
+function TDataSetEvents.AfterPost: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterPost) then fAfterPost := TNotifyEvents.Create;
+  if not Assigned(fAfterPost) then fAfterPost := TDataSetNotifyEvents.Create;
   Result := fAfterPost;
 end;
 
-function TDataSetEvents.AfterRefresh: TNotifyEvents;
+function TDataSetEvents.AfterRefresh: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterRefresh) then fAfterRefresh := TNotifyEvents.Create;
+  if not Assigned(fAfterRefresh) then fAfterRefresh := TDataSetNotifyEvents.Create;
   Result := fAfterRefresh;
 end;
 
-function TDataSetEvents.AfterScroll: TNotifyEvents;
+function TDataSetEvents.AfterScroll: IDataSetNotifyEvents;
 begin
-  if not Assigned(fAfterScroll) then fAfterScroll := TNotifyEvents.Create;
+  if not Assigned(fAfterScroll) then fAfterScroll := TDataSetNotifyEvents.Create;
   Result := fAfterScroll;
 end;
 
-function TDataSetEvents.BeforeCancel: TNotifyEvents;
+function TDataSetEvents.BeforeCancel: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeCancel) then fBeforeCancel := TNotifyEvents.Create;
+  if not Assigned(fBeforeCancel) then fBeforeCancel := TDataSetNotifyEvents.Create;
   Result := fBeforeCancel;
 end;
 
-function TDataSetEvents.BeforeClose: TNotifyEvents;
+function TDataSetEvents.BeforeClose: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeClose) then fBeforeClose := TNotifyEvents.Create;
+  if not Assigned(fBeforeClose) then fBeforeClose := TDataSetNotifyEvents.Create;
   Result := fBeforeClose;
 end;
 
-function TDataSetEvents.BeforeDelete: TNotifyEvents;
+function TDataSetEvents.BeforeDelete: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeDelete) then fBeforeDelete := TNotifyEvents.Create;
+  if not Assigned(fBeforeDelete) then fBeforeDelete := TDataSetNotifyEvents.Create;
   Result := fBeforeDelete;
 end;
 
-function TDataSetEvents.BeforeEdit: TNotifyEvents;
+function TDataSetEvents.BeforeEdit: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeEdit) then fBeforeEdit := TNotifyEvents.Create;
+  if not Assigned(fBeforeEdit) then fBeforeEdit := TDataSetNotifyEvents.Create;
   Result := fBeforeEdit;
 end;
 
-function TDataSetEvents.BeforeInsert: TNotifyEvents;
+function TDataSetEvents.BeforeInsert: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeInsert) then fBeforeInsert := TNotifyEvents.Create;
+  if not Assigned(fBeforeInsert) then fBeforeInsert := TDataSetNotifyEvents.Create;
   Result := fBeforeInsert;
 end;
 
-function TDataSetEvents.BeforeOpen: TNotifyEvents;
+function TDataSetEvents.BeforeOpen: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeOpen) then fBeforeOpen := TNotifyEvents.Create;
+  if not Assigned(fBeforeOpen) then fBeforeOpen := TDataSetNotifyEvents.Create;
   Result := fBeforeOpen;
 end;
 
-function TDataSetEvents.BeforePost: TNotifyEvents;
+function TDataSetEvents.BeforePost: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforePost) then fBeforePost := TNotifyEvents.Create;
+  if not Assigned(fBeforePost) then fBeforePost := TDataSetNotifyEvents.Create;
   Result := fBeforePost;
 end;
 
-function TDataSetEvents.BeforeRefresh: TNotifyEvents;
+function TDataSetEvents.BeforeRefresh: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeRefresh) then fBeforeRefresh := TNotifyEvents.Create;
+  if not Assigned(fBeforeRefresh) then fBeforeRefresh := TDataSetNotifyEvents.Create;
   Result := fBeforeRefresh;
 end;
 
-function TDataSetEvents.BeforeScroll: TNotifyEvents;
+function TDataSetEvents.BeforeScroll: IDataSetNotifyEvents;
 begin
-  if not Assigned(fBeforeScroll) then fBeforeScroll := TNotifyEvents.Create;
+  if not Assigned(fBeforeScroll) then fBeforeScroll := TDataSetNotifyEvents.Create;
   Result := fBeforeScroll;
 end;
 
@@ -252,7 +421,6 @@ constructor TDataSetEvents.Create(const dataSet: TDataSet);
 begin
   inherited Create;
   fDataSet := dataSet;
-  // Events
   fBeforeOpen := nil;
   fAfterOpen := nil;
   fBeforeClose := nil;
@@ -276,255 +444,161 @@ begin
   fOnEditError := nil;
   fOnPostError := nil;
   fOnDeleteError := nil;
-  // Configuration
   Setup;
 end;
 
 destructor TDataSetEvents.Destroy;
 begin
-  if Assigned(fBeforeOpen) then fBeforeOpen.Free;
-  if Assigned(fAfterOpen) then fAfterOpen.Free;
-  if Assigned(fBeforeClose) then fBeforeClose.Free;
-  if Assigned(fAfterClose) then fAfterClose.Free;
-  if Assigned(fBeforeInsert) then fBeforeInsert.Free;
-  if Assigned(fAfterInsert) then fAfterInsert.Free;
-  if Assigned(fBeforeEdit) then fBeforeEdit.Free;
-  if Assigned(fAfterEdit) then fAfterEdit.Free;
-  if Assigned(fBeforePost) then fBeforePost.Free;
-  if Assigned(fAfterPost) then fAfterPost.Free;
-  if Assigned(fBeforeCancel) then fBeforeCancel.Free;
-  if Assigned(fAfterCancel) then fAfterCancel.Free;
-  if Assigned(fBeforeDelete) then fBeforeDelete.Free;
-  if Assigned(fAfterDelete) then fAfterDelete.Free;
-  if Assigned(fBeforeRefresh) then fBeforeRefresh.Free;
-  if Assigned(fAfterRefresh) then fAfterRefresh.Free;
-  if Assigned(fBeforeScroll) then fBeforeScroll.Free;
-  if Assigned(fAfterScroll) then fAfterScroll.Free;
-  if Assigned(fOnNewRecord) then fOnNewRecord.Free;
-  if Assigned(fOnCalcFields) then fOnCalcFields.Free;
-  if Assigned(fOnEditError) then fOnEditError.Free;
-  if Assigned(fOnPostError) then fOnPostError.Free;
-  if Assigned(fOnDeleteError) then fOnDeleteError.Free;
   inherited Destroy;
 end;
 
 procedure TDataSetEvents.DoAfterCancel(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterCancel do
-    event.Value(dataSet);
+  Self.AfterCancel.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterClose(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterClose do
-    event.Value(dataSet);
+  Self.AfterClose.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterDelete(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterDelete do
-    event.Value(dataSet);
+  Self.AfterDelete.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterEdit(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterEdit do
-    event.Value(dataSet);
+  Self.AfterEdit.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterInsert(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterInsert do
-    event.Value(dataSet);
+  Self.AfterInsert.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterOpen(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterOpen do
-    event.Value(dataSet);
+  Self.AfterOpen.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterPost(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterPost do
-    event.Value(dataSet);
+  Self.AfterPost.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterRefresh(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterRefresh do
-    event.Value(dataSet);
+  Self.AfterRefresh.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoAfterScroll(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.AfterScroll do
-    event.Value(dataSet);
+  Self.AfterScroll.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeCancel(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeCancel do
-    event.Value(dataSet);
+  Self.BeforeCancel.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeClose(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeClose do
-    event.Value(dataSet);
+  Self.BeforeClose.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeDelete(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeDelete do
-    event.Value(dataSet);
+  Self.BeforeDelete.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeEdit(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeEdit do
-    event.Value(dataSet);
+  Self.BeforeEdit.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeInsert(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeInsert do
-    event.Value(dataSet);
+  Self.BeforeInsert.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeOpen(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeOpen do
-    event.Value(dataSet);
+  Self.BeforeOpen.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforePost(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforePost do
-    event.Value(dataSet);
+  Self.BeforePost.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeRefresh(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeRefresh do
-    event.Value(dataSet);
+  Self.BeforeRefresh.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoBeforeScroll(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.BeforeScroll do
-    event.Value(dataSet);
+  Self.BeforeScroll.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoOnCalcFields(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.OnCalcFields do
-    event.Value(dataSet);
+  Self.OnCalcFields.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoOnDeleteError(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
-var
-  event: TPair<string, TErrorEvent>;
 begin
-  for event in Self.OnDeleteError do
-    event.Value(dataSet, e, action);
+  Self.OnDeleteError.Execute(dataSet, e, action);
 end;
 
 procedure TDataSetEvents.DoOnEditError(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
-var
-  event: TPair<string, TErrorEvent>;
 begin
-  for event in Self.OnEditError do
-    event.Value(dataSet, e, action);
+  Self.OnEditError.Execute(dataSet, e, action);
 end;
 
 procedure TDataSetEvents.DoOnNewRecord(dataSet: TDataSet);
-var
-  event: TPair<string, TNotifyEvent>;
 begin
-  for event in Self.OnNewRecord do
-    event.Value(dataSet);
+  Self.OnNewRecord.Execute(dataSet);
 end;
 
 procedure TDataSetEvents.DoOnPostError(dataSet: TDataSet; e: EDatabaseError; var action: TDataAction);
-var
-  event: TPair<string, TErrorEvent>;
 begin
-  for event in Self.OnPostError do
-    event.Value(dataSet, e, action);
+  Self.OnPostError.Execute(dataSet, e, action);
 end;
 
-function TDataSetEvents.OnCalcFields: TNotifyEvents;
+function TDataSetEvents.OnCalcFields: IDataSetNotifyEvents;
 begin
-  if not Assigned(fOnCalcFields) then fOnCalcFields := TNotifyEvents.Create;
+  if not Assigned(fOnCalcFields) then fOnCalcFields := TDataSetNotifyEvents.Create;
   Result := fOnCalcFields;
 end;
 
-function TDataSetEvents.OnDeleteError: TErrorEvents;
+function TDataSetEvents.OnDeleteError: IDataSetErrorEvents;
 begin
-  if not Assigned(fOnDeleteError) then fOnDeleteError := TErrorEvents.Create;
+  if not Assigned(fOnDeleteError) then fOnDeleteError := TDataSetErrorEvents.Create;
   Result := fOnDeleteError;
 end;
 
-function TDataSetEvents.OnEditError: TErrorEvents;
+function TDataSetEvents.OnEditError: IDataSetErrorEvents;
 begin
-  if not Assigned(fOnEditError) then fOnEditError := TErrorEvents.Create;
+  if not Assigned(fOnEditError) then fOnEditError := TDataSetErrorEvents.Create;
   Result := fOnEditError;
 end;
 
-function TDataSetEvents.OnNewRecord: TNotifyEvents;
+function TDataSetEvents.OnNewRecord: IDataSetNotifyEvents;
 begin
-  if not Assigned(fOnNewRecord) then fOnNewRecord := TNotifyEvents.Create;
+  if not Assigned(fOnNewRecord) then fOnNewRecord := TDataSetNotifyEvents.Create;
   Result := fOnNewRecord;
 end;
 
-function TDataSetEvents.OnPostError: TErrorEvents;
+function TDataSetEvents.OnPostError: IDataSetErrorEvents;
 begin
-  if not Assigned(fOnPostError) then fOnPostError := TErrorEvents.Create;
+  if not Assigned(fOnPostError) then fOnPostError := TDataSetErrorEvents.Create;
   Result := fOnPostError;
 end;
 
 procedure TDataSetEvents.Setup;
 begin
-  // Adds standard methods of DataSet
   if Assigned(fDataSet.BeforeOpen) then Self.BeforeOpen.Add('Default', fDataSet.BeforeOpen);
   if Assigned(fDataSet.AfterOpen) then Self.AfterOpen.Add('Default', fDataSet.AfterOpen);
   if Assigned(fDataSet.BeforeClose) then Self.BeforeClose.Add('Default', fDataSet.BeforeClose);
@@ -548,7 +622,7 @@ begin
   if Assigned(fDataSet.OnEditError) then Self.OnEditError.Add('Default', fDataSet.OnEditError);
   if Assigned(fDataSet.OnPostError) then Self.OnPostError.Add('Default', fDataSet.OnPostError);
   if Assigned(fDataSet.OnDeleteError) then Self.OnDeleteError.Add('Default', fDataSet.OnDeleteError);
-  // Reconfigures the DataSet
+
   fDataSet.BeforeOpen := DoBeforeOpen;
   fDataSet.AfterOpen := DoAfterOpen;
   fDataSet.BeforeClose := DoBeforeClose;

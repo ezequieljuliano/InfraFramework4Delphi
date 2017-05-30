@@ -68,7 +68,6 @@ end;
 procedure TTestInfraFwkDataSetEvents.TearDown;
 begin
   inherited;
-  fDataSetEvents := nil;
   fDataSet.Free;
 end;
 
@@ -80,7 +79,7 @@ begin
       fEventName := 'AfterCancel'
     end);
   CheckTrue(fDataSetEvents.AfterCancel.Count = 1);
-  fDataSetEvents.AfterCancel.Items['AfterCancel'](fDataSet);
+  fDataSetEvents.AfterCancel.Execute(fDataSet);
   CheckEquals('AfterCancel', fEventName);
 end;
 
@@ -92,7 +91,7 @@ begin
       fEventName := 'AfterClose'
     end);
   CheckTrue(fDataSetEvents.AfterClose.Count = 1);
-  fDataSetEvents.AfterClose.Items['AfterClose'](fDataSet);
+  fDataSetEvents.AfterClose.Execute(fDataSet);
   CheckEquals('AfterClose', fEventName);
 end;
 
@@ -104,7 +103,7 @@ begin
       fEventName := 'AfterDelete'
     end);
   CheckTrue(fDataSetEvents.AfterDelete.Count = 1);
-  fDataSetEvents.AfterDelete.Items['AfterDelete'](fDataSet);
+  fDataSetEvents.AfterDelete.Execute(fDataSet);
   CheckEquals('AfterDelete', fEventName);
 end;
 
@@ -116,7 +115,7 @@ begin
       fEventName := 'AfterEdit'
     end);
   CheckTrue(fDataSetEvents.AfterEdit.Count = 1);
-  fDataSetEvents.AfterEdit.Items['AfterEdit'](fDataSet);
+  fDataSetEvents.AfterEdit.Execute(fDataSet);
   CheckEquals('AfterEdit', fEventName);
 end;
 
@@ -128,7 +127,7 @@ begin
       fEventName := 'AfterInsert'
     end);
   CheckTrue(fDataSetEvents.AfterInsert.Count = 1);
-  fDataSetEvents.AfterInsert.Items['AfterInsert'](fDataSet);
+  fDataSetEvents.AfterInsert.Execute(fDataSet);
   CheckEquals('AfterInsert', fEventName);
 
   fEventName := '';
@@ -144,7 +143,7 @@ begin
       fEventName := 'AfterOpen'
     end);
   CheckTrue(fDataSetEvents.AfterOpen.Count = 1);
-  fDataSetEvents.AfterOpen.Items['AfterOpen'](fDataSet);
+  fDataSetEvents.AfterOpen.Execute(fDataSet);
   CheckEquals('AfterOpen', fEventName);
 end;
 
@@ -156,7 +155,7 @@ begin
       fEventName := 'AfterPost'
     end);
   CheckTrue(fDataSetEvents.AfterPost.Count = 1);
-  fDataSetEvents.AfterPost.Items['AfterPost'](fDataSet);
+  fDataSetEvents.AfterPost.Execute(fDataSet);
   CheckEquals('AfterPost', fEventName);
 end;
 
@@ -168,7 +167,7 @@ begin
       fEventName := 'AfterRefresh'
     end);
   CheckTrue(fDataSetEvents.AfterRefresh.Count = 1);
-  fDataSetEvents.AfterRefresh.Items['AfterRefresh'](fDataSet);
+  fDataSetEvents.AfterRefresh.Execute(fDataSet);
   CheckEquals('AfterRefresh', fEventName);
 end;
 
@@ -180,7 +179,7 @@ begin
       fEventName := 'AfterScroll'
     end);
   CheckTrue(fDataSetEvents.AfterScroll.Count = 1);
-  fDataSetEvents.AfterScroll.Items['AfterScroll'](fDataSet);
+  fDataSetEvents.AfterScroll.Execute(fDataSet);
   CheckEquals('AfterScroll', fEventName);
 end;
 
@@ -192,7 +191,7 @@ begin
       fEventName := 'BeforeCancel'
     end);
   CheckTrue(fDataSetEvents.BeforeCancel.Count = 1);
-  fDataSetEvents.BeforeCancel.Items['BeforeCancel'](fDataSet);
+  fDataSetEvents.BeforeCancel.Execute(fDataSet);
   CheckEquals('BeforeCancel', fEventName);
 end;
 
@@ -204,7 +203,7 @@ begin
       fEventName := 'BeforeClose'
     end);
   CheckTrue(fDataSetEvents.BeforeClose.Count = 1);
-  fDataSetEvents.BeforeClose.Items['BeforeClose'](fDataSet);
+  fDataSetEvents.BeforeClose.Execute(fDataSet);
   CheckEquals('BeforeClose', fEventName);
 end;
 
@@ -216,7 +215,7 @@ begin
       fEventName := 'BeforeDelete'
     end);
   CheckTrue(fDataSetEvents.BeforeDelete.Count = 1);
-  fDataSetEvents.BeforeDelete.Items['BeforeDelete'](fDataSet);
+  fDataSetEvents.BeforeDelete.Execute(fDataSet);
   CheckEquals('BeforeDelete', fEventName);
 end;
 
@@ -228,7 +227,7 @@ begin
       fEventName := 'BeforeEdit'
     end);
   CheckTrue(fDataSetEvents.BeforeEdit.Count = 1);
-  fDataSetEvents.BeforeEdit.Items['BeforeEdit'](fDataSet);
+  fDataSetEvents.BeforeEdit.Execute(fDataSet);
   CheckEquals('BeforeEdit', fEventName);
 end;
 
@@ -240,7 +239,7 @@ begin
       fEventName := 'BeforeInsert'
     end);
   CheckTrue(fDataSetEvents.BeforeInsert.Count = 1);
-  fDataSetEvents.BeforeInsert.Items['BeforeInsert'](fDataSet);
+  fDataSetEvents.BeforeInsert.Execute(fDataSet);
   CheckEquals('BeforeInsert', fEventName);
 end;
 
@@ -252,12 +251,13 @@ begin
       fEventName := 'BeforeOpen'
     end);
   CheckTrue(fDataSetEvents.BeforeOpen.Count = 1);
-  fDataSetEvents.BeforeOpen.Items['BeforeOpen'](fDataSet);
+  fDataSetEvents.BeforeOpen.Execute(fDataSet);
   CheckEquals('BeforeOpen', fEventName);
 
+  fDataSetEvents.BeforeOpen.Clear;
   fDataSetEvents.BeforeOpen.Add('InternalBeforeOpen', InternalBeforeOpen);
-  CheckTrue(fDataSetEvents.BeforeOpen.Count = 2);
-  fDataSetEvents.BeforeOpen.Items['InternalBeforeOpen'](fDataSet);
+  CheckTrue(fDataSetEvents.BeforeOpen.Count = 1);
+  fDataSetEvents.BeforeOpen.Execute(fDataSet);
   CheckEquals('InternalBeforeOpen', fEventName);
 end;
 
@@ -269,7 +269,7 @@ begin
       fEventName := 'BeforePost'
     end);
   CheckTrue(fDataSetEvents.BeforePost.Count = 1);
-  fDataSetEvents.BeforePost.Items['BeforePost'](fDataSet);
+  fDataSetEvents.BeforePost.Execute(fDataSet);
   CheckEquals('BeforePost', fEventName);
 end;
 
@@ -281,7 +281,7 @@ begin
       fEventName := 'BeforeRefresh'
     end);
   CheckTrue(fDataSetEvents.BeforeRefresh.Count = 1);
-  fDataSetEvents.BeforeRefresh.Items['BeforeRefresh'](fDataSet);
+  fDataSetEvents.BeforeRefresh.Execute(fDataSet);
   CheckEquals('BeforeRefresh', fEventName);
 end;
 
@@ -293,7 +293,7 @@ begin
       fEventName := 'BeforeScroll'
     end);
   CheckTrue(fDataSetEvents.BeforeScroll.Count = 1);
-  fDataSetEvents.BeforeScroll.Items['BeforeScroll'](fDataSet);
+  fDataSetEvents.BeforeScroll.Execute(fDataSet);
   CheckEquals('BeforeScroll', fEventName);
 end;
 
@@ -305,7 +305,7 @@ begin
       fEventName := 'OnCalcFields'
     end);
   CheckTrue(fDataSetEvents.OnCalcFields.Count = 1);
-  fDataSetEvents.OnCalcFields.Items['OnCalcFields'](fDataSet);
+  fDataSetEvents.OnCalcFields.Execute(fDataSet);
   CheckEquals('OnCalcFields', fEventName);
 end;
 
@@ -319,7 +319,7 @@ begin
       fEventName := 'OnDeleteError'
     end);
   CheckTrue(fDataSetEvents.OnDeleteError.Count = 1);
-  fDataSetEvents.OnDeleteError.Items['OnDeleteError'](fDataSet, nil, act);
+  fDataSetEvents.OnDeleteError.Execute(fDataSet, nil, act);
   CheckEquals('OnDeleteError', fEventName);
 end;
 
@@ -333,7 +333,7 @@ begin
       fEventName := 'OnEditError'
     end);
   CheckTrue(fDataSetEvents.OnEditError.Count = 1);
-  fDataSetEvents.OnEditError.Items['OnEditError'](fDataSet, nil, act);
+  fDataSetEvents.OnEditError.Execute(fDataSet, nil, act);
   CheckEquals('OnEditError', fEventName);
 end;
 
@@ -345,7 +345,7 @@ begin
       fEventName := 'OnNewRecord'
     end);
   CheckTrue(fDataSetEvents.OnNewRecord.Count = 1);
-  fDataSetEvents.OnNewRecord.Items['OnNewRecord'](fDataSet);
+  fDataSetEvents.OnNewRecord.Execute(fDataSet);
   CheckEquals('OnNewRecord', fEventName);
 end;
 
@@ -359,7 +359,7 @@ begin
       fEventName := 'OnPostError'
     end);
   CheckTrue(fDataSetEvents.OnPostError.Count = 1);
-  fDataSetEvents.OnPostError.Items['OnPostError'](fDataSet, nil, act);
+  fDataSetEvents.OnPostError.Execute(fDataSet, nil, act);
   CheckEquals('OnPostError', fEventName);
 end;
 
