@@ -32,6 +32,7 @@ type
   TDataSetIterator = class(TInterfacedObject, IDataSetIterator)
   private
     fDataSet: TDataSet;
+    fIndex: Integer;
     fOwns: Boolean;
   protected
     procedure First;
@@ -62,6 +63,7 @@ begin
   inherited Create;
   fDataSet := dataSet;
   fOwns := ownsDataSet;
+  fIndex := 0;
 
   if not Assigned(fDataSet) then
     raise EDataSetIteratorException.CreateFmt('Source DataSet %s is nil in the Iterator!', [dataSet.Name]);
@@ -113,9 +115,12 @@ end;
 
 function TDataSetIterator.HasNext: Boolean;
 begin
+  Inc(fIndex);
+
+  if (fIndex > 1) then
+    FDataSet.Next;
+
   Result := not fDataSet.Eof;
-  if Result then
-    fDataSet.Next;
 end;
 
 function TDataSetIterator.IsEmpty: Boolean;
