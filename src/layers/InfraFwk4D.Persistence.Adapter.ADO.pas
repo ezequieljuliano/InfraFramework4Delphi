@@ -6,6 +6,7 @@ uses
   System.SysUtils,
   System.Generics.Collections,
   System.Rtti,
+  System.Classes,
   Data.DB,
   Data.Win.ADODB,
   InfraFwk4D.Persistence,
@@ -23,9 +24,9 @@ type
     { public declarations }
   end;
 
-  TADOStatementAdapter = class(TDriverStatementAdapter<TADOConnection>)
+  TADOStatementAdapter = class(TDriverStatementAdapter)
   private
-    { private declarations }
+    procedure ValidateDataSetType(const dataSet: TDataSet);
   protected
     procedure DataSetPreparation(const dataSet: TDataSet); override;
     procedure Execute(const commit: Boolean); override;
@@ -35,10 +36,22 @@ type
     { public declarations }
   end;
 
+  TADOTransactionAdapter = class(TDriverTransactionAdapter<TADOConnection>)
+  private
+    { private declarations }
+  protected
+    procedure Commit; override;
+    procedure Rollback; override;
+    function InTransaction: Boolean; override;
+  public
+    { public declarations }
+  end;
+
   TADOSessionAdapter = class(TDriverSessionAdapter<TADOConnection>)
   private
     { private declarations }
   protected
+    function BeginTransaction: IDBTransaction; override;
     function NewStatement: IDBStatement; override;
   public
     { public declarations }
@@ -54,10 +67,18 @@ type
     { public declarations }
   end;
 
+  TADODelegateAdapter = class(TDriverDelegateAdapter<TADOQuery>)
+  private
+    { private declarations }
+  protected
+    procedure Setup(const dao: TDataModule); override;
+  public
+    { public declarations }
+  end;
+
   TADOMetaDataInfoAdapter = class(TDriverMetaDataInfoAdapter<TADOConnection>)
   private
-    function GetMetaInfo(const kind: TObject): IDataSetIterator; overload;
-    function GetMetaInfo(const kind: TObject; const objectName: string): IDataSetIterator; overload;
+    { private declarations }
   protected
     function GetTables: IDataSetIterator; override;
     function GetFields(const tableName: string): IDataSetIterator; override;
@@ -77,6 +98,9 @@ function TADOStatementAdapter.AsDataSet(const fetchRows: Integer): TDataSet;
 var
   dataSet: TADOQuery;
 begin
+  if (fetchRows > 0) then
+    raise EPersistenceException.Create('ADO Statement Adapter does not work with fetch rows.');
+
   dataSet := TADOQuery.Create(nil);
   DataSetPreparation(dataSet);
   dataSet.Open;
@@ -86,21 +110,25 @@ end;
 procedure TADOStatementAdapter.Execute(const commit: Boolean);
 var
   dataSet: TADOQuery;
+  transaction: IDBTransaction;
 begin
   if (GetPreparedDataSet <> nil) then
-    dataSet := GetPreparedDataSet as TADOQuery
+  begin
+    ValidateDataSetType(GetPreparedDataSet);
+    dataSet := GetPreparedDataSet as TADOQuery;
+  end
   else
     dataSet := TADOQuery.Create(nil);
   try
     DataSetPreparation(dataSet);
     if commit then
     begin
-      GetConnection.GetComponent.BeginTrans;
+      transaction := GetSession.BeginTransaction;
       try
         dataSet.ExecSQL;
-        GetConnection.GetComponent.CommitTrans;
+        transaction.Commit;
       except
-        GetConnection.GetComponent.RollbackTrans;
+        transaction.Rollback;
         raise;
       end;
     end
@@ -114,30 +142,64 @@ begin
   end;
 end;
 
+procedure TADOStatementAdapter.ValidateDataSetType(const dataSet: TDataSet);
+begin
+  if not(dataSet is TADOQuery) then
+    raise EPersistenceException.CreateFmt('The DataSet can not be prepared because the class %s is not valid for preparation.', [dataSet.ClassName]);
+end;
+
 procedure TADOStatementAdapter.DataSetPreparation(const dataSet: TDataSet);
 var
   param: TPair<string, TValue>;
   typedDataSet: TADOQuery;
 begin
+  ValidateDataSetType(dataSet);
+
   typedDataSet := dataSet as TADOQuery;
-
-  if typedDataSet.Active then
-    typedDataSet.Close;
-
-  typedDataSet.Connection := GetConnection.GetComponent;
+  typedDataSet.Close;
+  typedDataSet.Connection := (GetSession.GetOwner as IDBConnection<TADOConnection>).GetComponent;
   typedDataSet.SQL.Text := GetQuery;
 
   for param in GetParams do
     typedDataSet.Parameters.ParamByName(param.Key).Value := param.Value.AsVariant;
 
-  typedDataSet.Prepared := True;;
+  typedDataSet.Prepared := True;
+end;
+
+{ TADOTransactionAdapter }
+
+procedure TADOTransactionAdapter.Commit;
+begin
+  if Assigned(Transaction) then
+    Transaction.CommitTrans;
+end;
+
+function TADOTransactionAdapter.InTransaction: Boolean;
+begin
+  Result := Assigned(Transaction) and Transaction.InTransaction;
+end;
+
+procedure TADOTransactionAdapter.Rollback;
+begin
+  if Assigned(Transaction) then
+    Transaction.RollbackTrans;
 end;
 
 { TADOSessionAdapter }
 
+function TADOSessionAdapter.BeginTransaction: IDBTransaction;
+begin
+  Result := nil;
+  if not GetConnection.GetComponent.InTransaction then
+  begin
+    GetConnection.GetComponent.BeginTrans;
+    Result := TADOTransactionAdapter.Create(GetConnection.GetComponent);
+  end;
+end;
+
 function TADOSessionAdapter.NewStatement: IDBStatement;
 begin
-  Result := TADOStatementAdapter.Create(GetConnection);
+  Result := TADOStatementAdapter.Create(Self);
 end;
 
 { TADOQueryChangerAdapter }
@@ -157,42 +219,60 @@ end;
 
 function TADOMetaDataInfoAdapter.GetFields(const tableName: string): IDataSetIterator;
 begin
-  raise Exception.Create('Not Implemented!');
+  raise EPersistenceException.Create('Not Implemented!');
 end;
 
 function TADOMetaDataInfoAdapter.GetForeignKeys(const tableName: string): IDataSetIterator;
 begin
-  raise Exception.Create('Not Implemented!');
+  raise EPersistenceException.Create('Not Implemented!');
 end;
 
 function TADOMetaDataInfoAdapter.GetGenerators: IDataSetIterator;
 begin
-  raise Exception.Create('Not Implemented!');
+  raise EPersistenceException.Create('Not Implemented!');
 end;
 
 function TADOMetaDataInfoAdapter.GetIndexes(const tableName: string): IDataSetIterator;
 begin
-  raise Exception.Create('Not Implemented!');
-end;
-
-function TADOMetaDataInfoAdapter.GetMetaInfo(const kind: TObject): IDataSetIterator;
-begin
-  raise Exception.Create('Not Implemented!');
-end;
-
-function TADOMetaDataInfoAdapter.GetMetaInfo(const kind: TObject; const objectName: string): IDataSetIterator;
-begin
-  raise Exception.Create('Not Implemented!');
+  raise EPersistenceException.Create('Not Implemented!');
 end;
 
 function TADOMetaDataInfoAdapter.GetPrimaryKeys(const tableName: string): IDataSetIterator;
 begin
-  raise Exception.Create('Not Implemented!');
+  raise EPersistenceException.Create('Not Implemented!');
 end;
 
 function TADOMetaDataInfoAdapter.GetTables: IDataSetIterator;
 begin
-  raise Exception.Create('Not Implemented!');
+  raise EPersistenceException.Create('Not Implemented!');
+end;
+
+{ TADODelegateAdapter }
+
+procedure TADODelegateAdapter.Setup(const dao: TDataModule);
+var
+  i: Integer;
+  ctx: TRttiContext;
+  t: TRttiType;
+  p: TRttiProperty;
+begin
+  ctx := TRttiContext.Create;
+  try
+    for i := 0 to Pred(dao.ComponentCount) do
+      if dao.Components[i].ClassName.StartsWith('TADO') then
+      begin
+        t := ctx.GetType(dao.Components[i].ClassType);
+        p := t.GetProperty('Connection');
+        if Assigned(p) and p.GetValue(dao.Components[i]).IsType<TADOConnection> and p.IsWritable then
+        begin
+          p.SetValue(dao.Components[i], (GetSession.GetOwner as IDBConnection<TADOConnection>).GetComponent);
+          if dao.Components[i] is TADOQuery then
+            GetQueryChangers.AddOrSetValue(dao.Components[i].Name, TADOQueryChangerAdapter.Create(dao.Components[i] as TADOQuery));
+        end;
+      end;
+  finally
+    ctx.Free;
+  end;
 end;
 
 end.

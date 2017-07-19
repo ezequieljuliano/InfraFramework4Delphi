@@ -3,9 +3,12 @@ unit DAL.Connection;
 interface
 
 uses
-  System.SysUtils, System.Classes,
-  InfraFwk4D.Persistence, InfraFwk4D.Persistence.Adapter.ADO,
-  Data.Win.ADODB, Data.DB;
+  System.SysUtils,
+  System.Classes,
+  Data.Win.ADODB,
+  Data.DB,
+  InfraFwk4D.Persistence,
+  InfraFwk4D.Persistence.Adapter.ADO;
 
 type
 
@@ -15,9 +18,9 @@ type
     procedure DataModuleDestroy(Sender: TObject);
   private
     fConnection: IDBConnection<TADOConnection>;
-    fSession: IDBSession<TADOConnection>;
+    fSession: IDBSession;
   public
-    function GetSession: IDBSession<TADOConnection>;
+    function GetSession: IDBSession;
   end;
 
 var
@@ -40,7 +43,7 @@ begin
   ADOConnection.Connected := False;
 end;
 
-function TDALConnection.GetSession: IDBSession<TADOConnection>;
+function TDALConnection.GetSession: IDBSession;
 begin
   Result := fSession;
 end;
