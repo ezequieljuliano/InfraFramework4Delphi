@@ -295,7 +295,7 @@ begin
   ctx := TRttiContext.Create;
   try
     for i := 0 to Pred(dao.ComponentCount) do
-      if dao.Components[i].ClassName.StartsWith('TFD') then
+      if dao.Components[i].ClassName.Contains('FDQ') then
       begin
         t := ctx.GetType(dao.Components[i].ClassType);
         p := t.GetProperty('Connection');
