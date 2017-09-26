@@ -295,17 +295,16 @@ begin
   ctx := TRttiContext.Create;
   try
     for i := 0 to Pred(dao.ComponentCount) do
-      if dao.Components[i].ClassName.StartsWith('TFD') then
+    begin
+      t := ctx.GetType(dao.Components[i].ClassType);
+      p := t.GetProperty('Connection');
+      if Assigned(p) and p.GetValue(dao.Components[i]).IsType<TFDConnection> and p.IsWritable then
       begin
-        t := ctx.GetType(dao.Components[i].ClassType);
-        p := t.GetProperty('Connection');
-        if Assigned(p) and p.GetValue(dao.Components[i]).IsType<TFDConnection> and p.IsWritable then
-        begin
-          p.SetValue(dao.Components[i], (GetSession.GetOwner as IDBConnection<TFDConnection>).GetComponent);
-          if dao.Components[i] is TFDCustomQuery then
-            GetQueryChangers.AddOrSetValue(dao.Components[i].Name, TFireDACQueryChangerAdapter.Create(dao.Components[i] as TFDQuery));
-        end;
+        p.SetValue(dao.Components[i], (GetSession.GetOwner as IDBConnection<TFDConnection>).GetComponent);
+        if dao.Components[i] is TFDQuery then
+          GetQueryChangers.AddOrSetValue(dao.Components[i].Name, TFireDACQueryChangerAdapter.Create(dao.Components[i] as TFDQuery));
       end;
+    end;
   finally
     ctx.Free;
   end;
