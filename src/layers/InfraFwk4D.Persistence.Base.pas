@@ -81,6 +81,8 @@ type
   private
     fTransaction: T;
   protected
+    function GetComponent: TComponent;
+
     procedure Commit; virtual; abstract;
     procedure Rollback; virtual; abstract;
     function InTransaction: Boolean; virtual; abstract;
@@ -346,6 +348,11 @@ begin
     Rollback;
   fTransaction.Free;
   inherited Destroy;
+end;
+
+function TDriverTransactionAdapter<T>.GetComponent: TComponent;
+begin
+  Result := fTransaction;
 end;
 
 { TDriverSessionAdapter<T> }

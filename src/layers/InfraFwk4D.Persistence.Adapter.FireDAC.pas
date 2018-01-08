@@ -140,6 +140,7 @@ begin
     begin
       transaction := GetSession.BeginTransaction;
       try
+        dataSet.Transaction := (transaction.GetComponent as TFDTransaction);
         dataSet.ExecSQL;
         transaction.Commit;
       except

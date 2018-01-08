@@ -58,6 +58,8 @@ type
 
   IDBTransaction = interface(IDB)
     ['{AAFAF475-B600-4E1B-BE52-8490373EDDEB}']
+    function GetComponent: TComponent;
+
     procedure Commit;
     procedure Rollback;
   end;
