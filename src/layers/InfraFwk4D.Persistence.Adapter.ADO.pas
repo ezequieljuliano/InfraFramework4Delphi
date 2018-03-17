@@ -259,17 +259,16 @@ begin
   ctx := TRttiContext.Create;
   try
     for i := 0 to Pred(dao.ComponentCount) do
-      if dao.Components[i].ClassName.StartsWith('TADO') then
+    begin
+      t := ctx.GetType(dao.Components[i].ClassType);
+      p := t.GetProperty('Connection');
+      if Assigned(p) and p.GetValue(dao.Components[i]).IsType<TADOConnection> and p.IsWritable then
       begin
-        t := ctx.GetType(dao.Components[i].ClassType);
-        p := t.GetProperty('Connection');
-        if Assigned(p) and p.GetValue(dao.Components[i]).IsType<TADOConnection> and p.IsWritable then
-        begin
-          p.SetValue(dao.Components[i], (GetSession.GetOwner as IDBConnection<TADOConnection>).GetComponent);
-          if dao.Components[i] is TADOQuery then
-            GetQueryChangers.AddOrSetValue(dao.Components[i].Name, TADOQueryChangerAdapter.Create(dao.Components[i] as TADOQuery));
-        end;
+        p.SetValue(dao.Components[i], (GetSession.GetOwner as IDBConnection<TADOConnection>).GetComponent);
+        if dao.Components[i] is TADOQuery then
+          GetQueryChangers.AddOrSetValue(dao.Components[i].Name, TADOQueryChangerAdapter.Create(dao.Components[i] as TADOQuery));
       end;
+    end;
   finally
     ctx.Free;
   end;
