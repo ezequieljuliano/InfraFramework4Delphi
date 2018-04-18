@@ -116,3 +116,7 @@
 /samples/ado/__history/User.BC.pas.~1~
 /samples/ado/__history/User.DAO.dfm.~11~
 /samples/ado/__history/User.DAO.pas.~23~
+*.local
+*.identcache
+*.stat
+__history
